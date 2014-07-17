@@ -1,5 +1,6 @@
 using System;
 using DebugDiag.Native.Test.Fixtures;
+using DebugDiag.Native.Test.Mock;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DebugDiag.Native.Test
@@ -10,6 +11,15 @@ namespace DebugDiag.Native.Test
     [TestClass]
     public class TestNativeType32
     {
+        private static readonly IDumpContext Context = new MockX86Dump();
+        
+        // Initialize the right context on every test to make sure tests run against the right "dump"
+        [TestInitialize]
+        public void SetUp()
+        {
+            Native.Initialize(Context);
+        }
+
         [TestMethod]
         public void TestPreloadType()
         {
@@ -19,7 +29,7 @@ namespace DebugDiag.Native.Test
         [TestMethod]
         public void TestPreloadUnknownType()
         {
-            Assert.IsFalse(NativeType.Preload("InvalidTypeDontFindMe"));
+            Assert.IsFalse(NativeType.Preload(X86.InvalidType));
         }
 
         [TestMethod]

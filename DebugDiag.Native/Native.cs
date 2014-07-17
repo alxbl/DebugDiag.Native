@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text.RegularExpressions;
 using DebugDiag.DotNet;
 
@@ -9,17 +9,16 @@ namespace DebugDiag.Native
     /// </summary>
     public static class Native
     {
-        private static DumpContext _context = null;
-        
-
+        public static IDumpContext Context { get; private set; }
+    
         /// <summary>
         /// Initializes the native library with the dump context.
         /// This can be called multiple times to change the context.
         /// </summary>
         /// <param name="context">The dump context that the native library will use.</param>
-        public static void Initialize(DumpContext context)
+        public static void Initialize(IDumpContext context)
         {
-            _context = context;
+            Context = context;
         }
 
         /// <summary>
@@ -29,7 +28,7 @@ namespace DebugDiag.Native
         {
             get
             {
-                return _context.Manager;
+                return Context.Manager;
             }
         }
 
@@ -40,7 +39,7 @@ namespace DebugDiag.Native
         {
             get
             {
-                return _context.Debugger;
+                return Context.Debugger;
             }
         }
 
@@ -51,7 +50,7 @@ namespace DebugDiag.Native
         {
             get
             {
-                return _context.Progress;
+                return Context.Progress;
             }
         }
 

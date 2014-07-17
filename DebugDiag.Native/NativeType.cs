@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -42,10 +42,11 @@ namespace DebugDiag.Native
 
         #region Private API
 
-        private void BuildOffsetTable()
+        private static void BuildOffsetTable(string data)
         {
             // Check if we've already computed the offset table for this type.
             // Parse each offset.
+            throw new NotImplementedException();
         }
         #endregion
 
@@ -58,6 +59,10 @@ namespace DebugDiag.Native
         /// <returns>Whether the type could be preloaded</returns>
         public static bool Preload(string type)
         {
+            var data = Native.Context.Execute(String.Format("dt {0}", type));
+            if (data.Equals(String.Format("Symbol {0} not found.", type))) return false;
+
+            BuildOffsetTable(data);
             return true;
         }
 

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -35,6 +35,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="DebugDiag.DotNet">
+      <HintPath>C:\Program Files\DebugDiag\DebugDiag.DotNet.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <Choose>
@@ -51,6 +54,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Fixtures\x86.cs" />
+    <Compile Include="Mock\MockX86Dump.cs" />
     <Compile Include="TestNative.cs" />
     <Compile Include="TestNativeType32.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

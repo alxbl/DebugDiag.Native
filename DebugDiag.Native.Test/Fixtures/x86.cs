@@ -1,4 +1,4 @@
-﻿namespace DebugDiag.Native.Test.Fixtures
+namespace DebugDiag.Native.Test.Fixtures
 {
     /// <summary>
     /// Fixture data for the 32 bit unit tests taken from a 32 bit compile dump of DebugDiag.Native.Test.App.
@@ -121,6 +121,9 @@
    +0x240 CritSecTracingEnabled : 0y0
    +0x240 SpareTracingBits : 0y000000000000000000000000000000 (0)";
         #endregion
+
+        public const string InvalidType = "nt!InvalidDoNotExist";
+        public const string InvalidTypeDt = "Symbol nt!InvalidDoNotExist not found.";
     }
 }
 
