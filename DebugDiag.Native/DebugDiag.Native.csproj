@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{AF6C0C7A-2638-4981-92AC-4A5BB953ED1B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DebugDiag.Native</RootNamespace>
+    <AssemblyName>DebugDiag.Native</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <!--======================================================-->
+  <!-- This is the path to your DebugDiag installation.
+    By default, that is: C:\Program Files\DebugDiag
+    If you installed the x64 version. Do not change this value.-->
+  <PropertyGroup>
+    <DebugDiagLocation>C:\Program Files\DebugDiag</DebugDiagLocation>
+  </PropertyGroup>
+  <!--======================================================-->
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <!-- DebugDiag references using the variable defined above. -->
+    <Reference Include="Microsoft.Diagnostics.Runtime">
+      <HintPath>$(DebugDiagLocation)\Microsoft.Diagnostics.Runtime.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ClrMemDiagExt">
+      <HintPath>$(DebugDiagLocation)\ClrMemDiagExt.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="DebugDiag.DotNet">
+      <HintPath>$(DebugDiagLocation)\DebugDiag.DotNet.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <!--========================================================-->
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DumpContext.cs" />
+    <Compile Include="FieldInfo.cs" />
+    <Compile Include="IDumpContext.cs" />
+    <Compile Include="Native.cs" />
+    <Compile Include="NativeType.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

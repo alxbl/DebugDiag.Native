@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using DebugDiag.Native.Test.Fixtures;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DebugDiag.Native.Test
@@ -12,14 +13,19 @@ namespace DebugDiag.Native.Test
         [TestMethod]
         public void TestPreloadType()
         {
-            NativeType.Preload("DebugDiag_Native_Test_App!PODType");
-            Assert.IsTrue(NativeType.IsCached("DebugDiag_Native_Test_App!PODType"));
+            Assert.IsTrue(NativeType.Preload("DebugDiag_Native_Test_App!PODType"));
+        }
+
+        [TestMethod]
+        public void TestPreloadUnknownType()
+        {
+            Assert.IsFalse(NativeType.Preload("InvalidTypeDontFindMe"));
         }
 
         [TestMethod]
         public void TestAtAddressVtableAsString()
         {
-            var t = NativeType.AtAddress(Fixtures32.VtableAddr);
+            var t = NativeType.AtAddress(X86.VtableAddr);
             Assert.AreEqual("VirtualTypeDeriv", t.TypeName);
             Assert.AreEqual("DebugDiag_Native_Test_App", t.ModuleName);
             Assert.AreEqual("DebugDiag_Native_Test_App!VirtualTypeDeriv", t.QualifiedName);
@@ -28,7 +34,7 @@ namespace DebugDiag.Native.Test
         [TestMethod]
         public void TestAtAddressVtableAsULong()
         {
-            var t = NativeType.AtAddress(Fixtures32.VtableAddrULong);
+            var t = NativeType.AtAddress(X86.VtableAddrULong);
             Assert.AreEqual("VirtualTypeDeriv", t.TypeName);
             Assert.AreEqual("DebugDiag_Native_Test_App", t.ModuleName);
             Assert.AreEqual("DebugDiag_Native_Test_App!VirtualTypeDeriv", t.QualifiedName);
@@ -37,23 +43,25 @@ namespace DebugDiag.Native.Test
         [TestMethod]
         public void TestAtAddressNoVtableAsString()
         {
-
+            Assert.Fail();
         }
 
         [TestMethod]
         public void TestAtAddressNoVtableAsULong()
         {
-
+            Assert.Fail();
         }
 
         [TestMethod]
         public void TestAtAddressWithRightType()
         {
+            Assert.Fail();
         }
 
         [TestMethod]
         public void TestAtAddressWithWrongType()
         {
+            Assert.Fail();
         }
 
         [TestMethod]

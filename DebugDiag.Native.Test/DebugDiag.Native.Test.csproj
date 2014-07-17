@@ -50,7 +50,8 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="Fixtures32.cs" />
+    <Compile Include="Fixtures\x86.cs" />
+    <Compile Include="TestNative.cs" />
     <Compile Include="TestNativeType32.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestNativeType64.cs" />
