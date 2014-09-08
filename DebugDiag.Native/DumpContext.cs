@@ -14,11 +14,13 @@ namespace DebugDiag.Native
         private NetProgress _progress;
         public DumpContext(NetScriptManager mgr, NetDbgObj dbg, NetProgress progress)
         {
+            if (mgr != null && dbg != null && progress != null)
+                _contextValid = true;
+
             Manager = mgr;
             Debugger = dbg;
             Progress = progress;
-            if (Manager != null && Debugger != null && Progress != null)
-                _contextValid = true;
+            
 
         }
 
