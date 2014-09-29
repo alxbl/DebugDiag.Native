@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using DebugDiag.DotNet;
 
@@ -54,6 +56,76 @@ namespace DebugDiag.Native
             }
         }
 
-        public static readonly Regex AddressFormat = new Regex("(0x)?([0-9a-fA-F]{8})|([0-9a-fA-F]{8}`?[0-9a-fA-F]{8})");
+        /// <summary>
+        /// Regular expression to match an address format. Currently only supports decimal or hexadecimal addresses.
+        /// 
+        /// Decimal format:
+        ///   - Starts with 0n
+        ///   - Contains one or more digit 0..9
+        ///   - Leading zero is ok, because 0n is explicit.
+        /// Hexadecimal format:
+        ///   - Optional start with 0x
+        ///   - Contains only hexadecimal digits 0..f
+        ///   - Optional ` to divide octets
+        ///   - Leading 0 is ok, because default is hexadecimal.
+        /// </summary>
+        public static readonly Regex AddressFormat = new Regex("(^0n[0-9]+$)|(^(0x)?([0-9a-fA-F]{0,7}|[0-9a-fA-F]{8}`?[0-9a-fA-F]{7})[0-9a-fA-F]{1}$)");
+
+        public enum PrimitiveType
+        {
+            /// <summary>
+            /// An object instance (not a primitive)
+            /// </summary>
+            Object,
+            // Actual primitives
+            Char,
+            UChar,
+            Int2B,
+            UInt2B,
+            Int4B,
+            Uint4B,
+            Int8B,
+            Uint8B,
+            Ptr32,
+            Ptr64
+        }
+
+        /// <summary>
+        /// Converts a string address into the corresponding unsigned long.
+        /// 
+        /// This method can handle decimal addresses prefixed by 0n, as well as hexadecimal addresses. 
+        /// Like Windbg, if there is no prefix, the address is assumed to be hexadecimal.
+        /// </summary>
+        /// <param name="addr">The string address.</param>
+        /// <returns>The ulong representation of the address.</returns>
+        /// <exception cref="ArgumentException">Thrown if the conversion fails.</exception>
+        public static ulong StringAddrToUlong(string addr)
+        {
+            if (string.IsNullOrEmpty(addr)) throw new ArgumentException("Cannot parse null address.");
+
+            string parse = addr;
+            bool isHex = true;
+
+            // Strip 0n or 0x
+            if (addr.StartsWith("0n") && addr.Length > 2)
+            {
+                parse = addr.Substring(2);
+                isHex = false;
+            }
+            else if (addr.StartsWith("0x") && addr.Length > 2)
+            {
+                parse = addr.Substring(2);
+            }
+
+            try
+            {
+                return Convert.ToUInt64(parse, isHex ? 16 : 10);
+            }
+            // ReSharper disable once EmptyGeneralCatchClause
+            catch (Exception x)
+            {
+                throw new ArgumentException(String.Format("Cannot parse address `{0}`. See inner exception.", addr), x);
+            }
+        }
     }
 }

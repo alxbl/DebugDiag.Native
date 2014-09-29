@@ -13,6 +13,12 @@ namespace DebugDiag.Native.Test.Fixtures
    +0x00c MoreOffset       : Int4B
    +0x010 Child            : Ptr32 VirtualType
    +0x014 PODObject        : PODType";
+        public const string VirtualTypeDerivInst = @"+0x000 __VFN_table : 0x0114cc84 
+   +0x004 POD              : 0n0
+   +0x008 Offset           : 0n0
+   +0x00c MoreOffset       : 0n0
+   +0x010 Child            : (null) 
+   +0x014 PODObject        : PODType";
         public const string VtableAddr = "0x0049beb8";
         public const ulong VtableAddrULong = 0x0049beb8;
 

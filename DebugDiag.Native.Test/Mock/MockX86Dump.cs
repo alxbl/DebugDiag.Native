@@ -28,9 +28,10 @@ namespace DebugDiag.Native.Test.Mock
         /// </summary>
         static MockX86Dump()
         {
-            InputOutputMap["ln poi(0x0049beb8)"] = Fixtures.X86.VtableLnPoi;
-            InputOutputMap["ln poi(0049beb8)"] = Fixtures.X86.VtableLnPoi;
+            InputOutputMap["ln poi(0x49beb8)"] = Fixtures.X86.VtableLnPoi;
+            InputOutputMap["ln poi(49beb8)"] = Fixtures.X86.VtableLnPoi;
             InputOutputMap["dt DebugDiag_Native_Test_App!VirtualTypeDeriv"] = Fixtures.X86.VirtualTypeDerivDt;
+            InputOutputMap["dt DebugDiag_Native_Test_App!VirtualTypeDeriv 0x49beb8"] = Fixtures.X86.VirtualTypeDerivInst;
             InputOutputMap["dt nt!_PEB 0x7efde000"] = Fixtures.X86.Peb;
             InputOutputMap["dt nt!_PEB 7efde000"] = Fixtures.X86.Peb;
             InputOutputMap["dt nt!InvalidDoNotExist"] = Fixtures.X86.InvalidTypeDt; 

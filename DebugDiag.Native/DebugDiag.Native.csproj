@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DumpContext.cs" />
+    <Compile Include="Windbg\DumpType.cs" />
     <Compile Include="FieldInfo.cs" />
     <Compile Include="IDumpContext.cs" />
     <Compile Include="Native.cs" />

@@ -51,27 +51,34 @@ namespace DebugDiag.Native.Test
         }
 
         [TestMethod]
+        public void TestAtAddressVtableWithoutVtable()
+        {
+            // This type does not have a vtable, we shouldn't be able to find it.
+            var t = NativeType.AtAddress(X86.PodTypeAddr);
+            Assert.IsNull(t);
+        }
+
+        [TestMethod]
+        public void TestGetAddress()
+        {
+            var t = NativeType.AtAddress(X86.VtableAddrULong);
+            Assert.AreEqual(X86.VtableAddrULong, t.Address);
+        }
+
+        [TestMethod]
         public void TestAtAddressNoVtableAsString()
         {
-            Assert.Fail();
+            var t = NativeType.AtAddress(X86.PodTypeAddr, "nt!_PEB");
+            Assert.AreEqual(X86.PodTypeAddrULong, t.Address);
+            Assert.AreEqual("_PEB", t.TypeName);
         }
 
         [TestMethod]
         public void TestAtAddressNoVtableAsULong()
         {
-            Assert.Fail();
-        }
-
-        [TestMethod]
-        public void TestAtAddressWithRightType()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod]
-        public void TestAtAddressWithWrongType()
-        {
-            Assert.Fail();
+            var t = NativeType.AtAddress(X86.PodTypeAddrULong, "nt!_PEB");
+            Assert.AreEqual(X86.PodTypeAddrULong, t.Address);
+            Assert.AreEqual("_PEB", t.TypeName);
         }
 
         [TestMethod]
@@ -79,6 +86,27 @@ namespace DebugDiag.Native.Test
         public void TestAtAddressNull()
         {
             var t = NativeType.AtAddress(0, null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void TestAtAddressInvalid()
+        {
+            var t = NativeType.AtAddress("notAnAddress");
+        }
+
+        [TestMethod]
+        public void TestParseTypeWithBitfield()
+        {
+            var t = NativeType.AtAddress(X86.PodTypeAddrULong, "nt!_PEB");
+            var field = t.GetField(0x3); // PEB->BitField
+            Assert.AreEqual(0x8, field.GetIntValue());
+        }
+
+        [TestMethod]
+        public void TestGetPrimitiveString()
+        {
+            Assert.Fail();
         }
     }
 }
