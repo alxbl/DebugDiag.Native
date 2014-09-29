@@ -81,13 +81,36 @@ namespace DebugDiag.Native
             Char,
             UChar,
             Int2B,
-            UInt2B,
+            Uint2B,
             Int4B,
             Uint4B,
             Int8B,
             Uint8B,
             Ptr32,
             Ptr64
+        }
+
+        /// <summary>
+        /// Converts the string representation of a primitive type into an enumeration.
+        /// </summary>
+        /// <param name="v">The string representation of the type.</param>
+        /// <returns>A PrimitiveType enumeration representing that type</returns>
+        public static PrimitiveType TypeFromString(string v)
+        {
+            if (string.IsNullOrWhiteSpace(v)) throw new ArgumentException("Type cannot be empty");
+
+            // TODO: Handle Ptr32 Ptr32 (Object)
+            if (v.Equals("Char")) return PrimitiveType.Char;
+            if (v.Equals("UChar")) return PrimitiveType.UChar;
+            if (v.Equals("Int2B")) return PrimitiveType.Int2B;
+            if (v.Equals("Uint2B")) return PrimitiveType.Uint2B;
+            if (v.Equals("Int4B")) return PrimitiveType.Int4B;
+            if (v.Equals("Uint4B")) return PrimitiveType.Uint4B;
+            if (v.Equals("Int8B")) return PrimitiveType.Int8B;
+            if (v.Equals("Uint8B")) return PrimitiveType.Uint8B;
+            if (v.StartsWith("Ptr32")) return PrimitiveType.Ptr32;
+            if (v.StartsWith("Ptr64")) return PrimitiveType.Ptr64;
+            return PrimitiveType.Object;
         }
 
         /// <summary>
@@ -126,6 +149,21 @@ namespace DebugDiag.Native
             {
                 throw new ArgumentException(String.Format("Cannot parse address `{0}`. See inner exception.", addr), x);
             }
+        }
+
+        /// <summary>
+        /// Parses a windbg primitive value type and attempts to extract the raw value.
+        /// TODO: Private?
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static ulong? ParseWindbgPrimitive(string value)
+        {
+            // TODO: Handle complex array/pointer types in conversion.
+            if (string.IsNullOrWhiteSpace(value)) return null;
+            if (value.StartsWith("0x") || value.StartsWith("0n")) return StringAddrToUlong(value);
+            if (value.Equals("(null)")) return 0;
+            return null;
         }
     }
 }

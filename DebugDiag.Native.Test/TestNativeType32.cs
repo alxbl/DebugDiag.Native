@@ -1,6 +1,7 @@
 using System;
 using DebugDiag.Native.Test.Fixtures;
 using DebugDiag.Native.Test.Mock;
+using DebugDiag.Native.Windbg;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DebugDiag.Native.Test
@@ -21,15 +22,10 @@ namespace DebugDiag.Native.Test
         }
 
         [TestMethod]
-        public void TestPreloadType()
-        {
-            Assert.IsTrue(NativeType.Preload("DebugDiag_Native_Test_App!PODType"));
-        }
-
-        [TestMethod]
+        [ExpectedException(typeof(TypeDoesNotExistException))]
         public void TestPreloadUnknownType()
         {
-            Assert.IsFalse(NativeType.Preload(X86.InvalidType));
+            NativeType.Preload(X86.InvalidType);
         }
 
         [TestMethod]
@@ -68,17 +64,19 @@ namespace DebugDiag.Native.Test
         [TestMethod]
         public void TestAtAddressNoVtableAsString()
         {
-            var t = NativeType.AtAddress(X86.PodTypeAddr, "nt!_PEB");
+            var t = NativeType.AtAddress(X86.PodTypeAddr, "DebugDiag_Native_Test_App!PODType");
             Assert.AreEqual(X86.PodTypeAddrULong, t.Address);
-            Assert.AreEqual("_PEB", t.TypeName);
+            Assert.AreEqual("PODType", t.TypeName);
+            Assert.AreEqual("DebugDiag_Native_Test_App!PODType", t.QualifiedName);
         }
 
         [TestMethod]
         public void TestAtAddressNoVtableAsULong()
         {
-            var t = NativeType.AtAddress(X86.PodTypeAddrULong, "nt!_PEB");
+            var t = NativeType.AtAddress(X86.PodTypeAddrULong, "DebugDiag_Native_Test_App!PODType");
             Assert.AreEqual(X86.PodTypeAddrULong, t.Address);
-            Assert.AreEqual("_PEB", t.TypeName);
+            Assert.AreEqual("PODType", t.TypeName);
+            Assert.AreEqual("DebugDiag_Native_Test_App!PODType", t.QualifiedName);
         }
 
         [TestMethod]
@@ -98,15 +96,15 @@ namespace DebugDiag.Native.Test
         [TestMethod]
         public void TestParseTypeWithBitfield()
         {
-            var t = NativeType.AtAddress(X86.PodTypeAddrULong, "nt!_PEB");
+            var t = NativeType.AtAddress(X86.PebAddr, "nt!_PEB");
             var field = t.GetField(0x3); // PEB->BitField
-            Assert.AreEqual(0x8, field.GetIntValue());
+            Assert.AreEqual(0x8UL, field.GetIntValue());
         }
 
         [TestMethod]
         public void TestGetPrimitiveString()
         {
-            Assert.Fail();
+            Assert.Fail("Not Implemented");
         }
     }
 }

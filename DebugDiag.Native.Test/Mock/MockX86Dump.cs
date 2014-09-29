@@ -32,9 +32,14 @@ namespace DebugDiag.Native.Test.Mock
             InputOutputMap["ln poi(49beb8)"] = Fixtures.X86.VtableLnPoi;
             InputOutputMap["dt DebugDiag_Native_Test_App!VirtualTypeDeriv"] = Fixtures.X86.VirtualTypeDerivDt;
             InputOutputMap["dt DebugDiag_Native_Test_App!VirtualTypeDeriv 0x49beb8"] = Fixtures.X86.VirtualTypeDerivInst;
-            InputOutputMap["dt nt!_PEB 0x7efde000"] = Fixtures.X86.Peb;
-            InputOutputMap["dt nt!_PEB 7efde000"] = Fixtures.X86.Peb;
-            InputOutputMap["dt nt!InvalidDoNotExist"] = Fixtures.X86.InvalidTypeDt; 
+            InputOutputMap["dt Int4B 0x49bebc"] = "Symbol Int4B not found.";
+            InputOutputMap["dt Int4B"] = "Symbol Int4B not found.";
+            InputOutputMap["dt nt!_PEB"] = Fixtures.X86.DtPeb;
+            InputOutputMap["dt nt!_PEB 0x7efde000"] = Fixtures.X86.DtPebInst;
+            InputOutputMap["dt nt!_PEB 7efde000"] = Fixtures.X86.DtPebInst;
+            InputOutputMap["dt nt!InvalidDoNotExist"] = Fixtures.X86.InvalidTypeDt;
+            InputOutputMap["dt DebugDiag_Native_Test_App!PODType"] = Fixtures.X86.DtPodType;
+            InputOutputMap["dt DebugDiag_Native_Test_App!PODType 0x49becc"] = Fixtures.X86.DtPodTypeInst;
             //InputOutputMap[""] =;
         }
 

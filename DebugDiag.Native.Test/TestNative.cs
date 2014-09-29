@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using DebugDiag.Native.Test.Fixtures;
 using DebugDiag.Native.Test.Mock;
+using DebugDiag.Native.Windbg;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DebugDiag.Native.Test
@@ -55,13 +56,12 @@ namespace DebugDiag.Native.Test
         }
 
         [TestMethod]
-        public void TestGetPrimitiveNoPreload()
+        public void TestGetFieldByName()
         {
             var t = NativeType.AtAddress(X86.VtableAddrULong);
-            var field = t.GetField(0x4);
-            //Assert.AreEqual(Native.PrimitiveType.Int4B, field.);
+            var field = t.GetField("POD");
             Assert.IsTrue(field.IsPrimitive);
-            Assert.AreEqual(0, field.GetIntValue());
+            Assert.AreEqual(8UL, field.GetIntValue());
         }
 
         [TestMethod]
@@ -69,18 +69,25 @@ namespace DebugDiag.Native.Test
         {
             // WARN: This will return the raw memory at the type's root.
             var t = NativeType.AtAddress(X86.VtableAddrULong);
-            var field = t.GetField(0x14);
-            Assert.IsFalse(field.IsPrimitive);
-            var val = field.GetIntValue();
-            Assert.AreEqual(0x0114cc84, val); // vtable address.
+            //var field = t.GetField(0x14);
+            Assert.IsFalse(t.IsPrimitive);
+            Assert.AreEqual(0x0114cc84UL, t.GetIntValue()); // vtable address.
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void TestGetInvalidOffset()
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void TestGetFieldInvalidOffset()
         {
             var t = NativeType.AtAddress(X86.VtableAddrULong);
-            var field = t.GetField(0x10000); // This offset does not belong to that object.
+            t.GetField(0x10000); // This offset does not belong to that object.
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void TestGetFieldInvalidName()
+        {
+            var t = NativeType.AtAddress(X86.VtableAddrULong);
+            t.GetField("DoesNotExist"); // This field does not belong to that object.
         }
 
         [TestMethod]
@@ -90,7 +97,9 @@ namespace DebugDiag.Native.Test
             // Getting a field on a primitive is an invalid operation.
             var t = NativeType.AtAddress(X86.VtableAddrULong);
             var field = t.GetField(0x4);
+            Assert.IsTrue(field.IsInstance);
             Assert.IsTrue(field.IsPrimitive);
+            Assert.AreEqual(8UL, field.GetIntValue());
             field.GetField(0x0);
         }
 
@@ -160,6 +169,12 @@ namespace DebugDiag.Native.Test
         public void TestStringToULongNullAddr()
         {
             Native.StringAddrToUlong(null);
+        }
+
+        [TestMethod]
+        public void TestStringToULongWindbgNull()
+        {
+            Assert.AreEqual(0UL, Native.ParseWindbgPrimitive("(null)"));
         }
     }
 }

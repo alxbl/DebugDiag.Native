@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using DebugDiag.Native.Windbg;
 
 namespace DebugDiag.Native
 {
@@ -62,8 +63,10 @@ namespace DebugDiag.Native
         /// <returns>A NativeType instance representing the field.</returns>
         public NativeType GetField(string name)
         {
+            if (IsPrimitive) throw new InvalidOperationException("Cannot call GetField() on a primitive type.");
+
             if (string.IsNullOrEmpty(name) || !_nameLookup.ContainsKey(name))
-                throw new Exception(String.Format("The field `{0}` does not exist in type `{1}`", name, QualifiedName));
+                throw new ArgumentOutOfRangeException(String.Format("The field `{0}` does not exist in type `{1}`", name, QualifiedName));
 
             var o = _nameLookup[name];
             return GetInstance(o);
@@ -74,11 +77,14 @@ namespace DebugDiag.Native
         /// </summary>
         /// <param name="offset">The field name.</param>
         /// <returns>A NativeType instance representing the field.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the offset does not exist for this type.</exception>
         public NativeType GetField(ulong offset)
         {
+            if (IsPrimitive) throw new InvalidOperationException("Cannot call GetField() on a primitive type.");
             if (offset == 0) return this; // Type+0x0 == Type
+
             if (!_offsetLookup.ContainsKey(offset))
-                throw new Exception(String.Format("The offset `+0x{0:03x}` does not exist in type `{1}`", offset, QualifiedName));
+                throw new ArgumentOutOfRangeException(String.Format("The offset `+0x{0:03x}` does not exist in type `{1}`", offset, QualifiedName));
             var o = _offsetLookup[offset];
             return GetInstance(o);
         }
@@ -105,12 +111,12 @@ namespace DebugDiag.Native
 
         #region Private API
 
-        private static Regex _vtableFormat = new Regex(@" *([^ :]+)::`vftable'");
-        // TODO: Type instances should be globally cached in case the user reuses AtAddress(); ?
+        private static readonly Regex _vtableFormat = new Regex(@" *([^ :]+)::`vftable'");
+        
         /// <summary>
         /// The type instance's offset table, indexed by field name.
         /// </summary>
-        private readonly IDictionary<string, Offset> _nameLookup = new Dictionary<string, Offset>();
+        private readonly IDictionary<string, Offset> _nameLookup = new Dictionary<string, Offset>(); // TODO: Type instances should be globally cached in case the user reuses AtAddress() ?
 
         /// <summary>
         /// The type instance's offset table, indexed by field offset.
@@ -132,6 +138,45 @@ namespace DebugDiag.Native
             IsInstance = false; // When a default object is constructed, it is not an instance.
         }
 
+        private void ParseTypeName(string type)
+        {
+            var split = type.Split('!');
+            Debug.Assert(split.Length == 2, "A fully qualified name consists of two parts.");
+            ModuleName = split[0];
+            TypeName = split[1];
+        }
+
+        /// <summary>
+        /// Populates this instance based on the windbg output.
+        /// </summary>
+        /// <param name="dt">The parsed dt output from windbg.</param>
+        private void InitializeInstance(DumpType dt)
+        {
+            if (dt.TypeName != null)
+            {
+                ParseTypeName(dt.TypeName);
+            }
+
+            bool first = true;
+            foreach (var line in dt)
+            {
+                Debug.Assert(_offsetLookup.ContainsKey(line.Offset), "Type offset tables mismatched");
+                var offset = _offsetLookup[line.Offset];
+                offset.Address = Address + offset.Bytes; // Compute Absolute Address of this offset.
+                // TODO: Handle bitfield details here.
+                if (!line.IsBits) offset.RawMemory = Native.ParseWindbgPrimitive(line.Value);
+
+                if (line.Offset == 0 && first)
+                {
+                    // Offset 0 is self, so populate this instance.
+                    _rawMem = offset.RawMemory.HasValue ? offset.RawMemory.Value : 0; 
+                    // Should always have value though?
+                    // What about scenario where the first field of a POD is also a POD?
+                }
+                first = false;
+            }
+        }
+
         /// <summary>
         /// Returns the type instance at a given offset of this type.
         /// 
@@ -139,52 +184,75 @@ namespace DebugDiag.Native
         /// </summary>
         /// <param name="o">The offset information object.</param>
         /// <returns>An instance of the NativeType at the given offset.</returns>
-        private NativeType GetInstance(Offset o)
+        private static NativeType GetInstance(Offset o)
         {
             if (o.Instance != null) return o.Instance;
-            // The type has not been initialized. Do so.
-            o.Instance = AtAddress(o.Address, o.TypeName);
-            return o.Instance;
-        }
-        
-        /// <summary>
-        /// Loads a copy of the type information from the cache.
-        /// 
-        /// This method assumes the type information is already cached.
-        /// </summary>
-        /// <param name="type">The name of the type</param>
-        private void LoadFromCache(string type)
-        {
-            var cache = TypeLookup(type);
-            Debug.Assert(cache != null);
-
-            foreach (var kp in cache)
+            
+            // Handle primitive fields.
+            if (o.Type != Native.PrimitiveType.Object)
             {
-                var o = new Offset(kp.Value); // Deep Copy.
-                _nameLookup[kp.Key] = o;
-                _offsetLookup[o.Bytes] = o;
+                o.Instance = new NativeType{IsInstance = true, HasVtable = false, TypeName = o.TypeName, Address = o.Address};
+                Debug.Assert(o.RawMemory.HasValue, "A primitive type should always have a raw value available.");
+                o.Instance._rawMem = o.RawMemory ?? 0;
+                o.Instance._type = o.Type;
             }
+            else 
+                o.Instance = AtAddress(o.Address, o.TypeName);
+            return o.Instance;
         }
 
         #region Type Cache
-        private static readonly IDictionary<string, IDictionary<string, Offset>> _typeCache = new Dictionary<string, IDictionary<string, Offset>>();
+        private static readonly IDictionary<string, IDictionary<string, Offset>> TypeCache = new Dictionary<string, IDictionary<string, Offset>>();
 
         private static IDictionary<string, Offset> TypeLookup(string type)
         {
-            if (!_typeCache.ContainsKey(type)) return null;
-            return _typeCache[type];
+            return !TypeCache.ContainsKey(type) ? null : TypeCache[type];
         }
 
         private static void CacheType(string type, IDictionary<string, Offset> offsetTable)
         {
-            _typeCache.Add(type, offsetTable);
+            TypeCache[type] = offsetTable;
         }
 
-        private struct Offset
+        /// <summary>
+        /// Loads a copy of the type's offset table for this type instance.
+        ///
+        /// If the type hasn't been discovered yet, attempts to discover it.
+        /// </summary>
+        /// <param name="type">The name of the type</param>
+        /// <exception cref="TypeDoesNotExistException">Thrown when the type does not have symbols available or the type cannot be found.</exception>
+        private void LoadOffsetTable(string type)
         {
-            public Offset(Offset other) : this()
+            var cache = TypeLookup(type);
+            if (cache == null)
             {
-                Address = other.Address;
+                Preload(type);
+                cache = TypeLookup(type);
+                Debug.Assert(cache != null); // Should have been preloaded now. Otherwise there is a problem.
+            }
+
+            foreach (var kp in cache)
+            {
+                var o = new Offset(kp.Value); // Deep Copy.
+                o.Address = Address + o.Bytes; // Set each field's absolute address in the dump.
+                _nameLookup[kp.Key] = o;
+                
+                if (!_offsetLookup.ContainsKey(o.Bytes)) // Do not overwrite with Bitfield details.
+                    _offsetLookup[o.Bytes] = o; // TODO: Support Bitfield details.
+            }
+        }
+
+        /// <summary>
+        /// Represents a type's field at a specific offset. Internal structure used to navigate instances.
+        /// </summary>
+        private class Offset
+        {
+            public Offset()
+            {
+            }
+
+            public Offset(Offset other)
+            {
                 Bytes = other.Bytes;
                 TypeName = other.TypeName;
                 Type = other.Type;
@@ -194,26 +262,32 @@ namespace DebugDiag.Native
             /// <summary>
             /// Absolute address of this instance.
             /// </summary>
-            public ulong Address { get; private set; }
+            public ulong Address { get; internal set; }
+            
             /// <summary>
             /// Offset bytes from the base address.
             /// </summary>
-            public ulong Bytes { get; private set; }
+            public ulong Bytes { get; internal set; }
 
             /// <summary>
             /// The name (fully qualified if possible) of the type at this offset.
             /// </summary>
-            public string TypeName { get; private set; }
+            public string TypeName { get; internal set; }
 
             /// <summary>
             /// Primitive Type information.
             /// </summary>
-            public Native.PrimitiveType Type { get; private set; }
+            public Native.PrimitiveType Type { get; internal set; }
 
             /// <summary>
             /// The sub-instance, if it has been inspected.
             /// </summary>
             public NativeType Instance { get; internal set; }
+
+            /// <summary>
+            /// The raw memory value at that offset (for primitive types)
+            /// </summary>
+            public ulong? RawMemory { get; internal set; }
         }
         #endregion
         #endregion
@@ -225,21 +299,47 @@ namespace DebugDiag.Native
         /// This calls the dbgeng.dll command "dt" on the type.
         /// </summary>
         /// <param name="type">The qualified name of the type (</param>
-        /// <returns>Whether the type could be preloaded</returns>
-        public static bool Preload(string type)
+        /// <exception cref="ArgumentException">When the type cannot be found or preloaded</exception>
+        public static void Preload(string type)
         {
             // Avoid extra work if we already preloaded that type.
-            if (TypeLookup(type) != null) return true;
+            if (TypeLookup(type) != null) return;
 
             var data = Native.Context.Execute(String.Format("dt {0}", type));
 
             // Type not found...
-            if (string.IsNullOrWhiteSpace(data) || data.Equals(String.Format("Symbol {0} not found.", type))) return false;
+            if (string.IsNullOrWhiteSpace(data) || data.Contains(String.Format("Symbol {0} not found.", type)))
+                throw new TypeDoesNotExistException(String.Format("Symbols {0} not found.", type));
 
             // Parse each offset.
             IDictionary<string, Offset> offsetTable = new Dictionary<string, Offset>();
+            
+            DumpType dt;
+            try
+            {
+                dt = DumpType.Parse(data);
+                foreach (var line in dt)
+                {
+                    offsetTable.Add(line.Name, new Offset()
+                                               {
+                                                   Address = 0,
+                                                   Bytes = line.Offset,
+                                                   Instance = null,
+                                                   Type = Native.TypeFromString(line.Value),
+                                                   TypeName = line.Value // We know value here is the type.
+                                               });
+                }
+            }
+            // ReSharper disable once EmptyGeneralCatchClause
+            catch (Exception x)
+            {
+                throw new TypeDoesNotExistException(String.Format("An error occured while preloading symbol {0}. See the inner exception.", type), x);
+            }
 
-            return true;
+            // Cache the offset table.
+            if (dt.TypeName != null) // Also cache the fully qualified type name.
+                CacheType(dt.TypeName, offsetTable);
+            CacheType(type, offsetTable);
         }
 
         /// <summary>
@@ -277,13 +377,13 @@ namespace DebugDiag.Native
         /// This uses dbgeng.dll under the hood, so there is no way to validate if the parsed type is valid automatically.
         /// This method is useful for dumping POD types that do not have a vtable, but has a drawback that the type being dumped must be known at runtime.
         /// </summary>
-        /// <param name="addr"></param>
-        /// <param name="type"></param>
-        /// <returns></returns>
+        /// <param name="addr">The address to inspect.</param>
+        /// <param name="type">The type name located at that address.</param>
+        /// <returns>An instance of NativeType.</returns>
         public static NativeType AtAddress(ulong addr, string type)
         {
             if (string.IsNullOrEmpty(type)) throw new ArgumentException("Cannot lookup a null type. Use AtAddress(addr) for vtable lookup.");
-            return AtAddress(String.Format("0x{0:x16}", addr), type);
+            return AtAddress(String.Format("0x{0:x}", addr), type);
         }
 
         public static NativeType AtAddress(string addr, string type)
@@ -293,18 +393,24 @@ namespace DebugDiag.Native
             // Preload the type if it hasn't been encountered.
             Preload(type);
 
-            var output = Native.Context.Execute(String.Format("dt {0} {1}", addr, type));
+            var output = Native.Context.Execute(String.Format("dt {0} {1}", type, addr));
             if (string.IsNullOrWhiteSpace(output)) return null;
 
             // Create an instance.
-            var instance = new NativeType();
-            instance.LoadFromCache(type); 
+            var instance = new NativeType {IsInstance = true, Address = Native.StringAddrToUlong(addr)};
+            instance.LoadOffsetTable(type);
 
-            // Parse the `dt` output and initialize the instance.
-            instance.Address = Native.StringAddrToUlong(addr);
-            //instance.InitializeFromDumpType(DumpType.Parse(output));
+            if (type.Contains("!"))
+            {
+                instance.ParseTypeName(type);
+            }
+
+            // Parse the `dt` output and initialize the instance.            
+            instance.InitializeInstance(DumpType.Parse(output));
+            
             return instance;
         }
+
         #endregion
     }
 }
