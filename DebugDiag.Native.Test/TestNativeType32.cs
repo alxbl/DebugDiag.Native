@@ -102,6 +102,25 @@ namespace DebugDiag.Native.Test
         }
 
         [TestMethod]
+        public void TestParseTypeWithStaticField()
+        {
+            var t = NativeType.AtAddress(X86.StaticDtAddr);
+            var f = t.GetField("IAmSoStatic");
+            Assert.IsTrue(f.IsPrimitive);
+            Assert.IsTrue(f.IsStatic);
+            Assert.AreEqual(3UL, f.GetIntValue());
+        }
+
+        [TestMethod]
+        public void TestStaticInDifferentModules()
+        {
+            Assert.Fail("Not Implemented");
+            // A static member can have different values in different modules.
+            // This is a disgusting case, but it needs to be handled properly.
+            // The idea is that internally we want to always use the fully qualified type.
+        }
+
+        [TestMethod]
         public void TestGetPrimitiveString()
         {
             Assert.Fail("Not Implemented");

@@ -226,8 +226,19 @@ namespace DebugDiag.Native.Test.Fixtures
    +0x240 SpareTracingBits : 0y000000000000000000000000000000 (0)";
         #endregion
 
+        #region Invalid Type
         public const string InvalidType = "nt!InvalidDoNotExist";
         public const string InvalidTypeDt = "Symbol nt!InvalidDoNotExist not found.";
+        #endregion
+
+        #region Static Field
+        public const string StaticDtAddr = "0x0029cc00";
+        public const string StaticDt = @"DebugDiag_Native_Test_App!HasAStaticField
+   =00d6cb74 IAmSoStatic      : Int4B
+   =00d50000 HInstPtr         : Ptr32 Int4B";
+        public const string StaticDtInst = @"   =00d6cb74 IAmSoStatic      : 0n3
+   =00d50000 HInstPtr         : 0x00905a4d  -> ??";
+        #endregion
     }
 }
 

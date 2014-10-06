@@ -45,10 +45,19 @@ public:
     }
 };
 
+class HasAStaticField
+{
+public:
+    static const int IAmSoStatic = 3;
+    static int* HInstPtr;
+};
 int main(int argc, char** argv)
 {
     auto deriv = new VirtualTypeDeriv();
     deriv->OverrideMe(12); // 13
+
+    HasAStaticField* statico = new HasAStaticField();
+
     int* crash = nullptr;
     std::cout << *crash; // segfault
 }

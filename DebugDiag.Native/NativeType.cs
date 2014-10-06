@@ -56,6 +56,8 @@ namespace DebugDiag.Native
             get { return _type != Native.PrimitiveType.Object && IsInstance; }
         }
 
+        public bool IsStatic { get; private set; }
+
         /// <summary>
         /// Returns an instance to an object's field.
         /// </summary>
