@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using DebugDiag.DotNet;
@@ -117,7 +118,7 @@ namespace DebugDiag.Native
         /// Converts a string address into the corresponding unsigned long.
         /// 
         /// This method can handle decimal addresses prefixed by 0n, as well as hexadecimal addresses. 
-        /// Like Windbg, if there is no prefix, the address is assumed to be hexadecimal.
+        /// Like Windbg, if there is no prefix, the address is assumed to be hexadecimal
         /// </summary>
         /// <param name="addr">The string address.</param>
         /// <returns>The ulong representation of the address.</returns>
@@ -142,12 +143,13 @@ namespace DebugDiag.Native
 
             try
             {
-                return Convert.ToUInt64(parse, isHex ? 16 : 10);
+                // Coerce negative values into ulong.
+                return parse.StartsWith("-") ? (ulong)Convert.ToInt64(parse) : Convert.ToUInt64(parse, isHex ? 16 : 10);
             }
             // ReSharper disable once EmptyGeneralCatchClause
             catch (Exception x)
             {
-                throw new ArgumentException(String.Format("Cannot parse address `{0}`. See inner exception.", addr), x);
+                throw new ArgumentException(String.Format("Cannot parse address `{0}`:\n{1}", addr, x), x);
             }
         }
 

@@ -14,7 +14,7 @@ namespace DebugDiag.Native.Test.Fixtures
    +0x014 PODObject        : PODType";
         public const string VirtualTypeDerivInst = @"   +0x000 __VFN_table : 0x0114cc84 
    +0x004 POD              : 0n8
-   +0x008 Offset           : 0n0
+   +0x008 Offset           : 0n-1
    +0x00c MoreOffset       : 0n0
    +0x010 Child            : (null) 
    +0x014 PODObject        : PODType";
@@ -41,7 +41,7 @@ namespace DebugDiag.Native.Test.Fixtures
    +0x004 Offset2          : Int4B
    +0x008 Offset3          : Int4B";
         public const string DtPodTypeInst = @"   +0x000 Offset1          : 0n42
-   +0x004 Offset2          : 0n0
+   +0x004 Offset2          : 0n-1
    +0x008 Offset3          : 0n0";
 
         #endregion
