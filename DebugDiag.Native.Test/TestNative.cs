@@ -104,12 +104,29 @@ namespace DebugDiag.Native.Test
         }
 
         [TestMethod]
-        public void TestGetInstanceOfSelf()
+        public void TestGetZeroOffsetWithVtable()
         {
+            // A virtual type has its vtable at offset 0x000.
             var t = NativeType.AtAddress(X86.VtableAddrULong);
+            Assert.IsTrue(t.HasVtable);
             var field = t.GetField(0x0);
-            Assert.AreEqual(t, field);
-            Assert.AreSame(t, field);
+            Assert.IsTrue(field.IsPrimitive);
+            Assert.IsTrue(field.IsInstance);
+            Assert.AreEqual("Ptr32", field.QualifiedName);
+            Assert.AreEqual(0x0114cc84UL, field.GetIntValue());
+            // TODO: It should be possible to inspect the vtable.
+        }
+
+        [TestMethod]
+        public void TestGetZeroOffsetPod()
+        {
+            // A POD's first member is located at offset 0x000 and can be anything.
+            var t = NativeType.AtAddress(X86.PodTypeAddr, "DebugDiag_Native_Test_App!PODType");
+            Assert.AreEqual("DebugDiag_Native_Test_App!PODType", t.QualifiedName);
+            var field = t.GetField(0x0);
+            Assert.IsTrue(field.IsPrimitive);
+            Assert.IsTrue(field.IsInstance);
+            Assert.AreEqual(42UL, field.GetIntValue());
         }
 
         [TestMethod]

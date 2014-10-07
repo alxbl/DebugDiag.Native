@@ -104,7 +104,7 @@ namespace DebugDiag.Native.Test
         [TestMethod]
         public void TestParseTypeWithStaticField()
         {
-            var t = NativeType.AtAddress(X86.StaticDtAddr);
+            var t = NativeType.AtAddress(X86.StaticDtAddr, "HasAStaticField");
             var f = t.GetField("IAmSoStatic");
             Assert.IsTrue(f.IsPrimitive);
             Assert.IsTrue(f.IsStatic);
@@ -118,6 +118,37 @@ namespace DebugDiag.Native.Test
             // A static member can have different values in different modules.
             // This is a disgusting case, but it needs to be handled properly.
             // The idea is that internally we want to always use the fully qualified type.
+        }
+
+        [TestMethod]
+        public void TestDrillDownSubtypes()
+        {
+            // Retrieve the HasAStaticField object.
+            var t = NativeType.AtAddress(X86.StaticDtAddr, "HasAStaticField");
+
+            // Drill into its VirtualType instance.
+            var virtualType = t.GetField(0x0003);
+            Assert.IsFalse(virtualType.IsPrimitive);
+            Assert.IsFalse(virtualType.IsStatic);
+            Assert.IsTrue(virtualType.IsInstance);
+            Assert.AreEqual("DebugDiag_Native_Test_App!VirtualType", virtualType.QualifiedName);
+            
+            // Drill into the VirtualType's PODType instance. 
+            var podType = virtualType.GetField("PODObject");
+            Assert.IsFalse(podType.IsPrimitive);
+            Assert.IsFalse(podType.IsStatic);
+            Assert.IsTrue(podType.IsInstance);
+            Assert.AreEqual("DebugDiag_Native_Test_App!PODType", virtualType.QualifiedName);
+
+            // Finally, get the PODType's Offset1 value.
+            var offset1 = podType.GetField(0x000);
+            // FIXME: The podType has no vtable so offset +0x0000 returns 
+            // self, which is different from GetField("offset1"). This is
+            // a current limitation of the code and the behavior should not
+            // be made consistent.
+            Assert.AreSame(podType, offset1); // FIXME: This should be false.
+            // This will work because PODType has no vtable.
+            Assert.AreEqual(42UL, offset1.GetIntValue()); 
         }
 
         [TestMethod]

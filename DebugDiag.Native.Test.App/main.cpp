@@ -50,6 +50,7 @@ class HasAStaticField
 public:
     static const int IAmSoStatic = 3;
     static int* HInstPtr;
+    VirtualType subType;
 };
 int main(int argc, char** argv)
 {

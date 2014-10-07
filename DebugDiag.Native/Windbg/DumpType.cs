@@ -37,6 +37,7 @@ namespace DebugDiag.Native.Windbg
         /// </summary>
         public string TypeName { get; private set; }
         public bool RecursionDetected { get; private set; } // TODO: Allow for internal recursion when parsing dt.
+        public bool IsVirtualType { get; private set; }
         private readonly IList<Line> _lines = new List<Line>();
 
         /// <summary>
@@ -57,6 +58,7 @@ namespace DebugDiag.Native.Windbg
             var output = new DumpType {RecursionDetected = false}; // RecursionDetected is always false for now.
 
             var first = true;
+            var checkVtable = true;
             foreach (var l in content.Split('\n'))
             {
                 if (first)
@@ -67,8 +69,15 @@ namespace DebugDiag.Native.Windbg
                     if (output.TypeName != null) continue; // We found a type name, skip this line.
                 }
 
+                // Determine whether this type is virtual (i.e. its first offset is a vtable)
+                if (checkVtable)
+                {
+                    output.IsVirtualType = l.Contains("__VFN_table");
+                    checkVtable = false;
+                }
+
                 var m = LineFormat.Matches(l);
-                Debug.Assert(m.Count == 1, "LineFormat should only match once per line.");
+                Debug.Assert(m.Count == 1, "LineFormat should match exactly once per line.");
 
                 var groups = m[0].Groups;
                 Debug.Assert(groups.Count == 4, "Could not match all required offset information");

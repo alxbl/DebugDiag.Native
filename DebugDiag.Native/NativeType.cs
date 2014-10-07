@@ -37,9 +37,15 @@ namespace DebugDiag.Native
         public string TypeName { get; private set; }
 
         /// <summary>
-        /// The fully qualified name of this type ([module]![type])
+        /// The fully qualified name of this type ([module]![type]). If the type is a primitive, then this is the same as TypeName.
         /// </summary>
-        public string QualifiedName { get { return String.Format("{0}!{1}", ModuleName, TypeName); } }
+        public string QualifiedName
+        {
+            get
+            {
+                return !String.IsNullOrEmpty(ModuleName) ? String.Format("{0}!{1}", ModuleName, TypeName) : TypeName;
+            }
+        }
 
         /// <summary>
         /// True if this type is virtual and has a Vtable entry.
@@ -83,7 +89,6 @@ namespace DebugDiag.Native
         public NativeType GetField(ulong offset)
         {
             if (IsPrimitive) throw new InvalidOperationException("Cannot call GetField() on a primitive type.");
-            if (offset == 0) return this; // Type+0x0 == Type
 
             if (!_offsetLookup.ContainsKey(offset))
                 throw new ArgumentOutOfRangeException(String.Format("The offset `+0x{0:03x}` does not exist in type `{1}`", offset, QualifiedName));
@@ -107,18 +112,18 @@ namespace DebugDiag.Native
         {
             return Native.Context.Execute(String.Format("du {0}", _rawMem));
         }
-        
+
         #endregion
         #endregion
 
         #region Private API
 
         private static readonly Regex _vtableFormat = new Regex(@" *([^ :]+)::`vftable'");
-        
+
         /// <summary>
         /// The type instance's offset table, indexed by field name.
         /// </summary>
-        private readonly IDictionary<string, Offset> _nameLookup = new Dictionary<string, Offset>(); // TODO: Type instances should be globally cached in case the user reuses AtAddress() ?
+        private readonly IDictionary<string, Offset> _nameLookup = new Dictionary<string, Offset>();
 
         /// <summary>
         /// The type instance's offset table, indexed by field offset.
@@ -151,13 +156,15 @@ namespace DebugDiag.Native
         /// <summary>
         /// Populates this instance based on the windbg output.
         /// </summary>
-        /// <param name="dt">The parsed dt output from windbg.</param>
+        /// <param name="dt">The parsed dt output from windbg.</param>s
         private void InitializeInstance(DumpType dt)
         {
             if (dt.TypeName != null)
             {
                 ParseTypeName(dt.TypeName);
             }
+
+            HasVtable = dt.IsVirtualType;
 
             bool first = true;
             foreach (var line in dt)
@@ -171,7 +178,7 @@ namespace DebugDiag.Native
                 if (line.Offset == 0 && first)
                 {
                     // Offset 0 is self, so populate this instance.
-                    _rawMem = offset.RawMemory.HasValue ? offset.RawMemory.Value : 0; 
+                    _rawMem = offset.RawMemory.HasValue ? offset.RawMemory.Value : 0;
                     // Should always have value though?
                     // What about scenario where the first field of a POD is also a POD?
                 }
@@ -189,16 +196,16 @@ namespace DebugDiag.Native
         private static NativeType GetInstance(Offset o)
         {
             if (o.Instance != null) return o.Instance;
-            
+
             // Handle primitive fields.
             if (o.Type != Native.PrimitiveType.Object)
             {
-                o.Instance = new NativeType{IsInstance = true, HasVtable = false, TypeName = o.TypeName, Address = o.Address};
+                o.Instance = new NativeType { IsInstance = true, HasVtable = false, TypeName = o.TypeName, Address = o.Address };
                 Debug.Assert(o.RawMemory.HasValue, "A primitive type should always have a raw value available.");
                 o.Instance._rawMem = o.RawMemory ?? 0;
                 o.Instance._type = o.Type;
             }
-            else 
+            else
                 o.Instance = AtAddress(o.Address, o.TypeName);
             return o.Instance;
         }
@@ -238,7 +245,7 @@ namespace DebugDiag.Native
                 var o = new Offset(kp.Value); // Deep Copy.
                 o.Address = Address + o.Bytes; // Set each field's absolute address in the dump.
                 _nameLookup[kp.Key] = o;
-                
+
                 if (!_offsetLookup.ContainsKey(o.Bytes)) // Do not overwrite with Bitfield details.
                     _offsetLookup[o.Bytes] = o; // TODO: Support Bitfield details.
             }
@@ -265,7 +272,7 @@ namespace DebugDiag.Native
             /// Absolute address of this instance.
             /// </summary>
             public ulong Address { get; internal set; }
-            
+
             /// <summary>
             /// Offset bytes from the base address.
             /// </summary>
@@ -315,7 +322,7 @@ namespace DebugDiag.Native
 
             // Parse each offset.
             IDictionary<string, Offset> offsetTable = new Dictionary<string, Offset>();
-            
+
             DumpType dt;
             try
             {
@@ -364,6 +371,7 @@ namespace DebugDiag.Native
             Debug.Assert(matches.Count == 1); // There should never be more than one vtable for a given type.
             Debug.Assert(matches[0].Groups.Count == 2); // Full match & typename
             var s = matches[0].Groups[1].Value;
+
             return AtAddress(addr, s);
         }
 
@@ -391,7 +399,7 @@ namespace DebugDiag.Native
         public static NativeType AtAddress(string addr, string type)
         {
             if (string.IsNullOrEmpty(type)) throw new ArgumentException("Cannot lookup a null type. Use AtAddress(addr) for vtable lookup.");
-            
+
             // Preload the type if it hasn't been encountered.
             Preload(type);
 
@@ -399,7 +407,7 @@ namespace DebugDiag.Native
             if (string.IsNullOrWhiteSpace(output)) return null;
 
             // Create an instance.
-            var instance = new NativeType {IsInstance = true, Address = Native.StringAddrToUlong(addr)};
+            var instance = new NativeType { IsInstance = true, Address = Native.StringAddrToUlong(addr) };
             instance.LoadOffsetTable(type);
 
             if (type.Contains("!"))
@@ -409,7 +417,7 @@ namespace DebugDiag.Native
 
             // Parse the `dt` output and initialize the instance.            
             instance.InitializeInstance(DumpType.Parse(output));
-            
+
             return instance;
         }
 

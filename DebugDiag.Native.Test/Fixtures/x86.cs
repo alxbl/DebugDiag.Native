@@ -31,7 +31,7 @@ namespace DebugDiag.Native.Test.Fixtures
         public const string DtPodType = @"   +0x000 Offset1          : Int4B
    +0x004 Offset2          : Int4B
    +0x008 Offset3          : Int4B";
-        public const string DtPodTypeInst = @"   +0x000 Offset1          : 0n0
+        public const string DtPodTypeInst = @"   +0x000 Offset1          : 0n42
    +0x004 Offset2          : 0n0
    +0x008 Offset3          : 0n0";
 
@@ -234,10 +234,24 @@ namespace DebugDiag.Native.Test.Fixtures
         #region Static Field
         public const string StaticDtAddr = "0x0029cc00";
         public const string StaticDt = @"DebugDiag_Native_Test_App!HasAStaticField
-   =00d6cb74 IAmSoStatic      : Int4B
-   =00d50000 HInstPtr         : Ptr32 Int4B";
-        public const string StaticDtInst = @"   =00d6cb74 IAmSoStatic      : 0n3
-   =00d50000 HInstPtr         : 0x00905a4d  -> ??";
+   =00f1cb74 IAmSoStatic      : Int4B
+   =00f00000 HInstPtr         : Ptr32 Int4B
+   +0x000 subType          : VirtualType";
+        public const string StaticDtInst = @"DebugDiag_Native_Test_App!HasAStaticField
+   =00f1cb74 IAmSoStatic      : 0n3
+   =00f00000 HInstPtr         : 0x00905a4d  -> ??
+   +0x000 subType          : VirtualType";
+        public const string StaticDtDrillSubType = @"   +0x000 __VFN_table : 0x00f1cc84 
+   +0x004 POD              : 0n0
+   +0x008 Offset           : 0n0
+   +0x00c MoreOffset       : 0n0
+   +0x010 Child            : (null) 
+   +0x014 PODObject        : PODType";
+        public const string StaticDtDrillPod = @"
+   +0x000 Offset1          : 0n42
+   +0x004 Offset2          : 0n0
+   +0x008 Offset3          : 0n0";
+
         #endregion
     }
 }
