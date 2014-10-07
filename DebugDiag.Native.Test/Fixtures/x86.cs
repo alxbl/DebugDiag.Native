@@ -232,7 +232,7 @@ namespace DebugDiag.Native.Test.Fixtures
         #endregion
 
         #region Static Field
-        public const string StaticDtAddr = "0x0029cc00";
+        public const string StaticDtAddr = "0x29cc00";
         public const string StaticDt = @"DebugDiag_Native_Test_App!HasAStaticField
    =00f1cb74 IAmSoStatic      : Int4B
    =00f00000 HInstPtr         : Ptr32 Int4B

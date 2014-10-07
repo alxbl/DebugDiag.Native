@@ -171,7 +171,8 @@ namespace DebugDiag.Native
             {
                 Debug.Assert(_offsetLookup.ContainsKey(line.Offset), "Type offset tables mismatched");
                 var offset = _offsetLookup[line.Offset];
-                offset.Address = Address + offset.Bytes; // Compute Absolute Address of this offset.
+
+                if (!offset.IsStatic) offset.Address = Address + offset.Bytes; // Compute Absolute Address of this offset.
                 // TODO: Handle bitfield details here.
                 if (!line.IsBits) offset.RawMemory = Native.ParseWindbgPrimitive(line.Value);
 
@@ -200,7 +201,7 @@ namespace DebugDiag.Native
             // Handle primitive fields.
             if (o.Type != Native.PrimitiveType.Object)
             {
-                o.Instance = new NativeType { IsInstance = true, HasVtable = false, TypeName = o.TypeName, Address = o.Address };
+                o.Instance = new NativeType { IsInstance = true, HasVtable = false, TypeName = o.TypeName, Address = o.Address, IsStatic = o.IsStatic };
                 Debug.Assert(o.RawMemory.HasValue, "A primitive type should always have a raw value available.");
                 o.Instance._rawMem = o.RawMemory ?? 0;
                 o.Instance._type = o.Type;
@@ -243,7 +244,7 @@ namespace DebugDiag.Native
             foreach (var kp in cache)
             {
                 var o = new Offset(kp.Value); // Deep Copy.
-                o.Address = Address + o.Bytes; // Set each field's absolute address in the dump.
+                if (!o.IsStatic) o.Address = Address + o.Bytes; // Compute the absolute address of this offset unless it is static.
                 _nameLookup[kp.Key] = o;
 
                 if (!_offsetLookup.ContainsKey(o.Bytes)) // Do not overwrite with Bitfield details.
@@ -266,6 +267,7 @@ namespace DebugDiag.Native
                 TypeName = other.TypeName;
                 Type = other.Type;
                 Instance = null; // Don't copy the instance data over.
+                IsStatic = other.IsStatic;
             }
 
             /// <summary>
@@ -297,6 +299,14 @@ namespace DebugDiag.Native
             /// The raw memory value at that offset (for primitive types)
             /// </summary>
             public ulong? RawMemory { get; internal set; }
+
+            /// <summary>
+            /// Whether this "offset" represents a static type.
+            /// 
+            /// When this is true, RawMemory is null and Bytes is equal to Address 
+            /// since the offset really points to an arbitrary memory location.
+            /// </summary>
+            public bool IsStatic { get; internal set; }
         }
         #endregion
         #endregion
@@ -308,6 +318,7 @@ namespace DebugDiag.Native
         /// This calls the dbgeng.dll command "dt" on the type.
         /// </summary>
         /// <param name="type">The qualified name of the type (</param>
+        /// <returns>The preloaded type information. This is not an instance.</returns>
         /// <exception cref="ArgumentException">When the type cannot be found or preloaded</exception>
         public static void Preload(string type)
         {
@@ -331,11 +342,13 @@ namespace DebugDiag.Native
                 {
                     offsetTable.Add(line.Name, new Offset()
                                                {
-                                                   Address = 0,
+                                                   // If the offset is static, we already know its address. Otherwise it will be computed by InitializeInstance().
+                                                   Address = line.IsStatic ? line.Offset : 0, 
                                                    Bytes = line.Offset,
                                                    Instance = null,
                                                    Type = Native.TypeFromString(line.Value),
-                                                   TypeName = line.Value // We know value here is the type.
+                                                   TypeName = line.Value, // We know value here is the type.
+                                                   IsStatic = line.IsStatic
                                                });
                 }
             }
@@ -403,7 +416,7 @@ namespace DebugDiag.Native
             // Preload the type if it hasn't been encountered.
             Preload(type);
 
-            var output = Native.Context.Execute(String.Format("dt {0} {1}", type, addr));
+            var output = Native.Context.Execute(String.Format("dt {0} {1}", type, addr)); // TODO: Always use qualified type name internally.
             if (string.IsNullOrWhiteSpace(output)) return null;
 
             // Create an instance.

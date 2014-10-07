@@ -11,7 +11,7 @@ namespace DebugDiag.Native.Windbg
     /// </summary>
     public class DumpType : IEnumerable<DumpType.Line>
     {
-        private static readonly Regex LineFormat = new Regex(@" +\+0x([0-9a-fA-F]+) ([A-Za-z_][A-Za-z0-9_]+) +: +([^ \n\r]*)");
+        private static readonly Regex LineFormat = new Regex(@" +(\+0x|=)([0-9a-fA-F]+) ([A-Za-z_][A-Za-z0-9_]+) +: +([^ \n\r]*)");
         /// <summary>
         /// Represents one line of output.
         /// </summary>
@@ -21,6 +21,11 @@ namespace DebugDiag.Native.Windbg
             public string Name { get; internal set; }
             public string Value { get; internal set; }
             public string Type { get; internal set; }
+
+            /// <summary>
+            /// Whether this line represents a static field.
+            /// </summary>
+            public bool IsStatic { get; internal set; }
 
             /// <summary>
             /// Whether this is part of a bitfield's bit breakdown.
@@ -80,14 +85,15 @@ namespace DebugDiag.Native.Windbg
                 Debug.Assert(m.Count == 1, "LineFormat should match exactly once per line.");
 
                 var groups = m[0].Groups;
-                Debug.Assert(groups.Count == 4, "Could not match all required offset information");
-                var offset = Convert.ToUInt64(groups[1].Value, 16);
-                var fieldName = groups[2].Value;
-                var value = groups[3].Value;
+                Debug.Assert(groups.Count == 5, "Could not match all required offset information");
+                var offset = Convert.ToUInt64(groups[2].Value, 16);
+                var fieldName = groups[3].Value;
+                var value = groups[4].Value;
                 output._lines.Add(new Line()
                            {
                                Offset = offset,
                                IsBits = value.Contains("0y"),
+                               IsStatic = groups[1].Value == "=",
                                Name = fieldName,
                                Value = value // TODO: This requires additional parsing.
                            });

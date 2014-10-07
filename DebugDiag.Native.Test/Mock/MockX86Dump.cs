@@ -42,6 +42,7 @@ namespace DebugDiag.Native.Test.Mock
             InputOutputMap["dt DebugDiag_Native_Test_App!PODType 0x49becc"] = Fixtures.X86.DtPodTypeInst;
             InputOutputMap["dt HasAStaticField"] = Fixtures.X86.StaticDt;
             InputOutputMap["dt DebugDiag_Native_Test_App!HasAStaticField 0x29cc00"] = Fixtures.X86.StaticDtInst;
+            InputOutputMap["dt HasAStaticField 0x29cc00"] = Fixtures.X86.StaticDtInst;
             InputOutputMap["dt DebugDiag_Native_Test_App!VirtualType 0x29cc00"] = Fixtures.X86.StaticDtDrillSubType;
             InputOutputMap["dt DebugDiag_Native_Test_App!PODType 0x29cc14"] = Fixtures.X86.StaticDtDrillPod;
             //InputOutputMap[""] =;
