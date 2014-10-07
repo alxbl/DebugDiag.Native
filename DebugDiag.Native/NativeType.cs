@@ -338,10 +338,14 @@ namespace DebugDiag.Native
             try
             {
                 dt = DumpType.Parse(data);
+                var vtableCount = 0;
                 foreach (var line in dt)
                 {
-                    Debug.Assert(!offsetTable.ContainsKey(line.Name));
-                    offsetTable.Add(line.Name, new Offset()
+                    // TODO: FIXME: Need to handle nested vtable name collisions in order to be able to inspect them by name.
+                    // This is a really hacky bandage fix until a clean solution is designed. It has the
+                    // limitation that vtable occurences cannot be lookup by name. Offset still works.
+                    string name = (line.Name == "__VFN_table") ? line.Name + vtableCount++ : line.Name;
+                    offsetTable.Add(name, new Offset()
                                                {
                                                    // If the offset is static, we already know its address. Otherwise it will be computed by InitializeInstance().
                                                    Address = line.IsStatic ? line.Offset : 0, 

@@ -110,6 +110,12 @@ namespace DebugDiag.Native.Test
         }
 
         [TestMethod]
+        public void TestParseCorruptedVtableType()
+        {
+            Assert.Fail("Not implemented");
+        }
+
+        [TestMethod]
         public void TestParseTypeWithStaticField()
         {
             var t = NativeType.AtAddress(X86.StaticDtAddr, "HasAStaticField");
