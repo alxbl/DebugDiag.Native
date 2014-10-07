@@ -340,6 +340,7 @@ namespace DebugDiag.Native
                 dt = DumpType.Parse(data);
                 foreach (var line in dt)
                 {
+                    Debug.Assert(!offsetTable.ContainsKey(line.Name));
                     offsetTable.Add(line.Name, new Offset()
                                                {
                                                    // If the offset is static, we already know its address. Otherwise it will be computed by InitializeInstance().
@@ -355,7 +356,7 @@ namespace DebugDiag.Native
             // ReSharper disable once EmptyGeneralCatchClause
             catch (Exception x)
             {
-                throw new TypeDoesNotExistException(String.Format("An error occured while preloading symbol {0}. See the inner exception.", type), x);
+                throw new TypeDoesNotExistException(String.Format("An error occured while preloading symbol {0}:\n{1}", type, x), x);
             }
 
             // Cache the offset table.

@@ -24,8 +24,17 @@ namespace DebugDiag.Native.Test.Fixtures
         public const string VtableLnPoi = @"(0114cc84)   DebugDiag_Native_Test_App!VirtualTypeDeriv::`vftable'   |  (0114cc90)   DebugDiag_Native_Test_App!`string'";
         #endregion
 
-        #region PODType
+        #region MultiVtable
 
+        public const string MultiVtableAddr = @"0x88ccff22";
+        public const string MultiVtableDt = @"   +0x000 __VFN_table          : Ptr32
+   +0x004 Offset1          : Int4B
+   +0x008 __VFN_table          : Ptr32";
+        public const string MultiVtableDtInst = @"   +0x000 __VFN_table      : 0x13141516
+   +0x004 Offset1          : Int4B
+   +0x008 __VFN_table          : 0x2cff32bb";
+        #endregion
+        #region PODType
         public const string PodTypeAddr = "0x49becc";
         public const ulong PodTypeAddrULong = 0x0049becc;
         public const string DtPodType = @"   +0x000 Offset1          : Int4B

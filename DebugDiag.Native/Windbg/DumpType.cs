@@ -64,7 +64,8 @@ namespace DebugDiag.Native.Windbg
 
             var first = true;
             var checkVtable = true;
-            foreach (var l in content.Split('\n'))
+            
+            foreach (var l in content.TrimEnd().Split('\n')) // Remove trailing whitespace.
             {
                 if (first)
                 {
@@ -95,7 +96,7 @@ namespace DebugDiag.Native.Windbg
                                IsBits = value.Contains("0y"),
                                IsStatic = groups[1].Value == "=",
                                Name = fieldName,
-                               Value = value // TODO: This requires additional parsing.
+                               Value = value.TrimEnd() // TODO: This requires additional parsing.
                            });
             }
             return output;

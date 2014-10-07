@@ -102,6 +102,14 @@ namespace DebugDiag.Native.Test
         }
 
         [TestMethod]
+        public void TestParseTypeWithMultipleVtables()
+        {
+            // Nested types with vtables will have more than one __VFN_table member.
+            var t = NativeType.AtAddress(X86.MultiVtableAddr, "MultiVtable"); // No fixture for vtable discovery.
+            Assert.IsNotNull(t);
+        }
+
+        [TestMethod]
         public void TestParseTypeWithStaticField()
         {
             var t = NativeType.AtAddress(X86.StaticDtAddr, "HasAStaticField");
