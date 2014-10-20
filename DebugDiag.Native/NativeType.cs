@@ -474,7 +474,7 @@ namespace DebugDiag.Native
             // Preload the type if it hasn't been encountered.
             Preload(type);
 
-            var output = Native.Context.Execute(String.Format("dt {0} {1}", type, addr)); // TODO: Always use qualified type name internally.
+            var output = Native.Context.Execute(String.Format("dt {0} {1}", addr, type)); // TODO: Always use qualified type name internally.
             if (string.IsNullOrWhiteSpace(output)) return null;
 
             // Create an instance.
