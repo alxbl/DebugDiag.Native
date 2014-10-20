@@ -96,7 +96,7 @@ namespace DebugDiag.Native.Windbg
                                IsBits = value.Contains("0y"),
                                IsStatic = groups[1].Value == "=", // Windbg prefixes static fields with = instead of +
                                Name = fieldName,
-                               Value = value.TrimEnd() // TODO: This requires additional parsing.
+                               Value = value.TrimEnd()
                            });
             }
             return output;

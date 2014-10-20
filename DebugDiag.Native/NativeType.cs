@@ -253,6 +253,8 @@ namespace DebugDiag.Native
             // Handle primitive fields.
             if (o.Type != Native.PrimitiveType.Object)
             {
+                // TODO: Hook into the type system and possibly instantiate a specific type for this field.
+                // Vector.cs, List.cs, Map.cs for enumerables... possibly user-defined types?
                 o.Instance = new NativeType { IsInstance = true, HasVtable = false, TypeName = o.TypeName, Address = o.Address, IsStatic = o.IsStatic };
                 Debug.Assert(o.RawMemory.HasValue, "A primitive type should always have a raw value available.");
                 o.Instance._rawMem = o.RawMemory ?? 0;

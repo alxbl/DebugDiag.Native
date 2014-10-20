@@ -100,7 +100,6 @@ namespace DebugDiag.Native
         {
             if (string.IsNullOrWhiteSpace(v)) throw new ArgumentException("Type cannot be empty");
 
-            // TODO: Handle Ptr32 Ptr32 (Object)
             if (v.Equals("Char")) return PrimitiveType.Char;
             if (v.Equals("UChar")) return PrimitiveType.UChar;
             if (v.Equals("Int2B")) return PrimitiveType.Int2B;
@@ -155,13 +154,11 @@ namespace DebugDiag.Native
 
         /// <summary>
         /// Parses a windbg primitive value type and attempts to extract the raw value.
-        /// TODO: Private?
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
         public static ulong? ParseWindbgPrimitive(string value)
         {
-            // TODO: Handle complex array/pointer types in conversion.
             if (string.IsNullOrWhiteSpace(value)) return null;
             if (value.StartsWith("0x") || value.StartsWith("0n") || value == "0") return StringAddrToUlong(value);
             if (value.Equals("(null)")) return 0;
