@@ -62,17 +62,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DumpContext.cs" />
+    <Compile Include="Type\Enumerable.cs" />
+    <Compile Include="Type\Map.cs" />
+    <Compile Include="Type\Vector.cs" />
     <Compile Include="Windbg\DumpType.cs" />
-    <Compile Include="FieldInfo.cs" />
     <Compile Include="IDumpContext.cs" />
     <Compile Include="Native.cs" />
     <Compile Include="NativeType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Windbg\TypeDoesNotExistException.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Type\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

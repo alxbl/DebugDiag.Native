@@ -170,5 +170,29 @@ namespace DebugDiag.Native.Test
         {
             Assert.Fail("Not Implemented");
         }
+
+        [TestMethod]
+        public void TestCastPrimitiveToInteger()
+        {
+            Assert.Fail("Not implemented");
+        }
+
+        [TestMethod]
+        public void TestCastPrimitiveToString()
+        {
+            Assert.Fail("Not implemented");
+        }
+
+        [TestMethod]
+        public void TestCastNonPrimitiveToInteger()
+        {
+            Assert.Fail("Not implemented");
+        }
+
+        [TestMethod]
+        public void TestCastNonPrimitiveToString()
+        {
+            Assert.Fail("Not implemented");
+        }
     }
 }

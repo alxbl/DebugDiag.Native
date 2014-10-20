@@ -163,7 +163,7 @@ namespace DebugDiag.Native
         {
             // TODO: Handle complex array/pointer types in conversion.
             if (string.IsNullOrWhiteSpace(value)) return null;
-            if (value.StartsWith("0x") || value.StartsWith("0n")) return StringAddrToUlong(value);
+            if (value.StartsWith("0x") || value.StartsWith("0n") || value == "0") return StringAddrToUlong(value);
             if (value.Equals("(null)")) return 0;
             return null;
         }

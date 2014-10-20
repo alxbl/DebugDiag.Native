@@ -65,6 +65,31 @@ namespace DebugDiag.Native.Test
         }
 
         [TestMethod]
+        public void TestGetIntValueField()
+        {
+            var t = NativeType.AtAddress(X86.VtableAddrULong);
+            Assert.AreEqual(0UL, t.GetIntValue("MoreOffset"));
+            Assert.AreEqual(8UL, t.GetIntValue(0x004));
+        }
+
+        [TestMethod]
+        public void TestDynamicFieldAccess()
+        {
+            dynamic t = NativeType.AtAddress(X86.VtableAddrULong);
+            dynamic field = t.POD;
+            Assert.IsTrue(field.IsPrimitive);
+            Assert.AreEqual(8UL, field.GetIntValue());
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void TestInvalidDynamicFieldAccess()
+        {
+            dynamic t = NativeType.AtAddress(X86.VtableAddrULong);
+            dynamic field = t.DoesNotExist;
+        }
+
+        [TestMethod]
         public void TestGetPrimitiveWhenInstance()
         {
             // WARN: This will return the raw memory at the type's root.

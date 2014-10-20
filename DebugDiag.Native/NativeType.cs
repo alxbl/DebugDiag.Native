@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Dynamic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -13,8 +14,26 @@ namespace DebugDiag.Native
     /// <summary>
     /// Stores information about a native type as well as the instance it is linked to.
     /// </summary>
-    public class NativeType
+    public class NativeType : DynamicObject
     {
+        #region Dynamic API
+
+        /// <summary>
+        /// Allows to use the member accessors to navigate types easily.
+        /// 
+        /// <code>
+        ///     NativeType foo = NativeType.AtAddress(0x3c0ffee5, "MyApp!Foo");
+        ///     NativeType bar = foo.bar; // Accesses a field "bar" in type "MyApp!Foo".
+        ///     Console.WriteLine("There are {0} bars in Foo.", bar.GetIntValue());
+        /// </code>
+        /// </summary>
+        public override bool TryGetMember(GetMemberBinder binder, out object result)
+        {
+            result = GetField(binder.Name); // Might throw.
+            return true;
+        }
+
+        #endregion
         #region Public API
 
         /// <summary>
@@ -31,6 +50,7 @@ namespace DebugDiag.Native
         /// The module in which this type is defined.
         /// </summary>
         public string ModuleName { get; private set; }
+
         /// <summary>
         /// The name of the type.
         /// </summary>
@@ -65,6 +85,11 @@ namespace DebugDiag.Native
         public bool IsStatic { get; private set; }
 
         /// <summary>
+        /// Whether this type can be enumerated in a foreach loop for further inspection.
+        /// </summary>
+        public bool IsEnumerable { get; internal set; }
+
+        /// <summary>
         /// Returns an instance to an object's field.
         /// </summary>
         /// <param name="name">The field name.</param>
@@ -91,18 +116,46 @@ namespace DebugDiag.Native
             if (IsPrimitive) throw new InvalidOperationException("Cannot call GetField() on a primitive type.");
 
             if (!_offsetLookup.ContainsKey(offset))
-                throw new ArgumentOutOfRangeException(String.Format("The offset `+0x{0:03x}` does not exist in type `{1}`", offset, QualifiedName));
+                throw new ArgumentOutOfRangeException(String.Format("The offset `+0x{0:x04}` does not exist in type `{1}`", offset, QualifiedName));
             var o = _offsetLookup[offset];
             return GetInstance(o);
         }
 
         #region Primitive Access
 
+        /// <summary>
+        /// Converts a primitive instance into its integer value.
+        /// </summary>
+        /// <returns>The raw memory at this instance's base address as a 64 bit integer.</returns>
         public ulong GetIntValue()
         {
             return _rawMem;
         }
 
+        /// <summary>
+        /// Shortcut method for dumping out the integer value of a field.
+        /// </summary>
+        /// <param name="field">The name of the field in the current type.</param>
+        /// <returns>The raw memory at this instance's base address as a 64 bit integer.</returns>
+        public ulong GetIntValue(string field)
+        {
+            return GetField(field).GetIntValue();
+        }
+
+        /// <summary>
+        /// Shortcut method for dumping out the integer value of a field.
+        /// </summary>
+        /// <param name="offset">The offset of the field in the current type.</param>
+        /// <returns>The raw memory at this instance's base address as a 64 bit integer.</returns>
+        public ulong GetIntValue(ulong offset)
+        {
+            return GetField(offset).GetIntValue();
+        }
+
+        /// <summary>
+        /// Converts a primitive null-terminated C-style string NativeType into the string literal based at that location.
+        /// </summary>
+        /// <returns>The string based at this object's given location</returns>
         public string GetStringValue()
         {
             return Native.Context.Execute(String.Format("ds {0}", _rawMem));
@@ -140,7 +193,7 @@ namespace DebugDiag.Native
         /// </summary>
         private Native.PrimitiveType _type;
 
-        private NativeType()
+        internal NativeType()
         {
             IsInstance = false; // When a default object is constructed, it is not an instance.
         }
@@ -166,7 +219,7 @@ namespace DebugDiag.Native
 
             HasVtable = dt.IsVirtualType;
 
-            bool first = true;
+            var first = true;
             foreach (var line in dt)
             {
                 Debug.Assert(_offsetLookup.ContainsKey(line.Offset), "Type offset tables mismatched");
@@ -176,14 +229,13 @@ namespace DebugDiag.Native
                 // TODO: Handle bitfield details here.
                 if (!line.IsBits) offset.RawMemory = Native.ParseWindbgPrimitive(line.Value);
 
-                if (line.Offset == 0 && first)
+                // Populate the raw memory if it is available at this stage.
+                // `dt` will list the raw memory of pointers and primitives, but not of objects.
+                if (first)
                 {
-                    // Offset 0 is self, so populate this instance.
                     _rawMem = offset.RawMemory.HasValue ? offset.RawMemory.Value : 0;
-                    // Should always have value though?
-                    // What about scenario where the first field of a POD is also a POD?
+                    first = false;
                 }
-                first = false;
             }
         }
 
@@ -268,6 +320,7 @@ namespace DebugDiag.Native
                 Type = other.Type;
                 Instance = null; // Don't copy the instance data over.
                 IsStatic = other.IsStatic;
+                //IsEnumerable = other.IsEnumerable; // TODO: Needed?
             }
 
             /// <summary>
@@ -343,7 +396,7 @@ namespace DebugDiag.Native
                 {
                     // TODO: FIXME: Need to handle nested vtable name collisions in order to be able to inspect them by name.
                     // This is a really hacky bandage fix until a clean solution is designed. It has the
-                    // limitation that vtable occurences cannot be lookup by name. Offset still works.
+                    // limitation that vtable occurrences cannot be looked up by name. Offset still works.
                     string name = (line.Name == "__VFN_table") ? line.Name + vtableCount++ : line.Name;
                     offsetTable.Add(name, new Offset()
                                                {
