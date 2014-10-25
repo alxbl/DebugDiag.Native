@@ -241,23 +241,23 @@ namespace DebugDiag.Native.Test.Fixtures
         #endregion
 
         #region Static Field
+
         public const string StaticDtAddr = "0x29cc00";
         public const string StaticDt = @"DebugDiag_Native_Test_App!HasAStaticField
    =00f1cb74 IAmSoStatic      : Int4B
    =00f00000 HInstPtr         : Ptr32 Int4B
-   +0x000 subType          : VirtualType";
+   +0x000 subType          : VirtualTypeDeriv";
         public const string StaticDtInst = @"DebugDiag_Native_Test_App!HasAStaticField
    =00f1cb74 IAmSoStatic      : 0n3
    =00f00000 HInstPtr         : 0x00905a4d  -> ??
-   +0x000 subType          : VirtualType";
+   +0x000 subType          : VirtualTypeDeriv";
         public const string StaticDtDrillSubType = @"   +0x000 __VFN_table : 0x00f1cc84 
    +0x004 POD              : 0n0
    +0x008 Offset           : 0n0
    +0x00c MoreOffset       : 0n0
    +0x010 Child            : (null) 
    +0x014 PODObject        : PODType";
-        public const string StaticDtDrillPod = @"
-   +0x000 Offset1          : 0n42
+        public const string StaticDtDrillPod = @"   +0x000 Offset1          : 0n42
    +0x004 Offset2          : 0n0
    +0x008 Offset3          : 0n0";
 
