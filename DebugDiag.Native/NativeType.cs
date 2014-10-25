@@ -200,10 +200,18 @@ namespace DebugDiag.Native
 
         private void ParseTypeName(string type)
         {
-            var split = type.Split('!');
-            Debug.Assert(split.Length == 2, "A fully qualified name consists of two parts.");
-            ModuleName = split[0];
-            TypeName = split[1];
+            if (type.Contains("!"))
+            {
+                var split = type.Split('!');
+                Debug.Assert(split.Length == 2, "A fully qualified name consists of two parts.");
+                ModuleName = split[0];
+                TypeName = split[1];
+            }
+            else // unknown module name.
+            {
+                ModuleName = "";
+                TypeName = type;
+            }
         }
 
         /// <summary>
@@ -482,11 +490,7 @@ namespace DebugDiag.Native
             // Create an instance.
             var instance = new NativeType { IsInstance = true, Address = Native.StringAddrToUlong(addr) };
             instance.LoadOffsetTable(type);
-
-            if (type.Contains("!"))
-            {
-                instance.ParseTypeName(type);
-            }
+            instance.ParseTypeName(type);
 
             // Parse the `dt` output and initialize the instance.            
             instance.InitializeInstance(DumpType.Parse(output));

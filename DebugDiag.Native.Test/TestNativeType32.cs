@@ -141,28 +141,34 @@ namespace DebugDiag.Native.Test
             var t = NativeType.AtAddress(X86.StaticDtAddr, "HasAStaticField");
 
             // Drill into its VirtualType instance.
-            var virtualType = t.GetField(0x0003);
+            var virtualType = t.GetField("subType");
             Assert.IsFalse(virtualType.IsPrimitive);
             Assert.IsFalse(virtualType.IsStatic);
             Assert.IsTrue(virtualType.IsInstance);
-            Assert.AreEqual("DebugDiag_Native_Test_App!VirtualType", virtualType.QualifiedName);
+            Assert.AreEqual("VirtualTypeDeriv", virtualType.TypeName);
             
             // Drill into the VirtualType's PODType instance. 
             var podType = virtualType.GetField("PODObject");
             Assert.IsFalse(podType.IsPrimitive);
             Assert.IsFalse(podType.IsStatic);
             Assert.IsTrue(podType.IsInstance);
-            Assert.AreEqual("DebugDiag_Native_Test_App!PODType", virtualType.QualifiedName);
+            Assert.AreEqual("PODType", podType.TypeName);
 
             // Finally, get the PODType's Offset1 value.
             var offset1 = podType.GetField(0x000);
-            // FIXME: The podType has no vtable so offset +0x0000 returns 
-            // self, which is different from GetField("offset1"). This is
-            // a current limitation of the code and the behavior should not
-            // be made consistent.
-            Assert.AreSame(podType, offset1); // FIXME: This should be false.
+            Assert.AreNotSame(podType, offset1);
             // This will work because PODType has no vtable.
             Assert.AreEqual(42UL, offset1.GetIntValue()); 
+        }
+
+        [TestMethod]
+        public void TestDrillDownSubtypesDynamic()
+        {
+            // Retrieve the HasAStaticField object.
+            dynamic t = NativeType.AtAddress(X86.StaticDtAddr, "HasAStaticField");
+
+            // Drill into its VirtualType instance (easily) thanks to 
+            Assert.AreEqual(42UL, t.subType.PODObject.Offset1.GetIntValue());
         }
 
         [TestMethod]
