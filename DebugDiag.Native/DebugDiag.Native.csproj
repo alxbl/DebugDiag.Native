@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="DumpContext.cs" />
     <Compile Include="IDeepCopyable.cs" />
+    <Compile Include="NativeInstance.cs" />
     <Compile Include="Type\Enumerable.cs" />
     <Compile Include="Type\Map.cs" />
     <Compile Include="Type\Pointer.cs" />

@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using DebugDiag.Native.Test.Fixtures;
 using DebugDiag.Native.Test.Mock;
+using DebugDiag.Native.Type;
 using DebugDiag.Native.Windbg;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -60,7 +61,7 @@ namespace DebugDiag.Native.Test
         {
             var t = NativeType.AtAddress(X86.VtableAddrULong);
             var field = t.GetField("POD");
-            Assert.IsTrue(field.IsPrimitive);
+            Assert.IsTrue(field is Primitive);
             Assert.AreEqual(X86.VtableAddrULong + t.GetOffset("POD"), field.Address);
             Assert.AreEqual(8UL, field.GetIntValue());
         }
@@ -78,7 +79,7 @@ namespace DebugDiag.Native.Test
         {
             dynamic t = NativeType.AtAddress(X86.VtableAddrULong);
             dynamic field = t.POD;
-            Assert.IsTrue(field.IsPrimitive);
+            Assert.IsTrue(field is Primitive);
             Assert.AreEqual(8UL, field.GetIntValue());
         }
 
@@ -96,7 +97,7 @@ namespace DebugDiag.Native.Test
             // WARN: This will return the raw memory at the type's root.
             var t = NativeType.AtAddress(X86.VtableAddrULong);
             //var field = t.GetField(0x14);
-            Assert.IsFalse(t.IsPrimitive);
+            Assert.IsFalse(t is Primitive);
             Assert.AreEqual(0x0114cc84UL, t.GetIntValue()); // vtable address.
         }
 
@@ -124,7 +125,7 @@ namespace DebugDiag.Native.Test
             var t = NativeType.AtAddress(X86.VtableAddrULong);
             var field = t.GetField(0x4);
             Assert.IsTrue(field.IsInstance);
-            Assert.IsTrue(field.IsPrimitive);
+            Assert.IsTrue(field is Primitive);
             Assert.AreEqual(8UL, field.GetIntValue());
             field.GetField(0x0);
         }
@@ -136,7 +137,7 @@ namespace DebugDiag.Native.Test
             var t = NativeType.AtAddress(X86.VtableAddrULong);
             Assert.IsTrue(t.HasVtable);
             var field = t.GetField(0x0);
-            Assert.IsTrue(field.IsPrimitive);
+            Assert.IsTrue(field is Primitive);
             Assert.IsTrue(field.IsInstance);
             Assert.AreEqual("Ptr32", field.QualifiedName);
             Assert.AreEqual(0x0114cc84UL, field.GetIntValue());
@@ -150,7 +151,7 @@ namespace DebugDiag.Native.Test
             var t = NativeType.AtAddress(X86.PodTypeAddr, "DebugDiag_Native_Test_App!PODType");
             Assert.AreEqual("DebugDiag_Native_Test_App!PODType", t.QualifiedName);
             var field = t.GetField(0x0);
-            Assert.IsTrue(field.IsPrimitive);
+            Assert.IsTrue(field is Primitive);
             Assert.IsTrue(field.IsInstance);
             Assert.AreEqual(42UL, field.GetIntValue());
         }

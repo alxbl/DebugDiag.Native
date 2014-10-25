@@ -16,7 +16,7 @@ namespace DebugDiag.Native
     /// Stores information about a native type as well as the instance it is linked to. 
     /// This class is externally immutable to avoid mishaps while digging a dump.
     /// </summary>
-    public class NativeType : DynamicObject, IDeepCopyable<NativeType>
+    public class NativeType : NativeInstance, IDeepCopyable<NativeType>
     {
         #region Dynamic API
 
@@ -42,13 +42,6 @@ namespace DebugDiag.Native
         /// Whether this NativeType object represents an object instance.
         /// </summary>
         public bool IsInstance { get; internal set; }
-
-        /// <summary>
-        /// The base address of this object instance.
-        /// 
-        /// If the object does not represent an instance, this is 0UL.
-        /// </summary>
-        public ulong Address { get; private set; }
 
         /// <summary>
         /// The module in which this type is defined.
@@ -81,18 +74,6 @@ namespace DebugDiag.Native
         public bool HasVtable { get; private set; }
 
         /// <summary>
-        /// Returns whether this object instance is a primitive type.
-        /// 
-        /// A primitive type is one of: Pointer, Char, Short, Int or Long.
-        /// 
-        /// TODO: Remove in favor of class hierarchy.
-        /// </summary>
-        public bool IsPrimitive
-        {
-            get { return IsInstance && (this is Primitive); }
-        }
-
-        /// <summary>
         /// Returns whether this type is a static instance.
         /// 
         /// If the type is not an instance, this is false. 
@@ -107,10 +88,9 @@ namespace DebugDiag.Native
         /// </summary>
         /// <param name="name">The field name.</param>
         /// <returns>A NativeType instance representing the field.</returns>
-        public NativeType GetField(string name)
+        public override NativeType GetField(string name)
         {
             CheckInstance();
-            if (IsPrimitive) throw new InvalidOperationException("Cannot call GetField() on a primitive type."); // TODO: Move to subclass
 
             if (string.IsNullOrEmpty(name) || !_nameLookup.ContainsKey(name))
                 throw new ArgumentOutOfRangeException(String.Format("The field `{0}` does not exist in type `{1}`", name, QualifiedName));
@@ -125,10 +105,9 @@ namespace DebugDiag.Native
         /// <param name="offset">The field name.</param>
         /// <returns>A NativeType instance representing the field.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when the offset does not exist for this type.</exception>
-        public NativeType GetField(ulong offset)
+        public override NativeType GetField(ulong offset)
         {
             CheckInstance();
-            if (IsPrimitive) throw new InvalidOperationException("Cannot call GetField() on a primitive type."); // TODO: Move to subclass.
 
             if (!_offsetLookup.ContainsKey(offset))
                 throw new ArgumentOutOfRangeException(String.Format("The offset `+0x{0:x04}` does not exist in type `{1}`", offset, QualifiedName));
@@ -140,7 +119,7 @@ namespace DebugDiag.Native
         /// Converts a primitive instance into its integer value.
         /// </summary>
         /// <returns>The raw memory at this instance's base address as a 64 bit integer.</returns>
-        public ulong GetIntValue()
+        public override ulong GetIntValue()
         {
             CheckInstance();
             return _rawMem;
@@ -151,7 +130,7 @@ namespace DebugDiag.Native
         /// </summary>
         /// <param name="field">The name of the field in the current type.</param>
         /// <returns>The raw memory at this instance's base address as a 64 bit integer.</returns>
-        public ulong GetIntValue(string field)
+        public override ulong GetIntValue(string field)
         {
             return GetField(field).GetIntValue();
         }
@@ -161,7 +140,7 @@ namespace DebugDiag.Native
         /// </summary>
         /// <param name="offset">The offset of the field in the current type.</param>
         /// <returns>The raw memory at this instance's base address as a 64 bit integer.</returns>
-        public ulong GetIntValue(ulong offset)
+        public override ulong GetIntValue(ulong offset)
         {
             return GetField(offset).GetIntValue();
         }
@@ -170,13 +149,13 @@ namespace DebugDiag.Native
         /// Converts a primitive null-terminated C-style string NativeType into the string literal based at that location.
         /// </summary>
         /// <returns>The string based at this object's given location</returns>
-        public string GetStringValue()
+        public override string GetStringValue()
         {
             CheckInstance();
             return Native.Context.Execute(String.Format("ds {0}", _rawMem));
         }
 
-        public string GetUnicodeStringValue()
+        public override string GetUnicodeStringValue()
         {
             CheckInstance();
             return Native.Context.Execute(String.Format("du {0}", _rawMem));
@@ -206,7 +185,7 @@ namespace DebugDiag.Native
 
             // Type not found...
             if (string.IsNullOrWhiteSpace(data) || data.Contains(String.Format("Symbol {0} not found.", type)))
-                throw new TypeDoesNotExistException(String.Format("Symbols {0} not found.", type));
+                throw new TypeDoesNotExistException(String.Format("Symbol {0} not found.", type));
 
             typeInfo = TypeParser.Parse(type);
             typeInfo.ParseTypeName(type);
@@ -409,12 +388,8 @@ namespace DebugDiag.Native
         {
             var output = Native.Context.Execute(String.Format("dt 0x{0:x} {1}", Address,  QualifiedName));
             
-            if (string.IsNullOrWhiteSpace(output))
-            {
-                IsInstance = false;
-                throw new Exception("ouch");
-            }
-
+            if (string.IsNullOrWhiteSpace(output) || output.Contains("symbol not found"))
+                throw new TypeDoesNotExistException(String.Format("Symbol {0} not found.", QualifiedName));
             
             var dt = DumpType.Parse(output);
 

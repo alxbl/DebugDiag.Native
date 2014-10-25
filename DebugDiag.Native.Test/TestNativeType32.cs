@@ -1,6 +1,7 @@
 using System;
 using DebugDiag.Native.Test.Fixtures;
 using DebugDiag.Native.Test.Mock;
+using DebugDiag.Native.Type;
 using DebugDiag.Native.Windbg;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -120,7 +121,7 @@ namespace DebugDiag.Native.Test
         {
             var t = NativeType.AtAddress(X86.StaticDtAddr, "HasAStaticField");
             var f = t.GetField("IAmSoStatic");
-            Assert.IsTrue(f.IsPrimitive);
+            Assert.IsTrue(f is Primitive);
             Assert.IsTrue(f.IsStatic);
             Assert.AreEqual(3UL, f.GetIntValue());
         }
@@ -142,14 +143,14 @@ namespace DebugDiag.Native.Test
 
             // Drill into its VirtualType instance.
             var virtualType = t.GetField("subType");
-            Assert.IsFalse(virtualType.IsPrimitive);
+            Assert.IsFalse(virtualType is Primitive);
             Assert.IsFalse(virtualType.IsStatic);
             Assert.IsTrue(virtualType.IsInstance);
             Assert.AreEqual("VirtualTypeDeriv", virtualType.TypeName);
             
             // Drill into the VirtualType's PODType instance. 
             var podType = virtualType.GetField("PODObject");
-            Assert.IsFalse(podType.IsPrimitive);
+            Assert.IsFalse(podType is Primitive);
             Assert.IsFalse(podType.IsStatic);
             Assert.IsTrue(podType.IsInstance);
             Assert.AreEqual("PODType", podType.TypeName);
