@@ -67,10 +67,11 @@ namespace DebugDiag.Native.Windbg
             
             foreach (var l in content.TrimEnd().Split('\n')) // Remove trailing whitespace.
             {
+                var line = l.TrimEnd();
                 if (first)
                 {
                     // Check if we have a fully qualified type name.
-                    output.TypeName = !l.Contains(":") ? l : null; 
+                    output.TypeName = !line.Contains(":") ? line : null; 
                     first = false;
                     if (output.TypeName != null) continue; // We found a type name, skip this line.
                 }
@@ -78,11 +79,11 @@ namespace DebugDiag.Native.Windbg
                 // Determine whether this type is virtual (i.e. its first offset is a vtable)
                 if (checkVtable)
                 {
-                    output.IsVirtualType = l.Contains("__VFN_table");
+                    output.IsVirtualType = line.Contains("__VFN_table");
                     checkVtable = false;
                 }
 
-                var m = LineFormat.Matches(l);
+                var m = LineFormat.Matches(line);
                 Debug.Assert(m.Count == 1, "LineFormat should match exactly once per line.");
 
                 var groups = m[0].Groups;
