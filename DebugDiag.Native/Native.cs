@@ -92,28 +92,6 @@ namespace DebugDiag.Native
         }
 
         /// <summary>
-        /// Converts the string representation of a primitive type into an enumeration.
-        /// </summary>
-        /// <param name="v">The string representation of the type.</param>
-        /// <returns>A PrimitiveType enumeration representing that type</returns>
-        public static PrimitiveType TypeFromString(string v)
-        {
-            if (string.IsNullOrWhiteSpace(v)) throw new ArgumentException("Type cannot be empty");
-
-            if (v.Equals("Char")) return PrimitiveType.Char;
-            if (v.Equals("UChar")) return PrimitiveType.UChar;
-            if (v.Equals("Int2B")) return PrimitiveType.Int2B;
-            if (v.Equals("Uint2B")) return PrimitiveType.Uint2B;
-            if (v.Equals("Int4B")) return PrimitiveType.Int4B;
-            if (v.Equals("Uint4B")) return PrimitiveType.Uint4B;
-            if (v.Equals("Int8B")) return PrimitiveType.Int8B;
-            if (v.Equals("Uint8B")) return PrimitiveType.Uint8B;
-            if (v.StartsWith("Ptr32")) return PrimitiveType.Ptr32;
-            if (v.StartsWith("Ptr64")) return PrimitiveType.Ptr64;
-            return PrimitiveType.Object;
-        }
-
-        /// <summary>
         /// Converts a string address into the corresponding unsigned long.
         /// 
         /// This method can handle decimal addresses prefixed by 0n, as well as hexadecimal addresses. 

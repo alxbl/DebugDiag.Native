@@ -61,6 +61,7 @@ namespace DebugDiag.Native.Test
             var t = NativeType.AtAddress(X86.VtableAddrULong);
             var field = t.GetField("POD");
             Assert.IsTrue(field.IsPrimitive);
+            Assert.AreEqual(X86.VtableAddrULong + t.GetOffset("POD"), field.Address);
             Assert.AreEqual(8UL, field.GetIntValue());
         }
 
