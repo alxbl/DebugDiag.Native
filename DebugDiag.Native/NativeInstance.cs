@@ -1,5 +1,6 @@
 using System;
 using System.Dynamic;
+using DebugDiag.Native.Type;
 
 namespace DebugDiag.Native
 {
@@ -59,5 +60,20 @@ namespace DebugDiag.Native
         public abstract string GetStringValue();
 
         public abstract string GetUnicodeStringValue();
+
+        /// <summary>
+        /// Adjusts each field in the type to reflect the instance context.
+        /// 
+        /// This method must be overridden by user defined types and serves as a hook
+        /// to do any additional parsing needed to instantiate the type when it is parsed.
+        /// The method will be called upon inspecting the type, and should populate specific fields.
+        /// 
+        /// This method is called by RebaseAt and the `Address` field is guaranteed to be valid by the
+        /// caller.
+        /// <see cref="Vector.Rebase"/>
+        /// <see cref="Map.Rebase"/>
+        /// <see cref="NativeType.Rebase"/>
+        /// </summary>
+        protected abstract void Rebase();
     }
 }

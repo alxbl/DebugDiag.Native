@@ -238,6 +238,33 @@ namespace DebugDiag.Native.Test.Fixtures
         #region Invalid Type
         public const string InvalidType = "nt!InvalidDoNotExist";
         public const string InvalidTypeDt = "Symbol nt!InvalidDoNotExist not found.";
+        public const string InvalidTypeUnqualified = "InvalidDoNotExist";
+        public const string InvalidTypeUnqualifiedDt = @"*************************************************************************
+***                                                                   ***
+***                                                                   ***
+***    Either you specified an unqualified symbol, or your debugger   ***
+***    doesn't have full symbol information.  Unqualified symbol      ***
+***    resolution is turned off by default. Please either specify a   ***
+***    fully qualified symbol module!symbolname, or enable resolution ***
+***    of unqualified symbols by typing "".symopt- 100"". Note that   ***
+***    enabling unqualified symbol resolution with network symbol     ***
+***    server shares in the symbol path may cause the debugger to     ***
+***    appear to hang for long periods of time when an incorrect      ***
+***    symbol name is typed or the network symbol server is down.     ***
+***                                                                   ***
+***    For some commands to work properly, your symbol path           ***
+***    must point to .pdb files that have full type information.      ***
+***                                                                   ***
+***    Certain .pdb files (such as the public OS symbols) do not      ***
+***    contain the required information.  Contact the group that      ***
+***    provided you with these symbols if you need this command to    ***
+***    work.                                                          ***
+***                                                                   ***
+***    Type referenced: InvalidDoNotExist                             ***
+***                                                                   ***
+*************************************************************************
+Symbol InvalidDoNotExist not found.";
+        
         #endregion
 
         #region Static Field

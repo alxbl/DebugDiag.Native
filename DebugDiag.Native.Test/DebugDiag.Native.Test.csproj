@@ -56,10 +56,9 @@
   <ItemGroup>
     <Compile Include="Fixtures\x86.cs" />
     <Compile Include="Mock\MockX86Dump.cs" />
-    <Compile Include="TestNative.cs" />
-    <Compile Include="TestNativeType32.cs" />
+    <Compile Include="TestNativeType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TestNativeType64.cs" />
+    <Compile Include="TestWindbg.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DebugDiag.Native\DebugDiag.Native.csproj">

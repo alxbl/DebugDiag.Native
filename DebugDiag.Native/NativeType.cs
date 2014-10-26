@@ -173,67 +173,57 @@ namespace DebugDiag.Native
         /// </summary>
         /// <param name="type">The qualified name of the type (</param>
         /// <returns>The preloaded type information. This is not a type instance.</returns>
-        /// <exception cref="ArgumentException">When the type cannot be found or preloaded</exception>
+        /// <exception cref="CommandException">When the type cannot be found or preloaded.</exception>
         public static NativeType Preload(string type)
         {
             // Avoid extra work if we already preloaded that type.
             var typeInfo = TypeLookup(type);
             if (typeInfo != null) return typeInfo;
-            
-            // TODO: (Refactor) DumpType should be executed from within the command, not from NativeType.
-            var data = Native.Context.Execute(String.Format("dt {0}", type));
-
-            // Type not found...
-            if (string.IsNullOrWhiteSpace(data) || data.Contains(String.Format("Symbol {0} not found.", type)))
-                throw new TypeDoesNotExistException(String.Format("Symbol {0} not found.", type));
 
             typeInfo = TypeParser.Parse(type);
             typeInfo.ParseTypeName(type);
 
-            DumpType dt;
-            try
+            var dt = new DumpType(type);
+            dt.Execute(); // Will throw if dt fails.
+
+            if (dt.TypeName != null)
             {
-                dt = DumpType.Parse(data);
-                if (dt.TypeName != null)
-                {
-                    typeInfo.ParseTypeName(dt.TypeName);
-                }
-                typeInfo.HasVtable = dt.IsVirtualType;
+                typeInfo.ParseTypeName(dt.TypeName);
+            }
+            typeInfo.HasVtable = dt.IsVirtualType;
 
-                var vtableCount = 0;
-                foreach (var line in dt)
-                {
+            var vtableCount = 0;
+            foreach (var line in dt)
+            {
                     
-                    // TODO: FIXME: Need to handle nested vtable name collisions in order to be able to inspect them by name.
-                    // This is a really hacky bandage fix until a clean solution is designed. It has the
-                    // limitation that vtable occurrences cannot be looked up by name. Offset still works.
-                    string name = (line.Name == "__VFN_table") ? line.Name + vtableCount++ : line.Name;
+                // TODO: FIXME: Need to handle nested vtable name collisions in order to be able to inspect them by name.
+                // This is a really hacky bandage fix until a clean solution is designed. It has the
+                // limitation that vtable occurrences cannot be looked up by name. Offset still works.
+                string name = (line.Name == "__VFN_table") ? line.Name + vtableCount++ : line.Name;
 
-                    // TODO: Possible optimization store this stub in the cache and lazily inspect it to avoid double parsing.
-                    var fieldInfo = TypeParser.Parse(line.Value); // We know value here is the type.
+                // TODO: Possible optimization store this stub in the cache and lazily inspect it to avoid double parsing.
+                var fieldInfo = TypeParser.Parse(line.Value); // We know value here is the type.
 
-                    var offset = new Offset
-                             {
-                                 // If the offset is static, we already know its address. Otherwise it will be computed at rebase time.
-                                 Address = line.IsStatic ? line.Offset : 0,
-                                 Bytes = line.Offset,
-                                 Instance = null,
-                                 TypeName = line.Value,
-                                 IsPrimitive = (fieldInfo is Primitive || fieldInfo is Pointer),
-                                 IsStatic = line.IsStatic
-                             };
+                var offset = new Offset
+                            {
+                                // If the offset is static, we already know its address. Otherwise it will be computed at rebase time.
+                                Address = line.IsStatic ? line.Offset : 0,
+                                Bytes = line.Offset,
+                                Instance = null,
+                                TypeName = line.Value,
+                                IsPrimitive = (fieldInfo is Primitive || fieldInfo is Pointer),
+                                IsStatic = line.IsStatic
+                            };
 
-                    // Create the offset tables.
+                // Create the offset tables.
+                if (!line.IsBits) // TODO: Handle bit fields.
+                {
                     typeInfo._nameLookup[name] = offset;
                     typeInfo._offsetLookup[offset.Bytes] = offset;
-                    // typeInfo._preloaded = true;
                 }
+                // typeInfo._preloaded = true;
             }
-                // ReSharper disable once EmptyGeneralCatchClause
-            catch (Exception x)
-            {
-                throw new TypeDoesNotExistException(String.Format("An error occured while preloading symbol {0}:\n{1}", type, x), x);
-            }
+
 
             // Cache the offset table.
             if (dt.TypeName != null) // Also cache the fully qualified type name.
@@ -320,7 +310,6 @@ namespace DebugDiag.Native
         /// </summary>
         private void CheckInstance()
         {
-            Debug.Assert(IsInstance, "Called an instance method on a non-instance type.");
             if (!IsInstance) throw new InvalidOperationException("This method needs to be called on an instantiated type.");
         }
 
@@ -384,14 +373,16 @@ namespace DebugDiag.Native
             return instance;
         }
 
-        private void Rebase()
+        /// <summary>
+        /// Rebase a generic native type with no special treatment.
+        /// 
+        /// For NativeType, this method runs a `dt` on the instance, and tries to parse primitive values into the type.
+        /// On top of that, it initializes the offset table addresses for this particular instance.
+        /// </summary>
+        protected override void Rebase()
         {
-            var output = Native.Context.Execute(String.Format("dt 0x{0:x} {1}", Address,  QualifiedName));
-            
-            if (string.IsNullOrWhiteSpace(output) || output.Contains("symbol not found"))
-                throw new TypeDoesNotExistException(String.Format("Symbol {0} not found.", QualifiedName));
-            
-            var dt = DumpType.Parse(output);
+            var dt = new DumpType(QualifiedName, Address);
+            dt.Execute();
 
             var first = true; // TODO: Remove when _rawMemory goes away.
             foreach (var l in dt)
@@ -408,7 +399,15 @@ namespace DebugDiag.Native
                 if (o.IsPrimitive)
                 {
                     // If this offset is a primitive, then get its value while we rebase.
-                    o.Instance = new Primitive { Address = Address + o.Bytes, IsInstance = true, TypeName = o.TypeName, HasVtable = false, _rawMem = o.RawMemory.GetValueOrDefault()};
+                    o.Instance = new Primitive
+                                 {
+                                     Address = Address + o.Bytes, 
+                                     IsStatic = o.IsStatic,
+                                     IsInstance = true, 
+                                     TypeName = o.TypeName, 
+                                     HasVtable = false, 
+                                     _rawMem = o.RawMemory.GetValueOrDefault()
+                                 };
                 }
                 
                 // TODO: Handle pointers, which also show their value in dt.
@@ -422,7 +421,6 @@ namespace DebugDiag.Native
                 // Update the offset.
                 _offsetLookup[l.Offset] = o;
                 _nameLookup[l.Name] = o;
-
             }
             
         }

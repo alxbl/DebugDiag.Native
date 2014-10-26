@@ -43,6 +43,7 @@ namespace DebugDiag.Native.Test.Mock
             InputOutputMap["dt 0x49bebc Int4B"] = "Symbol Int4B not found.";
             InputOutputMap["dt Int4B"] = "Symbol Int4B not found.";
             InputOutputMap["dt nt!InvalidDoNotExist"] = Fixtures.X86.InvalidTypeDt;
+            InputOutputMap["dt InvalidDoNotExist"] = Fixtures.X86.InvalidTypeUnqualifiedDt;
             #endregion
 
             #region PEB
@@ -50,6 +51,7 @@ namespace DebugDiag.Native.Test.Mock
             InputOutputMap["dt nt!_PEB 0x7efde000"] = Fixtures.X86.DtPebInst;
             InputOutputMap["dt 0x7efde000 nt!_PEB"] = Fixtures.X86.DtPebInst;
             InputOutputMap["dt nt!_PEB 7efde000"] = Fixtures.X86.DtPebInst;
+            InputOutputMap["dt 0x7efde000 ntdll!_PEB"] = Fixtures.X86.DtPebInst;
             InputOutputMap["dt 7efde000 nt!_PEB"] = Fixtures.X86.DtPebInst;
             #endregion
 
