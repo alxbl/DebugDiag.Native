@@ -11,5 +11,17 @@ namespace DebugDiag.Native.Test
         {
             Assert.Fail("Not implemented");
         }
+
+        [TestMethod]
+        public void TestPointToNull()
+        {
+            Assert.Fail("Not implemented");
+        }
+
+        [TestMethod]
+        public void TestPointToPointer()
+        {
+            Assert.Fail("Not implemented");
+        }
     }
 }

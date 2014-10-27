@@ -41,6 +41,8 @@ namespace DebugDiag.Native.Type
 
         public override NativeType GetField(string name)
         {
+            // If this pointer was created directly from a Rebase(), we need to inspect the pointed type.
+            if (Dereference == null) Dereference = NativeType.AtAddress(_pointsTo, PointedType.QualifiedName);
             return Dereference.GetField(name);
         }
 
@@ -52,6 +54,7 @@ namespace DebugDiag.Native.Type
         protected override void Rebase()
         {
             // We don't call base.Rebase() because a pointer is a (special) primitive.
+            
             var dp = new Dp(Address, 1);
             _pointsTo = dp.BytesAt(0);
 
