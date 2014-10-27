@@ -214,7 +214,8 @@ namespace DebugDiag.Native
                                  Bytes = line.Offset,
                                  Instance = null,
                                  TypeName = line.Detail,
-                                 IsPrimitive = (fieldInfo is Primitive || fieldInfo is Pointer),
+                                 IsPrimitive = (fieldInfo is Primitive),
+                                 IsPointer = (fieldInfo is Pointer),
                                  IsStatic = line.IsStatic
                              };
 
@@ -397,6 +398,18 @@ namespace DebugDiag.Native
                     o.RawMemory = Native.ParseWindbgPrimitive(l.Detail); // TODO: Remove RawMemory and instantiate primitive object
                 }
 
+                if (o.IsPointer)
+                {
+                    o.Instance = new Pointer(o.TypeName, o.RawMemory.GetValueOrDefault())
+                                 {
+                                     Address = Address + o.Bytes,
+                                     IsStatic = o.IsStatic,
+                                     IsInstance = true,
+                                     HasVtable = false,
+                                     _rawMem = o.RawMemory.GetValueOrDefault()
+                                 };
+                }
+
                 if (o.IsPrimitive)
                 {
                     // If this offset is a primitive, then get its value while we rebase.
@@ -496,9 +509,14 @@ namespace DebugDiag.Native
             public bool IsStatic { get; internal set; }
 
             /// <summary>
-            /// Whether this offset deals with a primitive type. This includes pointer types.
+            /// Whether this offset deals with a primitive type.
             /// </summary>
             public bool IsPrimitive { get; internal set; }
+
+            /// <summary>
+            /// Whether this offset deals with a pointer type.
+            /// </summary>
+            public bool IsPointer { get; internal set; }
 
             public Offset DeepCopy()
             {
@@ -508,7 +526,8 @@ namespace DebugDiag.Native
                            TypeName = TypeName,
                            Instance = null, // Don't copy the instance data over.
                            IsStatic = IsStatic,
-                           IsPrimitive = IsPrimitive
+                           IsPrimitive = IsPrimitive,
+                           IsPointer = IsPointer
                        };
             }
         }

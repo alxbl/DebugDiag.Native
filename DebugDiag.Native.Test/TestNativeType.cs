@@ -173,7 +173,7 @@ namespace DebugDiag.Native.Test
             var t = NativeType.AtAddress(X86.VtableAddrULong);
             Assert.IsTrue(t.HasVtable);
             var field = t.GetField(0x0);
-            Assert.IsTrue(field is Primitive);
+            Assert.IsTrue(field is Pointer); // Change to Vtable once Vtable support is added.
             Assert.IsTrue(field.IsInstance);
             Assert.AreEqual("Ptr32", field.QualifiedName);
             Assert.AreEqual(0x0114cc84UL, field.GetIntValue());

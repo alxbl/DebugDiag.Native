@@ -13,7 +13,7 @@ namespace DebugDiag.Native.Type
     {
         public static readonly Regex Syntax = new Regex(@"^std::vector<(.*),std::allocator<.*> >$");
         // Keep a cached copy of the instances to avoid constantly querying the dump file.
-        private List<NativeType> _elements = new List<NativeType>();
+        private readonly List<NativeType> _elements = new List<NativeType>();
         private bool _built;
         private ulong _first, _last, _end, _elementSize;
 

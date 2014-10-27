@@ -76,15 +76,25 @@ namespace DebugDiag.Native.Test.Mock
             InputOutputMap["dt 0x29cc00 VirtualTypeDeriv"] = X86.VirtualTypeDerivInst;
             InputOutputMap["dt 0x29cc00 DebugDiag_Native_Test_App!VirtualTypeDeriv"] = X86.VirtualTypeDerivInst;
             InputOutputMap["dt 0x29cc14 PODType"] = X86.StaticDtDrillPod;
+            InputOutputMap["dt 0x29cc14 DebugDiag_Native_Test_App!PODType"] = X86.StaticDtDrillPod;
             #endregion
 
             #region Map
+            // TODO: Test fixtures for Map.
             #endregion
 
             #region Vector
             InputOutputMap["dt 0 " + X86.PtrVector] = X86.PtrVectorDt;
             InputOutputMap[String.Format("dt {0} {1}", X86.PtrVectorAddr, X86.PtrVector)] = X86.PtrVectorDtInst;
             InputOutputMap["?? sizeof(PODType *)"] = "unsigned int 4";
+            #endregion
+
+            #region List
+            // TODO: Test fixtures for List.
+            #endregion
+
+            #region Set
+            // TODO: Test fixtures for Set.
             #endregion
         }
 

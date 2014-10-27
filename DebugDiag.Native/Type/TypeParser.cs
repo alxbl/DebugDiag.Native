@@ -39,9 +39,15 @@ namespace DebugDiag.Native.Type
             NativeType type = null;
 
             // In order of priority.
-            if (unqualifiedType.EndsWith("*")) // Pointer: Remove one `*` and parse the remaining type.
+            if (unqualifiedType.StartsWith("Ptr32") || unqualifiedType.StartsWith("Ptr64")) // Pointer: windbg style pointers.
             {
-                // TODO: Can also be a Ptr32|Ptr64
+                // A vtable is a "Ptr32" or "Ptr64" that doesn't pointer to anything else.
+                var i = typename.IndexOf(' ');
+                // TODO: Allow Vtable inspection.
+                type = new Pointer(i > 0 ? typename.Substring(i) : "`vtable' *");
+            }
+            else if (unqualifiedType.EndsWith("*")) // Pointer: C++ style pointers.
+            {
                 type = new Pointer(typename);
             }
             else if (IsPrimitive(unqualifiedType)) // Primitive: Create the matching primitive type.
@@ -71,8 +77,6 @@ namespace DebugDiag.Native.Type
             if (typename.Equals("Uint4B")) return true;
             if (typename.Equals("Int8B")) return true;
             if (typename.Equals("Uint8B")) return true;
-            if (typename.StartsWith("Ptr32")) return true; // Should be parsed as a Ptr.
-            if (typename.StartsWith("Ptr64")) return true; // Should be parsed as a Ptr.
             return false;
         }
 

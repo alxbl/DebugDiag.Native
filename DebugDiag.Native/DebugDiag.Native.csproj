@@ -64,6 +64,7 @@
     <Compile Include="DumpContext.cs" />
     <Compile Include="NativeInstance.cs" />
     <Compile Include="Type\Enumerable.cs" />
+    <Compile Include="Type\List.cs" />
     <Compile Include="Type\Map.cs" />
     <Compile Include="Type\Pointer.cs" />
     <Compile Include="Type\Primitive.cs" />

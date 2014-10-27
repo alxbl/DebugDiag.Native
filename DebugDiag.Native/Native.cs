@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using DebugDiag.DotNet;
+using DebugDiag.Native.Type;
 
 namespace DebugDiag.Native
 {
@@ -22,6 +23,14 @@ namespace DebugDiag.Native
         public static void Initialize(IDumpContext context)
         {
             Context = context;
+            // Register built-in user types.
+            if (!_typesRegistered)
+            {
+                TypeParser.RegisterUserType(Vector.Syntax, new Vector(""));
+                TypeParser.RegisterUserType(List.Syntax, new List(""));
+                //TypeParser.RegisterUserType();
+                _typesRegistered = true;
+            }
         }
 
         /// <summary>
@@ -71,6 +80,8 @@ namespace DebugDiag.Native
         ///   - Leading 0 is ok, because default is hexadecimal.
         /// </summary>
         public static readonly Regex AddressFormat = new Regex("(^0n[0-9]+$)|(^(0x)?([0-9a-fA-F]{0,7}|[0-9a-fA-F]{8}`?[0-9a-fA-F]{7})[0-9a-fA-F]{1}$)");
+
+        private static bool _typesRegistered;
 
         public enum PrimitiveType
         {

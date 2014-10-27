@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using DebugDiag.Native.Test.Fixtures;
 using DebugDiag.Native.Test.Mock;
 using DebugDiag.Native.Type;
@@ -39,16 +40,28 @@ namespace DebugDiag.Native.Test
         }
 
         [TestMethod]
-        public void TestVectoryEmpty()
+        public void TestVectorEmpty()
         {
-            
+            Assert.Fail("Not implemented");
         }
 
         [TestMethod]
         public void TestVectorEnumerate()
         {
             var count = (ulong)_vector.Count();
-            Assert.AreEqual(_vector.Size, count);
+            Assert.AreEqual(3UL, count);
+        }
+        
+        [TestMethod]
+        public void TestVectorEnumerateDynamic()
+        {
+            dynamic v = NativeType.AtAddress(X86.PtrVectorAddr, X86.PtrVector);
+            Assert.IsNotNull(v);
+            
+            ulong count = 0;
+            // Support for LINQ on dynamic types is not implemented yet. Usually we will iterate with a foreach.
+            foreach (var e in v) count++;
+            Assert.AreEqual(3UL, count);
         }
 
         [TestMethod]
