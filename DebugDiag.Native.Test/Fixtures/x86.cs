@@ -34,6 +34,7 @@ namespace DebugDiag.Native.Test.Fixtures
    +0x004 Offset1          : Int4B
    +0x008 __VFN_table          : 0x2cff32bb";
         #endregion
+
         #region PODType
         public const string PodTypeAddr = "0x49becc";
         public const ulong PodTypeAddrULong = 0x0049becc;
@@ -291,7 +292,6 @@ Symbol InvalidDoNotExist not found.";
         #endregion
 
         #region Vector
-
         public const string PtrVector = "std::vector<PODType *,std::allocator<PODType *> >";
         public const string PtrVectorElementType = "PODType *";
         public const string PtrVectorAddr = "0x49fc04";
@@ -304,7 +304,22 @@ Symbol InvalidDoNotExist not found.";
    +0x008 _Mylast          : 0x005bd3ec  -> 0xfdfdfdfd PODType
    +0x00c _Myend           : 0x005bd3ec  -> 0xfdfdfdfd PODType
 ";
+        public const string PtrVectorElem1 = @"   +0x000 Offset1          : 0n1
+   +0x004 Offset2          : 0n1
+   +0x008 Offset3          : 0n1";
+        public const string PtrVectorElem2 = @"   +0x000 Offset1          : 0n2
+   +0x004 Offset2          : 0n2
+   +0x008 Offset3          : 0n2";
+        public const string PtrVectorElem3 = @"   +0x000 Offset1          : 0n2
+   +0x004 Offset2          : 0n2
+   +0x008 Offset3          : 0n2";
+        #endregion
 
+        #region Pointer
+        public const string Dp = "005bd3e0  005bd0e0";
+        public const string Dp1 = "005bd3e4  005bd308";
+        public const string Dp2 = "005bd3e8  005bd398";
+        public const string DpInvalid = "00000000  ????????";
         #endregion
     }
 }

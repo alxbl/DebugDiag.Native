@@ -175,7 +175,7 @@ namespace DebugDiag.Native.Test
             var field = t.GetField(0x0);
             Assert.IsTrue(field is Pointer); // Change to Vtable once Vtable support is added.
             Assert.IsTrue(field.IsInstance);
-            Assert.AreEqual("Ptr32", field.QualifiedName);
+            Assert.AreEqual("`vftable' *", field.QualifiedName);
             Assert.AreEqual(0x0114cc84UL, field.GetIntValue());
             // TODO: It should be possible to inspect the vtable.
         }

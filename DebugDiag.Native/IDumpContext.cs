@@ -34,6 +34,11 @@ namespace DebugDiag.Native
         /// <returns>The output from the debugger engine.</returns>
         string Execute(string cmd);
 
+        /// <summary>
+        /// Returns whether the current context is a 32-bit dump.
+        /// </summary>
+        bool Is32Bit { get; }
+
         #endregion
     }
 }

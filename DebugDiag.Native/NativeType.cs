@@ -175,7 +175,6 @@ namespace DebugDiag.Native
             if (typeInfo != null) return typeInfo;
 
             typeInfo = TypeParser.Parse(type);
-            typeInfo.ParseTypeName(type);
 
             typeInfo.BuildOffsetTable(type);
 

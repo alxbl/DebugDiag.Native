@@ -65,6 +65,11 @@ namespace DebugDiag.Native
             private set { _progress = value; }
         }
 
+        public bool Is32Bit
+        {
+            get { return Debugger.Is32Bit; }
+        }
+
         public string Execute(string cmd)
         {
             return Debugger.Execute(cmd);

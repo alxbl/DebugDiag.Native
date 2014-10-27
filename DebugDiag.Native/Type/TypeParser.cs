@@ -41,10 +41,8 @@ namespace DebugDiag.Native.Type
             // In order of priority.
             if (unqualifiedType.StartsWith("Ptr32") || unqualifiedType.StartsWith("Ptr64")) // Pointer: windbg style pointers.
             {
-                // A vtable is a "Ptr32" or "Ptr64" that doesn't pointer to anything else.
-                var i = typename.IndexOf(' ');
                 // TODO: Allow Vtable inspection.
-                type = new Pointer(i > 0 ? typename.Substring(i) : "`vtable' *");
+                type = new Pointer(typename);
             }
             else if (unqualifiedType.EndsWith("*")) // Pointer: C++ style pointers.
             {
@@ -61,7 +59,7 @@ namespace DebugDiag.Native.Type
             }
             else // Default: unknown type. Can be explored by hand.
             {
-                type = new NativeType();
+                type = new NativeType(typename);
             }
 
             return type;

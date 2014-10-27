@@ -11,6 +11,7 @@ namespace DebugDiag.Native.Test.Mock
         public NetScriptManager Manager { get; private set; }
         public NetDbgObj Debugger { get; private set; }
         public NetProgress Progress { get; private set; }
+        public bool Is32Bit { get { return true; } }
 
         public string Execute(string cmd)
         {
@@ -79,6 +80,12 @@ namespace DebugDiag.Native.Test.Mock
             InputOutputMap["dt 0x29cc14 DebugDiag_Native_Test_App!PODType"] = X86.StaticDtDrillPod;
             #endregion
 
+            #region Pointer
+            InputOutputMap["dp /c1 0x5bd3e0 L1"] = X86.Dp;
+            InputOutputMap["dp /c1 0x5bd3e4 L1"] = X86.Dp1;
+            InputOutputMap["dp /c1 0x5bd3e8 L1"] = X86.Dp2;
+            InputOutputMap["dp /c1 0x0 L1"] = X86.DpInvalid;
+            #endregion
             #region Map
             // TODO: Test fixtures for Map.
             #endregion
@@ -87,14 +94,25 @@ namespace DebugDiag.Native.Test.Mock
             InputOutputMap["dt 0 " + X86.PtrVector] = X86.PtrVectorDt;
             InputOutputMap[String.Format("dt {0} {1}", X86.PtrVectorAddr, X86.PtrVector)] = X86.PtrVectorDtInst;
             InputOutputMap["?? sizeof(PODType *)"] = "unsigned int 4";
+            InputOutputMap["dt 0x5bd0e0 PODType"] = X86.PtrVectorElem1;
+            InputOutputMap["dt 0x5bd308 PODType"] = X86.PtrVectorElem2;
+            InputOutputMap["dt 0x5bd398 PODType"] = X86.PtrVectorElem3;
+            InputOutputMap["dt 0x5bd0e0 DebugDiag_Native_Test_App!PODType"] = X86.PtrVectorElem1;
+            InputOutputMap["dt 0x5bd308 DebugDiag_Native_Test_App!PODType"] = X86.PtrVectorElem2;
+            InputOutputMap["dt 0x5bd398 DebugDiag_Native_Test_App!PODType"] = X86.PtrVectorElem3;
+
             #endregion
 
             #region List
+
             // TODO: Test fixtures for List.
+
             #endregion
 
             #region Set
+
             // TODO: Test fixtures for Set.
+
             #endregion
         }
 

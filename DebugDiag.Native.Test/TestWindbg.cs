@@ -16,7 +16,6 @@ namespace DebugDiag.Native.Test
         }
 
         #region Command
-
         [TestMethod]
         public void TestCommandOutput()
         {
@@ -37,10 +36,9 @@ namespace DebugDiag.Native.Test
             Assert.IsNotNull(c.Output);
             Assert.IsTrue(c.Output.Contains("+0x000"));
         }
-
         #endregion
-        #region DumpType
 
+        #region DumpType
         [TestMethod]
         public void TestDumpTypeEnumerator()
         {
@@ -49,7 +47,28 @@ namespace DebugDiag.Native.Test
             Assert.IsNotNull(dt.GetEnumerator());
             // TODO: Check that the `dt` parsing was successful.
         }
+        #endregion
 
+        #region Dp
+        [TestMethod]
+        public void TestDp32Bits()
+        {
+            Assert.Fail("Not implemented");
+        }
+
+        [TestMethod]
+        public void TestDp64Bits()
+        {
+            Assert.Fail("Not implemented");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(CommandException))]
+        public void TestDpInvalidLocation()
+        {
+            var dp = new Dp(0, 1);
+            dp.Execute();
+        }
         #endregion
     }
 }

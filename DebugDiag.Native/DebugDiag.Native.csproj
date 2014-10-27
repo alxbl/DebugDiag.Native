@@ -73,6 +73,7 @@
     <Compile Include="Type\Vector.cs" />
     <Compile Include="Windbg\Command.cs" />
     <Compile Include="Windbg\CommandException.cs" />
+    <Compile Include="Windbg\Dp.cs" />
     <Compile Include="Windbg\DumpType.cs" />
     <Compile Include="IDumpContext.cs" />
     <Compile Include="Native.cs" />

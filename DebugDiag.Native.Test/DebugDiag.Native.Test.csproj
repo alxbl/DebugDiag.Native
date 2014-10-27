@@ -59,6 +59,7 @@
     <Compile Include="TestList.cs" />
     <Compile Include="TestNativeType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestPointer.cs" />
     <Compile Include="TestVector.cs" />
     <Compile Include="TestWindbg.cs" />
   </ItemGroup>
