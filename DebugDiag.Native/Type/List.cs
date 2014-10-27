@@ -53,6 +53,8 @@ namespace DebugDiag.Native.Type
 
         public override IEnumerator<NativeType> GetEnumerator()
         {
+            if (Size == 0) yield break;
+
             if (_built)
             {
                 foreach (var e in _elements) yield return e;

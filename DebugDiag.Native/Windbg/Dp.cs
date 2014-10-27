@@ -41,6 +41,7 @@ namespace DebugDiag.Native.Windbg
 
         protected override void Parse(string output)
         {
+            output = output.TrimEnd();
             if (output.Contains("?")) throw new ArgumentException(String.Format("Invalid memory location at 0x{0:x}", _baseAddr));
             _memory = output.Split(' ').Where(m => !string.IsNullOrWhiteSpace(m)).Skip(1).Select(Native.StringAddrToUlong).ToArray();
 

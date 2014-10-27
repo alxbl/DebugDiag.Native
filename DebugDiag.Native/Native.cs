@@ -23,11 +23,12 @@ namespace DebugDiag.Native
         public static void Initialize(IDumpContext context)
         {
             Context = context;
-            // Register built-in user types.
+            // Register built-in user types. (Could be registered by reflection.)
             if (!_typesRegistered)
             {
                 TypeParser.RegisterUserType(Vector.Syntax, new Vector(""));
                 TypeParser.RegisterUserType(List.Syntax, new List(""));
+                TypeParser.RegisterUserType(Map.Syntax, new Map(""));
                 //TypeParser.RegisterUserType();
                 _typesRegistered = true;
             }
