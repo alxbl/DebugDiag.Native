@@ -10,14 +10,8 @@ namespace DebugDiag.Native.Type
     /// <summary>
     /// Represents a native type that supports enumeration.
     /// </summary>
-    public abstract class Enumerable : NativeType, IEnumerable<NativeType>
+    public abstract class Enumerable : UserType, IEnumerable<NativeType>
     {
-        protected Enumerable(ulong size, string type)
-        {
-            Size = size;
-            Type = type;
-        }
-
         #region Public API
         /// <summary>
         /// The number of objects in this enumerable type.
@@ -27,7 +21,7 @@ namespace DebugDiag.Native.Type
         /// <summary>
         /// The type of object contained in this enumerable type.
         /// </summary>
-        public string Type { get; internal set; }
+        public NativeType ElementType { get; internal set; }
         #endregion
 
         #region Enumerable Interface
@@ -36,6 +30,17 @@ namespace DebugDiag.Native.Type
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+        #endregion
+
+        #region Constructor
+        protected Enumerable(string typename) : base(typename) { }
+
+        protected Enumerable(Enumerable other)
+            : base(other)
+        {
+            Size = other.Size;
+            ElementType = other.ElementType;
         }
         #endregion
     }

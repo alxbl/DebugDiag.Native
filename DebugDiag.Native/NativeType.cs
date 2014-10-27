@@ -16,7 +16,7 @@ namespace DebugDiag.Native
     /// Stores information about a native type as well as the instance it is linked to. 
     /// This class is externally immutable to avoid mishaps while digging a dump.
     /// </summary>
-    public class NativeType : NativeInstance, IDeepCopyable<NativeType>
+    public class NativeType : NativeInstance
     {
         #region Dynamic API
 
@@ -37,12 +37,6 @@ namespace DebugDiag.Native
 
         #endregion
         #region Type Information
-
-        /// <summary>
-        /// Whether this NativeType object represents an object instance.
-        /// </summary>
-        public bool IsInstance { get; internal set; }
-
         /// <summary>
         /// The module in which this type is defined.
         /// 
@@ -183,53 +177,55 @@ namespace DebugDiag.Native
             typeInfo = TypeParser.Parse(type);
             typeInfo.ParseTypeName(type);
 
+            typeInfo.BuildOffsetTable(type);
+
+            CacheType(typeInfo.TypeName, typeInfo);
+            CacheType(typeInfo.QualifiedName, typeInfo);
+
+            return typeInfo;
+        }
+
+        protected override void BuildOffsetTable(string type)
+        {
             var dt = new DumpType(type);
             dt.Execute(); // Will throw if dt fails.
 
             if (dt.TypeName != null)
             {
-                typeInfo.ParseTypeName(dt.TypeName);
+                ParseTypeName(dt.TypeName);
             }
-            typeInfo.HasVtable = dt.IsVirtualType;
+            HasVtable = dt.IsVirtualType;
 
             var vtableCount = 0;
             foreach (var line in dt)
             {
-                    
                 // TODO: FIXME: Need to handle nested vtable name collisions in order to be able to inspect them by name.
                 // This is a really hacky bandage fix until a clean solution is designed. It has the
                 // limitation that vtable occurrences cannot be looked up by name. Offset still works.
                 string name = (line.Name == "__VFN_table") ? line.Name + vtableCount++ : line.Name;
 
                 // TODO: Possible optimization store this stub in the cache and lazily inspect it to avoid double parsing.
-                var fieldInfo = TypeParser.Parse(line.Value); // We know value here is the type.
+                var fieldInfo = TypeParser.Parse(line.Detail); // We know value here is the type.
 
                 var offset = new Offset
-                            {
-                                // If the offset is static, we already know its address. Otherwise it will be computed at rebase time.
-                                Address = line.IsStatic ? line.Offset : 0,
-                                Bytes = line.Offset,
-                                Instance = null,
-                                TypeName = line.Value,
-                                IsPrimitive = (fieldInfo is Primitive || fieldInfo is Pointer),
-                                IsStatic = line.IsStatic
-                            };
+                             {
+                                 // If the offset is static, we already know its address. Otherwise it will be computed at rebase time.
+                                 Address = line.IsStatic ? line.Offset : 0,
+                                 Bytes = line.Offset,
+                                 Instance = null,
+                                 TypeName = line.Detail,
+                                 IsPrimitive = (fieldInfo is Primitive || fieldInfo is Pointer),
+                                 IsStatic = line.IsStatic
+                             };
 
                 // Create the offset tables.
                 if (!line.IsBits) // TODO: Handle bit fields.
                 {
-                    typeInfo._nameLookup[name] = offset;
-                    typeInfo._offsetLookup[offset.Bytes] = offset;
+                    _nameLookup[name] = offset;
+                    _offsetLookup[offset.Bytes] = offset;
                 }
                 // typeInfo._preloaded = true;
             }
-
-
-            // Cache the offset table.
-            if (dt.TypeName != null) // Also cache the fully qualified type name.
-                CacheType(dt.TypeName, typeInfo);
-            CacheType(type, typeInfo);
-            return typeInfo;
         }
 
         /// <summary>
@@ -305,6 +301,11 @@ namespace DebugDiag.Native
             IsInstance = false; // When a default object is constructed, it is not an instance.
         }
 
+        internal NativeType(string typename)
+        {
+            ParseTypeName(typename);   
+        }
+
         /// <summary>
         /// Checks that this type is instantiated, and throws an exception if it is not.
         /// </summary>
@@ -366,7 +367,7 @@ namespace DebugDiag.Native
         {
             Debug.Assert(!IsInstance, "Should not re-base an instance."); // Really?
             // Rebase things.
-            var instance = DeepCopy();
+            var instance = (NativeType)DeepCopy();
             instance.IsInstance = true;
             instance.Address = addr;
             instance.Rebase();
@@ -393,7 +394,7 @@ namespace DebugDiag.Native
                 
                 if (!l.IsBits) // Load the value into the primitive right away.
                 {
-                    o.RawMemory = Native.ParseWindbgPrimitive(l.Value); // TODO: Remove RawMemory and instantiate primitive object
+                    o.RawMemory = Native.ParseWindbgPrimitive(l.Detail); // TODO: Remove RawMemory and instantiate primitive object
                 }
 
                 if (o.IsPrimitive)
@@ -459,7 +460,7 @@ namespace DebugDiag.Native
         /// <summary>
         /// Represents a type's field at a specific offset. Internal structure used to navigate instances.
         /// </summary>
-        private class Offset : IDeepCopyable<Offset>
+        private class Offset
         {
             /// <summary>
             /// Absolute address of this instance.
@@ -514,27 +515,31 @@ namespace DebugDiag.Native
         #endregion
         #endregion
 
-        public NativeType DeepCopy()
+        #region Copy
+        protected override NativeInstance DeepCopy()
         {
             // Copy Type Information.
-            var type = new NativeType
-            {
-                IsInstance = IsInstance,
-                Address = Address,
-                ModuleName = ModuleName,
-                TypeName = TypeName,
-                HasVtable = HasVtable,
-                IsStatic = IsStatic,
-                _rawMem = _rawMem,
-                _type = _type
-            };
+            return new NativeType(this);
+        }
+
+        protected NativeType(NativeType other) :
+            this()
+        {
+            IsInstance = other.IsInstance;
+            Address = other.Address;
+            ModuleName = other.ModuleName;
+            TypeName = other.TypeName;
+            HasVtable = other.HasVtable;
+            IsStatic = other.IsStatic;
+            _rawMem = other._rawMem;
+            _type = other._type;
 
             // Copy offset tables.
-            foreach (var o in _nameLookup) type._nameLookup.Add(o.Key, o.Value.DeepCopy());
-            foreach (var o in _offsetLookup) type._offsetLookup.Add(o.Key, o.Value.DeepCopy());
-
-            return type;
+            foreach (var o in other._nameLookup) _nameLookup.Add(o.Key, o.Value.DeepCopy());
+            foreach (var o in other._offsetLookup) _offsetLookup.Add(o.Key, o.Value.DeepCopy());
         }
+
+        #endregion
 
         public ulong GetOffset(string field)
         {

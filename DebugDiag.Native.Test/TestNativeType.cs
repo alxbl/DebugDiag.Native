@@ -35,6 +35,20 @@ namespace DebugDiag.Native.Test
         }
 
         [TestMethod]
+        public void TestPreloadCompoundType()
+        {
+            // Manually preloading a compound type is very unnatural, since templates usually have many
+            // default parameters that windbg will always output, and requires to be explicitly specified
+            // in order to function properly.
+            // Usually, you should prefer getting the parent type, and navigating to the compound type using
+            // `GetField()` or dynamic accessors.
+
+            var t = NativeType.Preload(X86.PtrVector);
+            Assert.IsNotNull(t);
+            Assert.AreEqual(X86.PtrVector, t.TypeName);
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
         public void TestNavigateNonInstance()
         {

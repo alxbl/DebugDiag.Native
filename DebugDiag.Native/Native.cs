@@ -138,7 +138,10 @@ namespace DebugDiag.Native
         public static ulong? ParseWindbgPrimitive(string value)
         {
             if (string.IsNullOrWhiteSpace(value)) return null;
-            if (value.StartsWith("0x") || value.StartsWith("0n") || value == "0") return StringAddrToUlong(value);
+            // HACK: This method will be removed once primitives are parsed as objects and no longer rely on RawMemory for their value.
+            // In the mean time, split the value at the first space and take everything before that to prevent the "parser" from breaking
+            // due to compound type support.
+            if (value.StartsWith("0x") || value.StartsWith("0n") || value == "0") return StringAddrToUlong(value.Split(' ')[0]); 
             if (value.Equals("(null)")) return 0;
             return null;
         }

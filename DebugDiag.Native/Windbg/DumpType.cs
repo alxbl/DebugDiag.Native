@@ -22,7 +22,7 @@ namespace DebugDiag.Native.Windbg
             : this()
         {
             IsInstance = false;
-            _command = String.Format("dt {0}", type);
+            _command = String.Format("dt 0 {0}", type);
             _type = type;
         }
 
@@ -53,9 +53,7 @@ namespace DebugDiag.Native.Windbg
         {
             public ulong Offset { get; internal set; }
             public string Name { get; internal set; }
-            public string Value { get; internal set; }
-            public string Type { get; internal set; }
-
+            public string Detail { get; internal set; }
             /// <summary>
             /// Whether this line represents a static field.
             /// </summary>
@@ -98,11 +96,11 @@ namespace DebugDiag.Native.Windbg
 
         #region Private
 
-        private static readonly Regex LineFormat = new Regex(@" +(\+0x|=)([0-9a-fA-F]+) ([A-Za-z_][A-Za-z0-9_]+) +: +(Pos \d+, \d+ Bits?|[^ \n\r]*)");
+        private static readonly Regex LineFormat = new Regex(@" +(\+0x|=)([0-9a-fA-F]+) ([A-Za-z_][A-Za-z0-9_]+) +: +([^\n\r]*)");
         private static readonly Regex BitfieldFormat = new Regex(@"Pos (\d+), (\d+) Bits?");
         private readonly IList<Line> _lines = new List<Line>();
         private readonly string _command; // The windbg command to run.
-        private string _type; // cache requested type for error messages;
+        private readonly string _type; // cache requested type for error messages;
 
         #endregion
 
@@ -132,7 +130,7 @@ namespace DebugDiag.Native.Windbg
                 if (first)
                 {
                     // Check if we have a fully qualified type name.
-                    TypeName = !line.Contains(":") ? line : null;
+                    TypeName = line.Contains("!") ? line : null;
                     first = false;
                     if (TypeName != null) continue; // We found a type name, skip this line.
                 }
@@ -158,7 +156,7 @@ namespace DebugDiag.Native.Windbg
                                IsBits = BitfieldFormat.IsMatch(value) || value.Contains("0y"), // TODO: Extract bitfield info.
                                IsStatic = groups[1].Value == "=", // Windbg prefixes static fields with = instead of +
                                Name = fieldName,
-                               Value = value.TrimEnd()
+                               Detail = value.TrimEnd()
                            });
             }
         }

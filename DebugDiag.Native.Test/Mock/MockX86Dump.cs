@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using DebugDiag.DotNet;
+using DebugDiag.Native.Test.Fixtures;
 
 namespace DebugDiag.Native.Test.Mock
 {
@@ -8,7 +11,7 @@ namespace DebugDiag.Native.Test.Mock
         public NetScriptManager Manager { get; private set; }
         public NetDbgObj Debugger { get; private set; }
         public NetProgress Progress { get; private set; }
-        
+
         public string Execute(string cmd)
         {
             return InputOutputMap.ContainsKey(cmd)
@@ -29,71 +32,59 @@ namespace DebugDiag.Native.Test.Mock
         static MockX86Dump()
         {
             #region VirtualType
-            InputOutputMap["ln poi(0x49beb8)"] = Fixtures.X86.VtableLnPoi;
-            InputOutputMap["ln poi(49beb8)"] = Fixtures.X86.VtableLnPoi;
-            InputOutputMap["dt DebugDiag_Native_Test_App!VirtualTypeDeriv"] = Fixtures.X86.VirtualTypeDerivDt;
-            InputOutputMap["dt VirtualTypeDeriv"] = Fixtures.X86.VirtualTypeDerivDt;
-            InputOutputMap["dt 0x49beb8 DebugDiag_Native_Test_App!VirtualTypeDeriv "] = Fixtures.X86.VirtualTypeDerivInst;
-            InputOutputMap["dt DebugDiag_Native_Test_App!VirtualTypeDeriv 0x49beb8"] = Fixtures.X86.VirtualTypeDerivInst;
-            InputOutputMap["dt 0x49beb8 DebugDiag_Native_Test_App!VirtualTypeDeriv"] = Fixtures.X86.VirtualTypeDerivInst;
+            InputOutputMap["ln poi(0x49beb8)"] = X86.VtableLnPoi;
+            InputOutputMap["ln poi(49beb8)"] = X86.VtableLnPoi;
+            InputOutputMap["dt 0 DebugDiag_Native_Test_App!VirtualTypeDeriv"] = X86.VirtualTypeDerivDt;
+            InputOutputMap["dt 0 VirtualTypeDeriv"] = X86.VirtualTypeDerivDt;
+            InputOutputMap["dt 0x49beb8 DebugDiag_Native_Test_App!VirtualTypeDeriv "] = X86.VirtualTypeDerivInst;
+            InputOutputMap["dt 0x49beb8 DebugDiag_Native_Test_App!VirtualTypeDeriv"] = X86.VirtualTypeDerivInst;
             #endregion
 
             #region Edge Cases
-            InputOutputMap["dt Int4B 0x49bebc"] = "Symbol Int4B not found.";
             InputOutputMap["dt 0x49bebc Int4B"] = "Symbol Int4B not found.";
-            InputOutputMap["dt Int4B"] = "Symbol Int4B not found.";
-            InputOutputMap["dt nt!InvalidDoNotExist"] = Fixtures.X86.InvalidTypeDt;
-            InputOutputMap["dt InvalidDoNotExist"] = Fixtures.X86.InvalidTypeUnqualifiedDt;
+            InputOutputMap["dt 0 Int4B"] = "Symbol Int4B not found.";
+            InputOutputMap["dt 0 nt!InvalidDoNotExist"] = X86.InvalidTypeDt;
+            InputOutputMap["dt 0 InvalidDoNotExist"] = X86.InvalidTypeUnqualifiedDt;
             #endregion
 
             #region PEB
-            InputOutputMap["dt nt!_PEB"] = Fixtures.X86.DtPeb;
-            InputOutputMap["dt nt!_PEB 0x7efde000"] = Fixtures.X86.DtPebInst;
-            InputOutputMap["dt 0x7efde000 nt!_PEB"] = Fixtures.X86.DtPebInst;
-            InputOutputMap["dt nt!_PEB 7efde000"] = Fixtures.X86.DtPebInst;
-            InputOutputMap["dt 0x7efde000 ntdll!_PEB"] = Fixtures.X86.DtPebInst;
-            InputOutputMap["dt 7efde000 nt!_PEB"] = Fixtures.X86.DtPebInst;
+            InputOutputMap["dt 0 nt!_PEB"] = X86.DtPeb;
+            InputOutputMap["dt 0x7efde000 nt!_PEB"] = X86.DtPebInst;
+            InputOutputMap["dt 0x7efde000 ntdll!_PEB"] = X86.DtPebInst;
+            InputOutputMap["dt 7efde000 nt!_PEB"] = X86.DtPebInst;
             #endregion
 
             #region POD
-            InputOutputMap["dt DebugDiag_Native_Test_App!PODType"] = Fixtures.X86.DtPodType;
-            InputOutputMap["dt PODType"] = Fixtures.X86.DtPodType;
-            InputOutputMap["dt DebugDiag_Native_Test_App!PODType 0x49becc"] = Fixtures.X86.DtPodTypeInst;
-            InputOutputMap["dt 0x49becc DebugDiag_Native_Test_App!PODType"] = Fixtures.X86.DtPodTypeInst;
+            InputOutputMap["dt 0 DebugDiag_Native_Test_App!PODType"] = X86.DtPodType;
+            InputOutputMap["dt 0 PODType"] = X86.DtPodType;
+            InputOutputMap["dt 0x49becc DebugDiag_Native_Test_App!PODType"] = X86.DtPodTypeInst;
             #endregion
 
             #region Multiple Vtables
-            InputOutputMap["dt MultiVtable"] = Fixtures.X86.MultiVtableDt;
-            InputOutputMap["dt MultiVtable 0x88ccff22"] = Fixtures.X86.MultiVtableDtInst;
-            InputOutputMap["dt 0x88ccff22 MultiVtable"] = Fixtures.X86.MultiVtableDtInst;
+            InputOutputMap["dt 0 MultiVtable"] = X86.MultiVtableDt;
+            InputOutputMap["dt 0x88ccff22 MultiVtable"] = X86.MultiVtableDtInst;
             #endregion
 
-            //InputOutputMap[""] =;
-            
             #region Static Type
-            InputOutputMap["dt HasAStaticField"] = Fixtures.X86.StaticDt;
-            InputOutputMap["dt HasAStaticField 0x29cc00"] = Fixtures.X86.StaticDtInst;
-            InputOutputMap["dt 0x29cc00 HasAStaticField"] = Fixtures.X86.StaticDtInst;
-            InputOutputMap["dt DebugDiag_Native_Test_App!HasAStaticField 0x29cc00"] = Fixtures.X86.StaticDtInst;
-            InputOutputMap["dt 0x29cc00 DebugDiag_Native_Test_App!HasAStaticField"] = Fixtures.X86.StaticDtInst;
-            InputOutputMap["dt HasAStaticField 0x29cc00"] = Fixtures.X86.StaticDtInst;
-            InputOutputMap["dt 0x29cc00 HasAStaticField"] = Fixtures.X86.StaticDtInst;
+            InputOutputMap["dt 0 HasAStaticField"] = X86.StaticDt;
+            InputOutputMap["dt 0x29cc00 HasAStaticField"] = X86.StaticDtInst;
+            InputOutputMap["dt 0x29cc00 DebugDiag_Native_Test_App!HasAStaticField"] = X86.StaticDtInst;
+            InputOutputMap["dt 0x29cc00 HasAStaticField"] = X86.StaticDtInst;
             #endregion
 
             #region DrillDown
-            InputOutputMap["dt 0x29cc00 VirtualTypeDeriv"] = Fixtures.X86.VirtualTypeDerivInst;
-            InputOutputMap["dt VirtualTypeDeriv 0x29cc00"] = Fixtures.X86.VirtualTypeDerivInst;
-            InputOutputMap["dt PODType 0x29cc14"] = Fixtures.X86.StaticDtDrillPod;
-            InputOutputMap["dt 0x29cc14 PODType"] = Fixtures.X86.StaticDtDrillPod;
+            InputOutputMap["dt 0x29cc00 VirtualTypeDeriv"] = X86.VirtualTypeDerivInst;
+            InputOutputMap["dt 0x29cc00 DebugDiag_Native_Test_App!VirtualTypeDeriv"] = X86.VirtualTypeDerivInst;
+            InputOutputMap["dt 0x29cc14 PODType"] = X86.StaticDtDrillPod;
             #endregion
 
             #region Map
             #endregion
 
             #region Vector
-
-            InputOutputMap["?? (0x005bd15c - 0x005bd138) / sizeof(PODType)"] = "unsigned int 3";
-
+            InputOutputMap["dt 0 " + X86.PtrVector] = X86.PtrVectorDt;
+            InputOutputMap[String.Format("dt {0} {1}", X86.PtrVectorAddr, X86.PtrVector)] = X86.PtrVectorDtInst;
+            InputOutputMap["?? sizeof(PODType *)"] = "unsigned int 4";
             #endregion
         }
 

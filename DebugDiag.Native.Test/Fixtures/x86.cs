@@ -289,6 +289,23 @@ Symbol InvalidDoNotExist not found.";
    +0x008 Offset3          : 0n0";
 
         #endregion
+
+        #region Vector
+
+        public const string PtrVector = "std::vector<PODType *,std::allocator<PODType *> >";
+        public const string PtrVectorElementType = "PODType *";
+        public const string PtrVectorAddr = "0x49fc04";
+        public const string PtrVectorDt = @"   +0x000 _Myproxy         : Ptr32 std::_Container_proxy
+   +0x004 _Myfirst         : Ptr32 Ptr32 PODType
+   +0x008 _Mylast          : Ptr32 Ptr32 PODType
+   +0x00c _Myend           : Ptr32 Ptr32 PODType";
+        public const string PtrVectorDtInst = @"   +0x000 _Myproxy         : 0x005bd098 std::_Container_proxy
+   +0x004 _Myfirst         : 0x005bd3e0  -> 0x005bd0e0 PODType
+   +0x008 _Mylast          : 0x005bd3ec  -> 0xfdfdfdfd PODType
+   +0x00c _Myend           : 0x005bd3ec  -> 0xfdfdfdfd PODType
+";
+
+        #endregion
     }
 }
 

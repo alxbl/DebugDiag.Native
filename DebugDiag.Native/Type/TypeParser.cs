@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace DebugDiag.Native.Type
@@ -14,6 +16,22 @@ namespace DebugDiag.Native.Type
     /// </summary>
     public static class TypeParser
     {
+        private static readonly Dictionary<Regex, System.Type> RegisteredUserTypes = new Dictionary<Regex, System.Type>();
+
+        /// <summary>
+        /// Adds a user type to the type parser. When parsing a type, the parser will try to match the typename
+        /// against each type in its registered user types. If a match is found, the type parser will create an instance
+        /// of that user type and return it.
+        /// </summary>
+        /// <typeparam name="T">Restricts this method to be called with types that extend UserType.</typeparam>
+        /// <param name="pattern">A compiled regular expression user to match against this type.</param>
+        /// <param name="type"></param>
+        public static void RegisterUserType<T>(Regex pattern, T type) where T : UserType
+        {
+            Debug.Assert(pattern != null && type != null);
+            RegisteredUserTypes[pattern] = type.GetType();
+        }
+
         public static NativeType Parse(string typename)
         {
             var unqualifiedType = (typename.Contains("!")) ? typename.Split('!')[1] : typename; // Ignore module name.
@@ -23,7 +41,8 @@ namespace DebugDiag.Native.Type
             // In order of priority.
             if (unqualifiedType.EndsWith("*")) // Pointer: Remove one `*` and parse the remaining type.
             {
-                // type = new Pointer(typename, Parse(typename.Substring(0, typename.Length - 1)));
+                // TODO: Can also be a Ptr32|Ptr64
+                type = new Pointer(typename);
             }
             else if (IsPrimitive(unqualifiedType)) // Primitive: Create the matching primitive type.
             {
@@ -52,14 +71,33 @@ namespace DebugDiag.Native.Type
             if (typename.Equals("Uint4B")) return true;
             if (typename.Equals("Int8B")) return true;
             if (typename.Equals("Uint8B")) return true;
-            if (typename.StartsWith("Ptr32")) return true;
-            if (typename.StartsWith("Ptr64")) return true;
+            if (typename.StartsWith("Ptr32")) return true; // Should be parsed as a Ptr.
+            if (typename.StartsWith("Ptr64")) return true; // Should be parsed as a Ptr.
             return false;
         }
 
         private static bool IsUserType(string typename, ref NativeType type)
         {
-            return false;
+            foreach (var ut in RegisteredUserTypes)
+            {
+                var pattern = ut.Key;
+                var typeInfo = ut.Value;
+                
+                if (!pattern.IsMatch(typename)) continue;
+
+                UserType instance = null;
+                var cons = typeInfo.GetConstructor(new [] {typeof(string)});
+                if (cons != null)
+                    instance = cons.Invoke(new object[] {typename}) as UserType;
+
+                if (instance != null)
+                {
+                    instance.OnCreateInstance(typename, pattern.Match(typename));
+                    type = instance;
+                }
+                return true;
+            }
+            return false; // No matching user type found.
         }
     }
 }

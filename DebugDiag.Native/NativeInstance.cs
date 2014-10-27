@@ -12,6 +12,11 @@ namespace DebugDiag.Native
     public abstract class NativeInstance : DynamicObject
     {
         /// <summary>
+        /// Whether this NativeType object represents an object instance.
+        /// </summary>
+        public bool IsInstance { get; internal set; }
+
+        /// <summary>
         /// The base address of this object instance.
         /// 
         /// If the object does not represent an instance, this is 0UL.
@@ -75,5 +80,17 @@ namespace DebugDiag.Native
         /// <see cref="NativeType.Rebase"/>
         /// </summary>
         protected abstract void Rebase();
+
+        /// <summary>
+        /// Creates a deep copy of this type.
+        /// </summary>
+        /// <returns>A copy of this type.</returns>
+        protected abstract NativeInstance DeepCopy();
+
+        /// <summary>
+        /// Hook into building the offset table for a native type. This allows user types to bypass the offset table.
+        /// </summary>
+        /// <param name="type"></param>
+        protected abstract void BuildOffsetTable(string type);
     }
 }
