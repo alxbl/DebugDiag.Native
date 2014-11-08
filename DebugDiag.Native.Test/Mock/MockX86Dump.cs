@@ -6,7 +6,7 @@ using DebugDiag.Native.Test.Fixtures;
 
 namespace DebugDiag.Native.Test.Mock
 {
-    internal class MockX86Dump : IDumpContext
+    internal partial class MockX86Dump : IDumpContext
     {
         public NetScriptManager Manager { get; private set; }
         public NetDbgObj Debugger { get; private set; }
@@ -29,6 +29,7 @@ namespace DebugDiag.Native.Test.Mock
 
         /// <summary>
         /// Constructs the I/O map for mocking a dump context.
+        /// TODO: Move to a generated fixture.
         /// </summary>
         static MockX86Dump()
         {

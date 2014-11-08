@@ -3,6 +3,7 @@
 #include <vector>
 #include <map>
 
+// ------------- Define data structures used for test fixtures. -------------
 struct PODType
 {
     PODType() : PODType(0,0,0) 
@@ -62,32 +63,47 @@ public:
     static int* HInstPtr;
     VirtualType subType;
 };
+
+
+struct Fixture
+{
+    VirtualTypeDeriv deriv;
+    HasAStaticField staticField;
+    std::vector<PODType> objVector;
+    std::vector<PODType*> ptrVector;
+    std::map<int, int> primitiveMap;
+};
+
+// ------------- Initialize the fixture and crash. -------------
+
+void Crash()
+{
+    int* crash = nullptr;
+    *crash = 42;
+}
+
 int main(int argc, char** argv)
 {
-    auto deriv = new VirtualTypeDeriv();
-    deriv->OverrideMe(12); // 13
-
-    HasAStaticField* statico = new HasAStaticField();
+    Fixture f;
 
     // Test enumerable with POD.
     std::vector<PODType> objVector;
-    objVector.push_back(PODType(1,1,1));
-    objVector.push_back(PODType(2, 2, 2));
-    objVector.push_back(PODType(3, 3, 3));
+    f.objVector.push_back(PODType(1,1,1));
+    f.objVector.push_back(PODType(2, 2, 2));
+    f.objVector.push_back(PODType(3, 3, 3));
 
     /// Test enumerable with pointers.
     std::vector<PODType*> ptrVector;
-    ptrVector.push_back(new PODType(1, 1, 1));
-    ptrVector.push_back(new PODType(2, 2, 2));
-    ptrVector.push_back(new PODType(3, 3, 3));
+    f.ptrVector.push_back(new PODType(1, 1, 1));
+    f.ptrVector.push_back(new PODType(2, 2, 2));
+    f.ptrVector.push_back(new PODType(3, 3, 3));
 
     // Test map enumerable with primitives
     std::map<int, int> objMap;
-    objMap[1] = 2;
-    objMap[2] = 4;
-    objMap[3] = 6;
-    objMap[4] = 8;
+    f.primitiveMap[1] = 2;
+    f.primitiveMap[2] = 4;
+    f.primitiveMap[3] = 6;
+    f.primitiveMap[4] = 8;
 
-    int* crash = nullptr;
-    std::cout << *crash; // segfault
+    Crash();
 }
