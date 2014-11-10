@@ -10,7 +10,7 @@ namespace DebugDiag.Native.Type
         private readonly List<NativeType> _elements = new List<NativeType>();
 
         private bool _built;
-        private NativeType _head;
+        private Pointer _head;
 
         #region Type Implementation
 
@@ -18,35 +18,35 @@ namespace DebugDiag.Native.Type
         {
             base.Rebase();
             Size = GetIntValue("_Mysize");
-            _head = GetField("_Myhead");
+            _head = GetField("_Myhead") as Pointer;
+            Debug.Assert(_head != null, "Set cannot have a null head node.");
         }
 
         public override IEnumerator<NativeType> GetEnumerator()
         {
             if (Size == 0) yield break;
-            if (_built)
+            if (!_built)
             {
-                foreach (var e in _elements) yield return e;
-                yield break;
+                dynamic root = _head.GetField("_Parent");
+                EnumerateSubtree(root);
+                _built = true;
             }
-            dynamic root = _head.GetField("_Parent");
-            yield return EnumerateSubtree(root);
-            _built = true;
+            foreach (var e in _elements) yield return e;
         }
 
         /// <summary>
         /// In-order traversal of the tree.
         /// </summary>
         /// <param name="node">One node in the tree.</param>
-        /// <returns></returns>
-        private IEnumerable<NativeType> EnumerateSubtree(dynamic node)
+        private void EnumerateSubtree(dynamic node)
         {
-            if (node.Address == _head.Address) yield break; // base case: leaf node
-            yield return EnumerateSubtree(node._Left);
+            if (node.PointsTo == _head.PointsTo) return; // base case: leaf node
+            EnumerateSubtree(node._Left);
+            
             var e = node._Myval;
             _elements.Add(e);
-            yield return e;
-            yield return EnumerateSubtree(node._Right);
+            
+            EnumerateSubtree(node._Right);
         }
 
         #endregion

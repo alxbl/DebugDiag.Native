@@ -10,7 +10,7 @@ namespace DebugDiag.Native.Type
     /// </summary>
     public sealed class Pointer : NativeType
     {
-        private ulong _pointsTo; // The address to use when re-basing this pointer.
+        public ulong PointsTo { get; private set; } // The address to use when re-basing this pointer.
 
         /// <summary>
         /// Type information of the type this pointer this points to. This is not an instance.
@@ -27,7 +27,7 @@ namespace DebugDiag.Native.Type
         public override NativeType GetField(string name)
         {
             // If this pointer was created directly from a Rebase(), we need to inspect the pointed type.
-            if (Dereference == null) Dereference = AtAddress(_pointsTo, PointedType.QualifiedName);
+            if (Dereference == null) Dereference = AtAddress(PointsTo, PointedType.QualifiedName);
             return Dereference.GetField(name);
         }
 
@@ -41,13 +41,13 @@ namespace DebugDiag.Native.Type
             // We don't call base.Rebase() because a pointer is a (special) primitive.
 
             var dp = new Dp(Address, 1);
-            _pointsTo = dp.BytesAt(0);
+            PointsTo = dp.BytesAt(0);
 
             // When accessing a pointer, to an object instance, we have to preload the object.
             if (!(PointedType is Primitive) && !(PointedType is Pointer))
                 PointedType = Preload(PointedType.QualifiedName);
 
-            Dereference = PointedType.RebaseAt(_pointsTo);
+            Dereference = PointedType.RebaseAt(PointsTo);
         }
 
         protected override void BuildOffsetTable(string type)
@@ -102,7 +102,7 @@ namespace DebugDiag.Native.Type
         public Pointer(string typename, ulong pointsTo)
             : this(typename)
         {
-            _pointsTo = pointsTo;
+            PointsTo = pointsTo;
         }
 
         #endregion

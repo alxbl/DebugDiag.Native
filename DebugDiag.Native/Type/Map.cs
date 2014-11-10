@@ -10,7 +10,7 @@ namespace DebugDiag.Native.Type
         // Keep a cached copy of the instances to avoid constantly querying the dump file.
         private readonly List<NativeType> _elements = new List<NativeType>();
         private bool _built;
-        private NativeType _head;
+        private Pointer _head;
 
         public NativeType KeyType { get; private set; }
 
@@ -20,21 +20,20 @@ namespace DebugDiag.Native.Type
         {
             base.Rebase();
             Size = GetIntValue("_Mysize");
-            _head = GetField("_Myhead");
-
+            _head = GetField("_Myhead") as Pointer;
+            Debug.Assert(_head != null, "Map cannot have a null head node.");
         }
 
         public override IEnumerator<NativeType> GetEnumerator()
         {
             if (Size == 0) yield break;
-            if (_built)
+            if (!_built)
             {
-                foreach (var e in _elements) yield return e;
-                yield break;
+                dynamic root = _head.GetField("_Parent");
+                EnumerateSubtree(root);
+                _built = true;
             }
-            dynamic root = _head.GetField("_Parent");
-            yield return EnumerateSubtree(root);
-            _built = true;
+            foreach (var e in _elements) yield return e;
         }
 
         /// <summary>
@@ -42,14 +41,16 @@ namespace DebugDiag.Native.Type
         /// </summary>
         /// <param name="node">One node in the tree.</param>
         /// <returns></returns>
-        private IEnumerable<Pair> EnumerateSubtree(dynamic node)
+        private void EnumerateSubtree(dynamic node)
         {
-            if (node.Address == _head.Address) yield break; // base case: leaf node
-            yield return EnumerateSubtree(node._Left);
-            var e = new Pair { First = node._Myval.first, Second = node._Myval.second };
+            if (node.PointsTo == _head.PointsTo) return; // base case: leaf node
+            EnumerateSubtree(node._Left);
+            
+            // Fake that this is an instance, so that it behaves as expected.
+            var e = new Pair { Address = node._Myval.Address, IsInstance = true, First = node._Myval.first, Second = node._Myval.second };
             _elements.Add(e);
-            yield return e;
-            yield return EnumerateSubtree(node._Right);
+
+            EnumerateSubtree(node._Right);
         }
 
         #endregion

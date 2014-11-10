@@ -26,6 +26,7 @@ namespace DebugDiag.Native
                 TypeParser.RegisterUserType(Vector.Syntax, new Vector(""));
                 TypeParser.RegisterUserType(List.Syntax, new List(""));
                 TypeParser.RegisterUserType(Map.Syntax, new Map(""));
+                TypeParser.RegisterUserType(Set.Syntax, new Set(""));
                 //TypeParser.RegisterUserType();
                 _typesRegistered = true;
             }
