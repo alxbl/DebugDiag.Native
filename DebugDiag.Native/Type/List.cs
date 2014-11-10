@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace DebugDiag.Native.Type
 {
-    public class List : Enumerable
+    public sealed class List : Enumerable
     {
         public static readonly Regex Syntax = new Regex(@"^std::list<(.*),std::allocator<.*> >$");
         // Keep a cached copy of the instances to avoid constantly querying the dump file.
@@ -17,12 +13,13 @@ namespace DebugDiag.Native.Type
         private NativeType _head;
 
         #region Constructor
+
         protected override NativeInstance DeepCopy()
         {
             return new List(this);
         }
 
-        protected List(List other)
+        private List(List other)
             : base(other)
         {
             _elements = other._elements;
@@ -33,15 +30,16 @@ namespace DebugDiag.Native.Type
         {
 
         }
-        #endregion
 
+        #endregion
         #region Type Implementation
+
         internal override void OnCreateInstance(string typename, Match match)
         {
             Debug.Assert(match.Groups.Count == 2, "List expects only one group");
 
             // Recursively parse the type of elements inside the list.
-            ElementType = TypeParser.Parse(match.Groups[1].Value);
+            ValueType = TypeParser.Parse(match.Groups[1].Value);
         }
 
         protected override void Rebase()
@@ -75,6 +73,7 @@ namespace DebugDiag.Native.Type
             }
             _built = true;
         }
+
         #endregion
     }
 }

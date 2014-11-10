@@ -45,26 +45,6 @@ namespace DebugDiag.Native.Windbg
         }
 
         #endregion
-
-        /// <summary>
-        /// Represents one line of output.
-        /// </summary>
-        public struct Line
-        {
-            public ulong Offset { get; internal set; }
-            public string Name { get; internal set; }
-            public string Detail { get; internal set; }
-            /// <summary>
-            /// Whether this line represents a static field.
-            /// </summary>
-            public bool IsStatic { get; internal set; }
-
-            /// <summary>
-            /// Whether this is part of a bit field's bit breakdown.
-            /// </summary>
-            public bool IsBits { get; internal set; }
-        }
-
         #region Public API
 
         /// <summary>
@@ -93,7 +73,6 @@ namespace DebugDiag.Native.Windbg
 
         #endregion
         #endregion
-
         #region Private
 
         private static readonly Regex LineFormat = new Regex(@" +(\+0x|=)([0-9a-fA-F]+) ([A-Za-z_][A-Za-z0-9_]+) +: +([^\n\r]*)");
@@ -102,8 +81,26 @@ namespace DebugDiag.Native.Windbg
         private readonly string _command; // The windbg command to run.
         private readonly string _type; // cache requested type for error messages;
 
-        #endregion
+        /// <summary>
+        /// Represents one line of output.
+        /// </summary>
+        public struct Line
+        {
+            public ulong Offset { get; internal set; }
+            public string Name { get; internal set; }
+            public string Detail { get; internal set; }
+            /// <summary>
+            /// Whether this line represents a static field.
+            /// </summary>
+            public bool IsStatic { get; internal set; }
 
+            /// <summary>
+            /// Whether this is part of a bit field's bit breakdown.
+            /// </summary>
+            public bool IsBits { get; internal set; }
+        }
+
+        #endregion
         #region Command Implementation
 
         protected override string BuildCommand()
@@ -160,7 +157,7 @@ namespace DebugDiag.Native.Windbg
                            });
             }
         }
-        #endregion
 
+        #endregion
     }
 }

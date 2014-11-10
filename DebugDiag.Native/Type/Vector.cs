@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using DebugDiag.Native.Windbg;
 
 namespace DebugDiag.Native.Type
 {
-    public class Vector : Enumerable
+    public sealed class Vector : Enumerable
     {
         public static readonly Regex Syntax = new Regex(@"^std::vector<(.*),std::allocator<.*> >$");
         // Keep a cached copy of the instances to avoid constantly querying the dump file.
@@ -20,12 +16,13 @@ namespace DebugDiag.Native.Type
         public ulong Capacity { get; private set; }
 
         #region Type Implementation
+
         internal override void OnCreateInstance(string typename, Match match)
         {
             Debug.Assert(match.Groups.Count == 2, "Vector expects only one group");
 
             // Recursively parse the type of elements inside the vector.
-            ElementType = TypeParser.Parse(match.Groups[1].Value);
+            ValueType = TypeParser.Parse(match.Groups[1].Value);
         }
 
         public override IEnumerator<NativeType> GetEnumerator()
@@ -42,7 +39,7 @@ namespace DebugDiag.Native.Type
             ulong idx = 0;
             while (idx < Size)
             {
-                var e = ElementType.RebaseAt(_first + idx*_elementSize);
+                var e = ValueType.RebaseAt(_first + idx * _elementSize);
                 _elements.Add(e);
                 idx++;
                 yield return e;
@@ -57,22 +54,22 @@ namespace DebugDiag.Native.Type
             _last = GetIntValue("_Mylast");
             _end = GetIntValue("_Myend");
 
-            var size = new SizeOf(ElementType.TypeName);
+            var size = new SizeOf(ValueType.TypeName);
             _elementSize = size.Size; // Implicit  size.Execute();
 
-            Size = _elementSize > 0 ? (_last - _first)/_elementSize : 0;
-            Capacity = _elementSize > 0 ? (_end - _first)/_elementSize : 0;
+            Size = _elementSize > 0 ? (_last - _first) / _elementSize : 0;
+            Capacity = _elementSize > 0 ? (_end - _first) / _elementSize : 0;
         }
 
         #endregion
-
         #region Constructor
+
         protected override NativeInstance DeepCopy()
         {
             return new Vector(this);
         }
 
-        protected Vector(Vector other)
+        private Vector(Vector other)
             : base(other)
         {
             _elements = other._elements;
@@ -83,6 +80,7 @@ namespace DebugDiag.Native.Type
         {
 
         }
+
         #endregion
     }
 }

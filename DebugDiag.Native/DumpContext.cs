@@ -8,7 +8,7 @@ namespace DebugDiag.Native
     /// </summary>
     public class DumpContext : IDumpContext
     {
-        private bool _contextValid = false;
+        private readonly bool _contextValid;
         private NetScriptManager _mgr;
         private NetDbgObj _dbg;
         private NetProgress _progress;

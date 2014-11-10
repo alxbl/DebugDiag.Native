@@ -1,4 +1,3 @@
-using System.Security.Cryptography.X509Certificates;
 using DebugDiag.DotNet;
 
 namespace DebugDiag.Native
@@ -9,6 +8,7 @@ namespace DebugDiag.Native
     public interface IDumpContext
     {
         #region Properties
+
         /// <summary>
         /// The reference to the DebugDiag script management engine.
         /// </summary>
@@ -23,8 +23,8 @@ namespace DebugDiag.Native
         /// The reference to the DebugDiag progress tracker.
         /// </summary>
         NetProgress Progress { get; }
-        #endregion
 
+        #endregion
         #region API
 
         /// <summary>

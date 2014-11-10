@@ -1,7 +1,9 @@
 // A silly project used for dump fixtures in DebugDiag.Native.Test
 #include <iostream>
-#include <vector>
+#include <set>
 #include <map>
+#include <list>
+#include <vector>
 
 // ------------- Define data structures used for test fixtures. -------------
 struct PODType
@@ -72,38 +74,41 @@ struct Fixture
     std::vector<PODType> objVector;
     std::vector<PODType*> ptrVector;
     std::map<int, int> primitiveMap;
+    std::set<int> primitiveSet;
+    std::list<PODType> list;
 };
 
 // ------------- Initialize the fixture and crash. -------------
-
-void Crash()
-{
-    int* crash = nullptr;
-    *crash = 42;
-}
-
 int main(int argc, char** argv)
 {
     Fixture f;
 
-    // Test enumerable with POD.
-    std::vector<PODType> objVector;
+    // Vector with objects
     f.objVector.push_back(PODType(1,1,1));
     f.objVector.push_back(PODType(2, 2, 2));
     f.objVector.push_back(PODType(3, 3, 3));
 
-    /// Test enumerable with pointers.
-    std::vector<PODType*> ptrVector;
+    /// Vector with pointers
     f.ptrVector.push_back(new PODType(1, 1, 1));
     f.ptrVector.push_back(new PODType(2, 2, 2));
     f.ptrVector.push_back(new PODType(3, 3, 3));
 
-    // Test map enumerable with primitives
-    std::map<int, int> objMap;
+    // Map with primitives
     f.primitiveMap[1] = 2;
     f.primitiveMap[2] = 4;
     f.primitiveMap[3] = 6;
     f.primitiveMap[4] = 8;
 
-    Crash();
+    // Set with primitives
+    f.primitiveSet.insert(1);
+    f.primitiveSet.insert(3);
+    f.primitiveSet.insert(2);
+
+    // List with objects
+    f.list.push_back(PODType(1, 2, 3));
+    f.list.push_back(PODType(4, 5, 6));
+    f.list.push_back(PODType(7, 8, 9));
+
+    int* crash = nullptr;
+    *crash = 42;
 }

@@ -24,6 +24,6 @@ to be improved. Below is a non-exhaustive list of those things:
 
 * Add support for treating strings as primitives.
 * Add support for treating bitfields using the `:` syntax as primitives.
+* Add support for `const` in the type parser.
 * Add support for recursion on `dt` to improve performances (Investigate)
-* Support type information for nested pointer types (i.e. `Ptr32 Ptr32 Void`)
 * Add example analyses that use DebugDiag.Native and documentation on the framework.

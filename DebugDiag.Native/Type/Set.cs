@@ -4,15 +4,13 @@ using System.Text.RegularExpressions;
 
 namespace DebugDiag.Native.Type
 {
-    public sealed class Map : Enumerable
+    public sealed class Set : Enumerable
     {
-        public static readonly Regex Syntax = new Regex(@"^std::map<(.*),(.*),.*,std::allocator<std::pair<.*> > >$");
-        // Keep a cached copy of the instances to avoid constantly querying the dump file.
+        public static readonly Regex Syntax = new Regex(@"^std::set<(.*),.*,std::allocator<.*> >$");
         private readonly List<NativeType> _elements = new List<NativeType>();
+
         private bool _built;
         private NativeType _head;
-
-        public NativeType KeyType { get; private set; }
 
         #region Type Implementation
 
@@ -21,7 +19,6 @@ namespace DebugDiag.Native.Type
             base.Rebase();
             Size = GetIntValue("_Mysize");
             _head = GetField("_Myhead");
-
         }
 
         public override IEnumerator<NativeType> GetEnumerator()
@@ -42,11 +39,11 @@ namespace DebugDiag.Native.Type
         /// </summary>
         /// <param name="node">One node in the tree.</param>
         /// <returns></returns>
-        private IEnumerable<Pair> EnumerateSubtree(dynamic node)
+        private IEnumerable<NativeType> EnumerateSubtree(dynamic node)
         {
             if (node.Address == _head.Address) yield break; // base case: leaf node
             yield return EnumerateSubtree(node._Left);
-            var e = new Pair { First = node._Myval.first, Second = node._Myval.second };
+            var e = node._Myval;
             _elements.Add(e);
             yield return e;
             yield return EnumerateSubtree(node._Right);
@@ -57,26 +54,24 @@ namespace DebugDiag.Native.Type
 
         protected override NativeInstance DeepCopy()
         {
-            return new Map(this);
+            return new Set(this);
         }
 
+        public Set(string typename)
+            : base(typename)
+        {
+        }
 
-        public Map(Map other)
+        public Set(Set other)
             : base(other)
         {
             _elements = other._elements;
         }
 
-        public Map(string typename)
-            : base(typename)
-        {
-        }
-
         internal override void OnCreateInstance(string typename, Match match)
         {
-            Debug.Assert(match.Groups.Count == 3, "Map expects 2 groups.");
-            KeyType = TypeParser.Parse(match.Groups[1].Value);
-            ValueType = TypeParser.Parse(match.Groups[2].Value);
+            Debug.Assert(match.Groups.Count == 2, "Set expects 1 group.");
+            ValueType = TypeParser.Parse(match.Groups[1].Value);
         }
 
         #endregion

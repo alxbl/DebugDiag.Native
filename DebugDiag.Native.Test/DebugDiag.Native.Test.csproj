@@ -54,6 +54,9 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Fixtures\Generator.cs" />
+    <Compile Include="Fixtures\Generators\List.cs" />
+    <Compile Include="Fixtures\Generators\PodType.cs" />
     <Compile Include="Fixtures\x86.cs" />
     <Compile Include="Mock\MockX86Dump.cs" />
     <Compile Include="TestList.cs" />

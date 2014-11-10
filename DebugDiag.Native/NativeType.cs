@@ -2,11 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Dynamic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using DebugDiag.Native.Type;
 using DebugDiag.Native.Windbg;
 
@@ -18,6 +14,11 @@ namespace DebugDiag.Native
     /// </summary>
     public class NativeType : NativeInstance
     {
+        #region Constants
+
+        public const ulong InvalidOffset = ulong.MaxValue;
+
+        #endregion
         #region Dynamic API
 
         /// <summary>
@@ -37,6 +38,7 @@ namespace DebugDiag.Native
 
         #endregion
         #region Type Information
+
         /// <summary>
         /// The module in which this type is defined.
         /// 
@@ -156,8 +158,8 @@ namespace DebugDiag.Native
         }
 
         #endregion
-
         #region Type Discovery
+
         /// <summary>
         /// Preloads the type information of the given type.
         /// 
@@ -182,6 +184,219 @@ namespace DebugDiag.Native
             CacheType(typeInfo.QualifiedName, typeInfo);
 
             return typeInfo;
+        }
+
+        /// <summary>
+        /// Attempts to retrieve a type located at the specified address.
+        /// 
+        /// This convenience method works on the assumption that the address pointed to is a virtual type and that it has a valid vtable pointer.
+        /// 
+        /// </summary>
+        /// <param name="addr">String representation of the address.</param>
+        /// <returns>An instance of native type at the given address</returns>
+        public static NativeType AtAddress(string addr)
+        {
+            if (string.IsNullOrEmpty(addr) || !Native.AddressFormat.IsMatch(addr)) throw new ArgumentException("Invalid memory location.");
+
+            return AtAddressInternal(addr, Native.StringAddrToUlong(addr));
+        }
+
+        public static NativeType AtAddress(ulong addr)
+        {
+            if (addr == 0) throw new ArgumentException("Invalid memory location.");
+            return AtAddressInternal(String.Format("0x{0:x}", addr), addr);
+        }
+
+        public static NativeType AtAddress(string addr, string type)
+        {
+            return AtAddressInternal(Native.StringAddrToUlong(addr), type);
+        }
+
+        /// <summary>
+        /// Attempts to parse the given address as the type specified as a parameter. 
+        /// 
+        /// This uses dbgeng.dll under the hood, so there is no way to validate if the parsed type is valid automatically.
+        /// This method is useful for dumping POD types that do not have a vtable, but has a drawback that the type being dumped must be known at runtime.
+        /// </summary>
+        /// <param name="addr">The address to inspect.</param>
+        /// <param name="type">The type name located at that address.</param>
+        /// <returns>An instance of NativeType.</returns>
+        public static NativeType AtAddress(ulong addr, string type)
+        {
+            if (string.IsNullOrEmpty(type)) throw new ArgumentException("Cannot lookup a null type. Use AtAddress(addr) for vtable lookup.");
+            return AtAddressInternal(addr, type);
+
+        }
+
+        public ulong GetOffset(string field)
+        {
+            return (_nameLookup.ContainsKey(field)) ? _nameLookup[field].Bytes : InvalidOffset;
+        }
+
+        public bool HasOffset(ulong offset)
+        {
+            return _offsetLookup.ContainsKey(offset);
+        }
+
+        #endregion
+        #region Private API
+
+        internal NativeType()
+        {
+            IsInstance = false; // When a default object is constructed, it is not an instance.
+        }
+
+        internal NativeType(string typename)
+        {
+            ParseTypeName(typename);
+        }
+
+        private static NativeType AtAddressInternal(ulong addrUlong, string type)
+        {
+            // Preload the type if it hasn't been encountered.
+            var typeInfo = Preload(type);
+            return typeInfo.RebaseAt(addrUlong);
+        }
+
+        private static NativeType AtAddressInternal(string addrStr, ulong addrUlong)
+        {
+            // Look for a vtable.
+            string vtable = Native.Context.Execute(String.Format("ln poi({0})", addrStr));
+
+            var matches = VtableFormat.Matches(vtable);
+            if (matches.Count == 0) return null; // No matching vtable.
+            Debug.Assert(matches.Count == 1); // There should never be more than one vtable for a given type.
+            Debug.Assert(matches[0].Groups.Count == 2); // Full match & typename
+            var s = matches[0].Groups[1].Value;
+
+            return AtAddressInternal(addrUlong, s);
+        }
+
+        /// <summary>
+        /// Checks that this type is instantiated, and throws an exception if it is not.
+        /// </summary>
+        private void CheckInstance()
+        {
+            if (!IsInstance) throw new InvalidOperationException("This method needs to be called on an instantiated type.");
+        }
+
+        private void ParseTypeName(string type)
+        {
+            if (type.Contains("!"))
+            {
+                var split = type.Split('!');
+                Debug.Assert(split.Length == 2, "A fully qualified name consists of two parts.");
+                ModuleName = split[0];
+                TypeName = split[1];
+            }
+            else // unknown module name.
+            {
+                ModuleName = "";
+                TypeName = type;
+            }
+        }
+
+        private static readonly Regex VtableFormat = new Regex(@" *([^ :]+)::`vftable'");
+
+        /// <summary>
+        /// The type instance's offset table, indexed by field name.
+        /// </summary>
+        private readonly IDictionary<string, Offset> _nameLookup = new Dictionary<string, Offset>();
+
+        /// <summary>
+        /// The type instance's offset table, indexed by field offset.
+        /// </summary>
+        private readonly IDictionary<ulong, Offset> _offsetLookup = new Dictionary<ulong, Offset>();
+
+        /// <summary>
+        /// The memory value at this instance's address. Useful for primitive types.
+        /// </summary>
+        private ulong _rawMem;
+
+        #region Type Instantiation
+
+        /// <summary>
+        /// Instantiates a type at a given base memory address. This creates a copy of the type tree
+        /// and initializes the type instance based on the memory starting at the provided address.
+        /// 
+        /// Offsets will be recomputed based on the new address, and type navigation methods will
+        /// work.
+        /// </summary>
+        /// <param name="addr"></param>
+        /// <returns></returns>
+        public NativeType RebaseAt(ulong addr)
+        {
+            Debug.Assert(!IsInstance, "Should not re-base an instance."); // Really?
+            // Rebase things.
+            var instance = (NativeType)DeepCopy();
+            instance.IsInstance = true;
+            instance.Address = addr;
+            instance.Rebase();
+            return instance;
+        }
+
+        /// <summary>
+        /// Rebase a generic native type with no special treatment.
+        /// 
+        /// For NativeType, this method runs a `dt` on the instance, and tries to parse primitive values into the type.
+        /// On top of that, it initializes the offset table addresses for this particular instance.
+        /// </summary>
+        protected override void Rebase()
+        {
+            var dt = new DumpType(QualifiedName, Address);
+            dt.Execute();
+
+            var first = true; // TODO: Remove when _rawMemory goes away.
+            foreach (var l in dt)
+            {
+                Debug.Assert(_offsetLookup.ContainsKey(l.Offset), "Type offset tables mismatched");
+                var o = _offsetLookup[l.Offset];
+                if (!o.IsStatic) o.Address = Address + o.Bytes; // Compute the absolute address of this offset unless it is static.
+
+                if (!l.IsBits) // Load the value into the primitive right away.
+                {
+                    o.RawMemory = Native.ParseWindbgPrimitive(l.Detail); // TODO: Remove RawMemory and instantiate primitive object
+                }
+
+                if (o.IsPointer)
+                {
+                    o.Instance = new Pointer(o.TypeName, o.RawMemory.GetValueOrDefault())
+                                 {
+                                     Address = Address + o.Bytes,
+                                     IsStatic = o.IsStatic,
+                                     IsInstance = true,
+                                     HasVtable = false,
+                                     _rawMem = o.RawMemory.GetValueOrDefault()
+                                 };
+                }
+
+                if (o.IsPrimitive)
+                {
+                    // If this offset is a primitive, then get its value while we rebase.
+                    o.Instance = new Primitive
+                                 {
+                                     Address = Address + o.Bytes,
+                                     IsStatic = o.IsStatic,
+                                     IsInstance = true,
+                                     TypeName = o.TypeName,
+                                     HasVtable = false,
+                                     _rawMem = o.RawMemory.GetValueOrDefault()
+                                 };
+                }
+
+                // TODO: Handle pointers, which also show their value in dt.
+                // Populate the raw memory if it is available at this stage.
+                // `dt` will list the raw memory of pointers and primitives, but not of objects.
+                if (first)
+                {
+                    _rawMem = o.RawMemory.HasValue ? o.RawMemory.Value : 0;
+                    first = false;
+                }
+                // Update the offset.
+                _offsetLookup[l.Offset] = o;
+                _nameLookup[l.Name] = o;
+            }
+
         }
 
         protected override void BuildOffsetTable(string type)
@@ -229,216 +444,6 @@ namespace DebugDiag.Native
         }
 
         /// <summary>
-        /// Attempts to retrieve a type located at the specified address.
-        /// 
-        /// This convenience method works on the assumption that the address pointed to is a virtual type and that it has a valid vtable pointer.
-        /// 
-        /// </summary>
-        /// <param name="addr">String representation of the address.</param>
-        /// <returns>An instance of native type at the given address</returns>
-        public static NativeType AtAddress(string addr)
-        {
-            if (string.IsNullOrEmpty(addr) || !Native.AddressFormat.IsMatch(addr)) throw new ArgumentException("Invalid memory location.");
-
-            return AtAddressInternal(addr, Native.StringAddrToUlong(addr));
-        }
-
-        public static NativeType AtAddress(ulong addr)
-        {
-            if (addr == 0) throw new ArgumentException("Invalid memory location.");
-            return AtAddressInternal(String.Format("0x{0:x}", addr), addr);
-        }
-
-        public static NativeType AtAddress(string addr, string type)
-        {
-            return AtAddressInternal(addr, Native.StringAddrToUlong(addr), type);
-        }
-
-        /// <summary>
-        /// Attempts to parse the given address as the type specified as a parameter. 
-        /// 
-        /// This uses dbgeng.dll under the hood, so there is no way to validate if the parsed type is valid automatically.
-        /// This method is useful for dumping POD types that do not have a vtable, but has a drawback that the type being dumped must be known at runtime.
-        /// </summary>
-        /// <param name="addr">The address to inspect.</param>
-        /// <param name="type">The type name located at that address.</param>
-        /// <returns>An instance of NativeType.</returns>
-        public static NativeType AtAddress(ulong addr, string type)
-        {
-            if (string.IsNullOrEmpty(type)) throw new ArgumentException("Cannot lookup a null type. Use AtAddress(addr) for vtable lookup.");
-            return AtAddressInternal(String.Format("0x{0:x}", addr), addr, type);
-            
-        }
-
-        private static NativeType AtAddressInternal(string addrStr, ulong addrUlong, string type)
-        {
-            // Preload the type if it hasn't been encountered.
-            var typeInfo = Preload(type);
-            return typeInfo.RebaseAt(addrUlong);
-        }
-
-
-        private static NativeType AtAddressInternal(string addrStr, ulong addrUlong)
-        {
-            // Look for a vtable.
-            string vtable = Native.Context.Execute(String.Format("ln poi({0})", addrStr));
-
-            var matches = _vtableFormat.Matches(vtable);
-            if (matches.Count == 0) return null; // No matching vtable.
-            Debug.Assert(matches.Count == 1); // There should never be more than one vtable for a given type.
-            Debug.Assert(matches[0].Groups.Count == 2); // Full match & typename
-            var s = matches[0].Groups[1].Value;
-
-            return AtAddressInternal(addrStr, addrUlong, s);
-        }
-
-        #endregion
-
-        #region Private API
-
-        internal NativeType()
-        {
-            IsInstance = false; // When a default object is constructed, it is not an instance.
-        }
-
-        internal NativeType(string typename)
-        {
-            ParseTypeName(typename);   
-        }
-
-        /// <summary>
-        /// Checks that this type is instantiated, and throws an exception if it is not.
-        /// </summary>
-        private void CheckInstance()
-        {
-            if (!IsInstance) throw new InvalidOperationException("This method needs to be called on an instantiated type.");
-        }
-
-        private void ParseTypeName(string type)
-        {
-            if (type.Contains("!"))
-            {
-                var split = type.Split('!');
-                Debug.Assert(split.Length == 2, "A fully qualified name consists of two parts.");
-                ModuleName = split[0];
-                TypeName = split[1];
-            }
-            else // unknown module name.
-            {
-                ModuleName = "";
-                TypeName = type;
-            }
-        }
-
-        private static readonly Regex _vtableFormat = new Regex(@" *([^ :]+)::`vftable'");
-
-        /// <summary>
-        /// The type instance's offset table, indexed by field name.
-        /// </summary>
-        private readonly IDictionary<string, Offset> _nameLookup = new Dictionary<string, Offset>();
-
-        /// <summary>
-        /// The type instance's offset table, indexed by field offset.
-        /// </summary>
-        private readonly IDictionary<ulong, Offset> _offsetLookup = new Dictionary<ulong, Offset>();
-
-        /// <summary>
-        /// The memory value at this instance's address. Useful for primitive types.
-        /// </summary>
-        private ulong _rawMem;
-
-        /// <summary>
-        /// The type of primitive this instance is.
-        /// </summary>
-        private Native.PrimitiveType _type;
-
-        #region Type Instantiation
-
-        /// <summary>
-        /// Instantiates a type at a given base memory address. This creates a copy of the type tree
-        /// and initializes the type instance based on the memory starting at the provided address.
-        /// 
-        /// Offsets will be recomputed based on the new address, and type navigation methods will
-        /// work.
-        /// </summary>
-        /// <param name="addr"></param>
-        /// <returns></returns>
-        public NativeType RebaseAt(ulong addr)
-        {
-            Debug.Assert(!IsInstance, "Should not re-base an instance."); // Really?
-            // Rebase things.
-            var instance = (NativeType)DeepCopy();
-            instance.IsInstance = true;
-            instance.Address = addr;
-            instance.Rebase();
-            return instance;
-        }
-
-        /// <summary>
-        /// Rebase a generic native type with no special treatment.
-        /// 
-        /// For NativeType, this method runs a `dt` on the instance, and tries to parse primitive values into the type.
-        /// On top of that, it initializes the offset table addresses for this particular instance.
-        /// </summary>
-        protected override void Rebase()
-        {
-            var dt = new DumpType(QualifiedName, Address);
-            dt.Execute();
-
-            var first = true; // TODO: Remove when _rawMemory goes away.
-            foreach (var l in dt)
-            {
-                Debug.Assert(_offsetLookup.ContainsKey(l.Offset), "Type offset tables mismatched");
-                var o = _offsetLookup[l.Offset];
-                if (!o.IsStatic) o.Address = Address + o.Bytes; // Compute the absolute address of this offset unless it is static.
-                
-                if (!l.IsBits) // Load the value into the primitive right away.
-                {
-                    o.RawMemory = Native.ParseWindbgPrimitive(l.Detail); // TODO: Remove RawMemory and instantiate primitive object
-                }
-
-                if (o.IsPointer)
-                {
-                    o.Instance = new Pointer(o.TypeName, o.RawMemory.GetValueOrDefault())
-                                 {
-                                     Address = Address + o.Bytes,
-                                     IsStatic = o.IsStatic,
-                                     IsInstance = true,
-                                     HasVtable = false,
-                                     _rawMem = o.RawMemory.GetValueOrDefault()
-                                 };
-                }
-
-                if (o.IsPrimitive)
-                {
-                    // If this offset is a primitive, then get its value while we rebase.
-                    o.Instance = new Primitive
-                                 {
-                                     Address = Address + o.Bytes, 
-                                     IsStatic = o.IsStatic,
-                                     IsInstance = true, 
-                                     TypeName = o.TypeName, 
-                                     HasVtable = false, 
-                                     _rawMem = o.RawMemory.GetValueOrDefault()
-                                 };
-                }
-                
-                // TODO: Handle pointers, which also show their value in dt.
-                // Populate the raw memory if it is available at this stage.
-                // `dt` will list the raw memory of pointers and primitives, but not of objects.
-                if (first)
-                {
-                    _rawMem = o.RawMemory.HasValue ? o.RawMemory.Value : 0;
-                    first = false;
-                }
-                // Update the offset.
-                _offsetLookup[l.Offset] = o;
-                _nameLookup[l.Name] = o;
-            }
-            
-        }
-
-        /// <summary>
         /// Returns the type instance at a given offset of this type.
         /// 
         /// If the native type at the given offset cannot be parsed, this method returns null.
@@ -457,6 +462,7 @@ namespace DebugDiag.Native
 
         #endregion
         #region Type Cache
+
         private static readonly IDictionary<string, NativeType> TypeCache = new Dictionary<string, NativeType>();
 
         private static NativeType TypeLookup(string type)
@@ -530,10 +536,11 @@ namespace DebugDiag.Native
                        };
             }
         }
-        #endregion
-        #endregion
 
+        #endregion
+        #endregion
         #region Copy
+
         protected override NativeInstance DeepCopy()
         {
             // Copy Type Information.
@@ -550,7 +557,6 @@ namespace DebugDiag.Native
             HasVtable = other.HasVtable;
             IsStatic = other.IsStatic;
             _rawMem = other._rawMem;
-            _type = other._type;
 
             // Copy offset tables.
             foreach (var o in other._nameLookup) _nameLookup.Add(o.Key, o.Value.DeepCopy());
@@ -558,10 +564,5 @@ namespace DebugDiag.Native
         }
 
         #endregion
-
-        public ulong GetOffset(string field)
-        {
-            return (_nameLookup.ContainsKey(field)) ? _nameLookup[field].Bytes : 0UL;
-        }
     }
 }

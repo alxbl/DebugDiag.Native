@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Runtime.InteropServices;
+﻿using System.Linq;
 using DebugDiag.Native.Test.Fixtures;
 using DebugDiag.Native.Test.Mock;
 using DebugDiag.Native.Type;
@@ -11,13 +9,13 @@ namespace DebugDiag.Native.Test
     [TestClass]
     public class TestVector
     {
-        private static readonly IDumpContext _context = new MockX86Dump();
+        private static readonly IDumpContext Context = new MockX86Dump();
         private static Vector _vector;
+
         [TestInitialize]
         public void Setup()
         {
-            TypeParser.RegisterUserType(Vector.Syntax, new Vector(X86.PtrVector));
-            Native.Initialize(_context);
+            Native.Initialize(Context);
             _vector = NativeType.AtAddress(X86.PtrVectorAddr, X86.PtrVector) as Vector;
             Assert.IsNotNull(_vector);
         }
@@ -27,9 +25,9 @@ namespace DebugDiag.Native.Test
         {
             var v = _vector;
             Assert.IsNotNull(v);
-            Assert.IsNotNull(v.ElementType);
-            Assert.AreEqual(X86.PtrVectorElementType, v.ElementType.TypeName);
-            Assert.IsInstanceOfType(v.ElementType, typeof (Pointer));
+            Assert.IsNotNull(v.ValueType);
+            Assert.AreEqual(X86.PtrVectorElementType, v.ValueType.TypeName);
+            Assert.IsInstanceOfType(v.ValueType, typeof (Pointer));
         }
 
         [TestMethod]
@@ -60,7 +58,11 @@ namespace DebugDiag.Native.Test
             
             ulong count = 0;
             // Support for LINQ on dynamic types is not implemented yet. Usually we will iterate with a foreach.
-            foreach (var e in v) count++;
+            foreach (var e in v)
+            {
+                Assert.IsNotNull(e);
+                count++;
+            }
             Assert.AreEqual(3UL, count);
         }
 

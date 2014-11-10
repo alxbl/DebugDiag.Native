@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using DebugDiag.Native.Test.Fixtures;
 using DebugDiag.Native.Test.Mock;
 using DebugDiag.Native.Type;
@@ -24,14 +23,14 @@ namespace DebugDiag.Native.Test
         [ExpectedException(typeof(CommandException))]
         public void TestPreloadInvalidTypeQualified()
         {
-            var t = NativeType.Preload("nt!InvalidDoNotExist");
+            NativeType.Preload("nt!InvalidDoNotExist");
         }
 
         [TestMethod]
         [ExpectedException(typeof(CommandException))]
         public void TestPreloadInvalidTypeUnqualified()
         {
-            var t = NativeType.Preload("InvalidDoNotExist");
+            NativeType.Preload("InvalidDoNotExist");
         }
 
         [TestMethod]
@@ -53,13 +52,13 @@ namespace DebugDiag.Native.Test
         public void TestNavigateNonInstance()
         {
             var t = NativeType.Preload("VirtualTypeDeriv");
-            var pod = t.GetField("POD");
+            t.GetField("POD");
         }
 
         [TestMethod]
         public void TestAddressFormat()
         {
-            var validFormats = new string[]
+            var validFormats = new[]
                                {
                                    "1234",
                                    "0x49beb8",
@@ -73,10 +72,10 @@ namespace DebugDiag.Native.Test
                                    "64006400`64006400",
                                    "0x64006400`64006400",
                                    "0n123",
-                                   "a",
+                                   "a"
 
                                };
-            var invalidFormats = new string[]
+            var invalidFormats = new[]
                                  {
                                      "0x",
                                      "0n",
@@ -85,7 +84,7 @@ namespace DebugDiag.Native.Test
                                      "0xgggggggg",
                                      "-1",
                                      "null",
-                                     "0n123a",
+                                     "0n123a"
                                  };
             foreach (var addr in validFormats) Assert.IsTrue(Native.AddressFormat.IsMatch(addr), "Adddress {0} should be valid.", addr);
 
@@ -124,7 +123,8 @@ namespace DebugDiag.Native.Test
         public void TestInvalidDynamicFieldAccess()
         {
             dynamic t = NativeType.AtAddress(X86.VtableAddrULong);
-            dynamic field = t.DoesNotExist;
+            var f = t.DoesNotExist;
+            Assert.IsNull(f);
         }
 
         [TestMethod]
@@ -184,8 +184,8 @@ namespace DebugDiag.Native.Test
         public void TestGetZeroOffsetPod()
         {
             // A POD's first member is located at offset 0x000 and can be anything.
-            var t = NativeType.AtAddress(X86.PodTypeAddr, "DebugDiag_Native_Test_App!PODType");
-            Assert.AreEqual("DebugDiag_Native_Test_App!PODType", t.QualifiedName);
+            var t = NativeType.AtAddress(X86.PodTypeAddr, "PODType");
+            Assert.AreEqual("PODType", t.QualifiedName);
             var field = t.GetField(0x0);
             Assert.IsTrue(field is Primitive);
             Assert.IsTrue(field.IsInstance);
@@ -293,33 +293,33 @@ namespace DebugDiag.Native.Test
         [TestMethod]
         public void TestAtAddressNoVtableAsString()
         {
-            var t = NativeType.AtAddress(X86.PodTypeAddr, "DebugDiag_Native_Test_App!PODType");
+            var t = NativeType.AtAddress(X86.PodTypeAddr, "PODType");
             Assert.AreEqual(X86.PodTypeAddrULong, t.Address);
             Assert.AreEqual("PODType", t.TypeName);
-            Assert.AreEqual("DebugDiag_Native_Test_App!PODType", t.QualifiedName);
+            Assert.AreEqual("PODType", t.QualifiedName);
         }
 
         [TestMethod]
         public void TestAtAddressNoVtableAsULong()
         {
-            var t = NativeType.AtAddress(X86.PodTypeAddrULong, "DebugDiag_Native_Test_App!PODType");
+            var t = NativeType.AtAddress(X86.PodTypeAddrULong, "PODType");
             Assert.AreEqual(X86.PodTypeAddrULong, t.Address);
             Assert.AreEqual("PODType", t.TypeName);
-            Assert.AreEqual("DebugDiag_Native_Test_App!PODType", t.QualifiedName);
+            Assert.AreEqual("PODType", t.QualifiedName);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
         public void TestAtAddressNull()
         {
-            var t = NativeType.AtAddress(0, null);
+            NativeType.AtAddress(0, null);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
         public void TestAtAddressInvalid()
         {
-            var t = NativeType.AtAddress("notAnAddress");
+            NativeType.AtAddress("notAnAddress");
         }
 
         [TestMethod]
@@ -354,14 +354,16 @@ namespace DebugDiag.Native.Test
             Assert.AreEqual(3UL, f.GetIntValue());
         }
 
-        [TestMethod]
-        public void TestStaticInDifferentModules()
-        {
-            Assert.Fail("Not Implemented");
+        // TODO: Enable this test and implement it.
+        // Low priority since the same type shouldn't have different static values across module boundaries.
+        //[TestMethod]
+        //public void TestStaticInDifferentModules()
+        //{
+            // Assert.Fail("Not Implemented");
             // A static member can have different values in different modules.
             // This is a disgusting case, but it needs to be handled properly.
             // The idea is that internally we want to always use the fully qualified type.
-        }
+        //}
 
         [TestMethod]
         public void TestDrillDownSubtypes()

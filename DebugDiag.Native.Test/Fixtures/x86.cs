@@ -321,6 +321,82 @@ Symbol InvalidDoNotExist not found.";
         public const string Dp2 = "005bd3e8  005bd398";
         public const string DpInvalid = "00000000  ????????";
         #endregion
+
+        #region List
+
+        public const string ListAddr = "0x27fe50";
+        public const string List = "std::list<PODType,std::allocator<PODType> >";
+        public const string DtListInst = @"   +0x000 _Myproxy         : 0x0028d770 std::_Container_proxy
+   +0x004 _Myhead          : 0x0028d720 std::_List_node<PODType,void *>
+   +0x008 _Mysize          : 3";
+        public const string DtList = @"   +0x000 _Myproxy         : Ptr32 std::_Container_proxy
+   +0x004 _Myhead          : Ptr32 std::_List_node<PODType,void *>
+   +0x008 _Mysize          : Uint4B";
+        public const string DtListNode = @"   +0x000 _Next            : Ptr32 std::_List_node<PODType,void *>
+   +0x004 _Prev            : Ptr32 std::_List_node<PODType,void *>
+   +0x008 _Myval           : PODType";
+        // dt 0x0028d720 std::_List_node<PODType,void *>
+        public const string ListHeadAddr = "0x28d720";
+        public const string DtListHead = @"   +0x000 _Next            : 0x0028daf0 std::_List_node<PODType,void *>
+   +0x004 _Prev            : 0x0028db90 std::_List_node<PODType,void *>
+   +0x008 _Myval           : PODType";
+        // dt 0x0028daf0 std::_List_node<PODType,void *>
+        public const string DtListNode1 = @"   +0x000 _Next            : 0x0028db40 std::_List_node<PODType,void *>
+   +0x004 _Prev            : 0x0028d720 std::_List_node<PODType,void *>
+   +0x008 _Myval           : PODType";
+        // 0:000> dt 0x0028daf8 PODType
+        public const string DtListElem1 = @"   +0x000 Offset1          : 0n1
+   +0x004 Offset2          : 0n1
+   +0x008 Offset3          : 0n1";
+        // 0:000> dt 0x0028db40 std::_List_node<PODType,void *>
+        public const string DtListNode2 = @"   +0x000 _Next            : 0x0028db90 std::_List_node<PODType,void *>
+   +0x004 _Prev            : 0x0028daf0 std::_List_node<PODType,void *>
+   +0x008 _Myval           : PODType";
+        // 0:000> dt 0x0028db48 PODType
+        public const string DtListElem2 = @"   +0x000 Offset1          : 0n2
+   +0x004 Offset2          : 0n2
+   +0x008 Offset3          : 0n2";
+        // 0:000> dt 0x0028db90 std::_List_node<PODType,void *>
+        public const string DtListNode3 = @"   +0x000 _Next            : 0x0028d720 std::_List_node<PODType,void *>
+   +0x004 _Prev            : 0x0028db40 std::_List_node<PODType,void *>
+   +0x008 _Myval           : PODType";
+        // 0:000> dt 0x0028db98 PODType
+        public const string DtListElem3 = @"   +0x000 Offset1          : 0n3
+   +0x004 Offset2          : 0n3
+   +0x008 Offset3          : 0n3";
+        #endregion
+        #region Map
+
+        public const string Map = "std::map<int,int,std::less<int>,std::allocator<std::pair<int const ,int> > >";
+        public const string MapAddr = "0x27fe44";
+        //0:000> dt 0 std::map<int,int,std::less<int>,std::allocator<std::pair<int const ,int> > >
+        public const string DtMap = @"+0x000 _Myproxy         : Ptr32 std::_Container_proxy
+   +0x004 _Myhead          : Ptr32 std::_Tree_node<std::pair<int const ,int>,void *>
+   +0x008 _Mysize          : Uint4B";
+        //0:000> dt 0 std::pair<int const ,int>
+        public const string DtIntPair = @"   +0x000 first            : Int4B
+   +0x004 second           : Int4B";
+        //0:000> dt 0x27fe44 std::map<int,int,std::less<int>,std::allocator<std::pair<int const ,int> > >
+        public const string DtMapInst = @"   +0x000 _Myproxy         : 0x0028d6d8 std::_Container_proxy
+   +0x004 _Myhead          : 0x0028d680 std::_Tree_node<std::pair<int const ,int>,void *>
+   +0x008 _Mysize          : 4";
+        //0:000> dt 0x0028d680 std::_Tree_node<std::pair<int const ,int>,void *>
+        public const string DtMapHead =
+            @"   +0x000 _Left            : 0x0028d990 std::_Tree_node<std::pair<int const ,int>,void *>
+   +0x004 _Parent          : 0x0028d9e8 std::_Tree_node<std::pair<int const ,int>,void *>
+   +0x008 _Right           : 0x0028da98 std::_Tree_node<std::pair<int const ,int>,void *>
+   +0x00c _Color           : 1 ''
+   +0x00d _Isnil           : 1 ''
+   +0x010 _Myval           : std::pair<int const ,int>";
+// 0:000> dt 0x0028da98 std::_Tree_node<std::pair<int const ,int>,void *>
+        public const string DtMapHeadLeft =
+            @"   +0x000 _Left            : 0x0028d680 std::_Tree_node<std::pair<int const ,int>,void *>
+   +0x004 _Parent          : 0x0028da40 std::_Tree_node<std::pair<int const ,int>,void *>
+   +0x008 _Right           : 0x0028d680 std::_Tree_node<std::pair<int const ,int>,void *>
+   +0x00c _Color           : 0 ''
+   +0x00d _Isnil           : 0 ''
+   +0x010 _Myval           : std::pair<int const ,int>";
+
+        #endregion
     }
 }
-

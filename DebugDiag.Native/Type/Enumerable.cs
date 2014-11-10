@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DebugDiag.Native.Type
 {
@@ -13,6 +9,7 @@ namespace DebugDiag.Native.Type
     public abstract class Enumerable : UserType, IEnumerable<NativeType>
     {
         #region Public API
+
         /// <summary>
         /// The number of objects in this enumerable type.
         /// </summary>
@@ -21,27 +18,30 @@ namespace DebugDiag.Native.Type
         /// <summary>
         /// The type of object contained in this enumerable type.
         /// </summary>
-        public NativeType ElementType { get; internal set; }
-        #endregion
+        public NativeType ValueType { get; internal set; }
 
+        #endregion
         #region Enumerable Interface
+
         public abstract IEnumerator<NativeType> GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
         }
-        #endregion
 
+        #endregion
         #region Constructor
+
         protected Enumerable(string typename) : base(typename) { }
 
         protected Enumerable(Enumerable other)
             : base(other)
         {
             Size = other.Size;
-            ElementType = other.ElementType;
+            ValueType = other.ValueType;
         }
+
         #endregion
     }
 }

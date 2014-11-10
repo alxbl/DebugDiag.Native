@@ -32,6 +32,7 @@ namespace DebugDiag.Native.Test
             var c = new DumpType("HasAStaticField");
             Assert.IsFalse(c.Executed);
             var output = c.Output; // This causes the command to execute.
+            Assert.IsNotNull(output);
             Assert.IsTrue(c.Executed);
             Assert.IsNotNull(c.Output);
             Assert.IsTrue(c.Output.Contains("+0x000"));

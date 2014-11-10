@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace DebugDiag.Native.Type
 {
@@ -84,13 +79,13 @@ namespace DebugDiag.Native.Type
             {
                 var pattern = ut.Key;
                 var typeInfo = ut.Value;
-                
+
                 if (!pattern.IsMatch(typename)) continue;
 
                 UserType instance = null;
-                var cons = typeInfo.GetConstructor(new [] {typeof(string)});
+                var cons = typeInfo.GetConstructor(new[] { typeof(string) });
                 if (cons != null)
-                    instance = cons.Invoke(new object[] {typename}) as UserType;
+                    instance = cons.Invoke(new object[] { typename }) as UserType;
 
                 if (instance != null)
                 {

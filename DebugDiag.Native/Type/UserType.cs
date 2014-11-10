@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
 
 namespace DebugDiag.Native.Type
 {
@@ -24,14 +19,17 @@ namespace DebugDiag.Native.Type
         internal abstract void OnCreateInstance(string typename, Match match);
 
         #region Constructor
-        protected UserType(string typename) : base (typename)
-        {   
+
+        protected UserType(string typename)
+            : base(typename)
+        {
         }
 
         protected UserType(NativeType other)
             : base(other)
         {
         }
+
         #endregion
     }
 }

@@ -3,8 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DebugDiag.Native.Windbg
 {
@@ -49,15 +47,17 @@ namespace DebugDiag.Native.Windbg
         }
 
         #region IEnumerable
+
         public IEnumerator<ulong> GetEnumerator()
         {
-            return ((IEnumerable<ulong>) _memory).GetEnumerator();
+            return ((IEnumerable<ulong>)_memory).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
         }
+
         #endregion
     }
 }

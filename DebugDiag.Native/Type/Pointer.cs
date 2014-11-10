@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DebugDiag.Native.Windbg;
+﻿using DebugDiag.Native.Windbg;
 
 namespace DebugDiag.Native.Type
 {
@@ -13,7 +8,7 @@ namespace DebugDiag.Native.Type
     /// Calling investigation methods on the pointer will automatically forward the methods
     /// to the pointed-to instance, thereby implicitly dereferencing the type.
     /// </summary>
-    public class Pointer : NativeType
+    public sealed class Pointer : NativeType
     {
         private ulong _pointsTo; // The address to use when re-basing this pointer.
 
@@ -27,22 +22,12 @@ namespace DebugDiag.Native.Type
         /// </summary>
         public NativeType Dereference { get; private set; }
 
-        public Pointer(string typename, ulong pointsTo)
-            : this(typename)
-        {
-            _pointsTo = pointsTo;
-        }
-        public Pointer(string typename)
-            : base(StandardizePointerType(typename))
-        {
-            // Use the standardized pointer type.
-            PointedType = TypeParser.Parse(TypeName.Substring(0, TypeName.Length - 1).TrimEnd());
-        }
+        #region Type Implementation
 
         public override NativeType GetField(string name)
         {
             // If this pointer was created directly from a Rebase(), we need to inspect the pointed type.
-            if (Dereference == null) Dereference = NativeType.AtAddress(_pointsTo, PointedType.QualifiedName);
+            if (Dereference == null) Dereference = AtAddress(_pointsTo, PointedType.QualifiedName);
             return Dereference.GetField(name);
         }
 
@@ -54,7 +39,7 @@ namespace DebugDiag.Native.Type
         protected override void Rebase()
         {
             // We don't call base.Rebase() because a pointer is a (special) primitive.
-            
+
             var dp = new Dp(Address, 1);
             _pointsTo = dp.BytesAt(0);
 
@@ -93,17 +78,33 @@ namespace DebugDiag.Native.Type
             return std;
         }
 
-        #region Copy
+        #endregion
+        #region Constructor
+
         protected override NativeInstance DeepCopy()
         {
             return new Pointer(this);
         }
 
-        protected Pointer(Pointer other)
+        private Pointer(Pointer other)
             : base(other)
         {
             PointedType = other.PointedType;
         }
+
+        public Pointer(string typename)
+            : base(StandardizePointerType(typename))
+        {
+            // Use the standardized pointer type.
+            PointedType = TypeParser.Parse(TypeName.Substring(0, TypeName.Length - 1).TrimEnd());
+        }
+
+        public Pointer(string typename, ulong pointsTo)
+            : this(typename)
+        {
+            _pointsTo = pointsTo;
+        }
+
         #endregion
     }
 }
