@@ -54,13 +54,13 @@ namespace DebugDiag.Native.Test
         [TestMethod]
         public void TestDp32Bits()
         {
-            Assert.Fail("Not implemented");
+            Assert.Inconclusive("Not implemented.");
         }
 
         [TestMethod]
         public void TestDp64Bits()
         {
-            Assert.Fail("Not implemented");
+            Assert.Inconclusive("Not implemented.");
         }
 
         [TestMethod]

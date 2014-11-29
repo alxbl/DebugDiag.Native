@@ -69,7 +69,7 @@ namespace DebugDiag.Native.Test
         [TestMethod]
         public void TestEmptyList()
         {
-            Assert.Fail("Not implemented");
+            Assert.Inconclusive("Not implemented.");
         }
     }
 }

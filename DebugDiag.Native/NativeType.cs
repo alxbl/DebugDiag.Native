@@ -118,7 +118,7 @@ namespace DebugDiag.Native
         public override ulong GetIntValue()
         {
             CheckInstance();
-            return _rawMem;
+            throw new InvalidOperationException("Cannot Retrieve Integer Value of non-primitive.");
         }
 
         /// <summary>
@@ -346,52 +346,22 @@ namespace DebugDiag.Native
             var dt = new DumpType(QualifiedName, Address);
             dt.Execute();
 
-            var first = true; // TODO: Remove when _rawMemory goes away.
             foreach (var l in dt)
             {
                 Debug.Assert(_offsetLookup.ContainsKey(l.Offset), "Type offset tables mismatched");
                 var o = _offsetLookup[l.Offset];
                 if (!o.IsStatic) o.Address = Address + o.Bytes; // Compute the absolute address of this offset unless it is static.
 
-                if (!l.IsBits) // Load the value into the primitive right away.
+                // Retrieve the instance value of primitive fields.
+                if (o.IsPrimitive && !l.IsBits)
                 {
-                    o.RawMemory = Native.ParseWindbgPrimitive(l.Detail); // TODO: Remove RawMemory and instantiate primitive object
+                    o.Instance = TypeParser.Parse(l, o.TypeName, /* isInstance: */ true);
+                    o.Instance.IsInstance = true;
+                    o.Instance.IsStatic = o.IsStatic;
+                    o.Instance.Address = Address + o.Bytes;
+                    o.Instance.HasVtable = false;
                 }
 
-                if (o.IsPointer)
-                {
-                    o.Instance = new Pointer(o.TypeName, o.RawMemory.GetValueOrDefault())
-                                 {
-                                     Address = Address + o.Bytes,
-                                     IsStatic = o.IsStatic,
-                                     IsInstance = true,
-                                     HasVtable = false,
-                                     _rawMem = o.RawMemory.GetValueOrDefault()
-                                 };
-                }
-
-                if (o.IsPrimitive)
-                {
-                    // If this offset is a primitive, then get its value while we rebase.
-                    o.Instance = new Primitive
-                                 {
-                                     Address = Address + o.Bytes,
-                                     IsStatic = o.IsStatic,
-                                     IsInstance = true,
-                                     TypeName = o.TypeName,
-                                     HasVtable = false,
-                                     _rawMem = o.RawMemory.GetValueOrDefault()
-                                 };
-                }
-
-                // TODO: Handle pointers, which also show their value in dt.
-                // Populate the raw memory if it is available at this stage.
-                // `dt` will list the raw memory of pointers and primitives, but not of objects.
-                if (first)
-                {
-                    _rawMem = o.RawMemory.HasValue ? o.RawMemory.Value : 0;
-                    first = false;
-                }
                 // Update the offset.
                 _offsetLookup[l.Offset] = o;
                 _nameLookup[l.Name] = o;
@@ -419,7 +389,9 @@ namespace DebugDiag.Native
                 string name = (line.Name == "__VFN_table") ? line.Name + vtableCount++ : line.Name;
 
                 // TODO: Possible optimization store this stub in the cache and lazily inspect it to avoid double parsing.
-                var fieldInfo = TypeParser.Parse(line.Detail); // We know value here is the type.
+                // When building the offset table, there is no instance information available so we tell the parser not
+                // to bother with instance information.
+                var fieldInfo = TypeParser.Parse(line, line.Detail, /*isInstance:*/ false);
 
                 var offset = new Offset
                              {
@@ -427,9 +399,8 @@ namespace DebugDiag.Native
                                  Address = line.IsStatic ? line.Offset : 0,
                                  Bytes = line.Offset,
                                  Instance = null,
-                                 TypeName = line.Detail,
-                                 IsPrimitive = (fieldInfo is Primitive),
-                                 IsPointer = (fieldInfo is Pointer),
+                                 TypeName = fieldInfo.TypeName,
+                                 IsPrimitive = (fieldInfo is Primitive || fieldInfo is Pointer),
                                  IsStatic = line.IsStatic
                              };
 
@@ -473,68 +444,6 @@ namespace DebugDiag.Native
         private static void CacheType(string type, NativeType typeInfo)
         {
             TypeCache[type] = typeInfo;
-        }
-
-        /// <summary>
-        /// Represents a type's field at a specific offset. Internal structure used to navigate instances.
-        /// </summary>
-        private class Offset
-        {
-            /// <summary>
-            /// Absolute address of this instance.
-            /// </summary>
-            public ulong Address { get; internal set; }
-
-            /// <summary>
-            /// Offset bytes from the base address.
-            /// </summary>
-            public ulong Bytes { get; internal set; }
-
-            /// <summary>
-            /// The name (fully qualified if possible) of the type at this offset.
-            /// </summary>
-            public string TypeName { get; internal set; }
-
-            /// <summary>
-            /// The sub-instance, if it has been inspected.
-            /// </summary>
-            public NativeType Instance { get; internal set; }
-
-            /// <summary>
-            /// The raw memory value at that offset (for primitive types)
-            /// </summary>
-            public ulong? RawMemory { get; internal set; }
-
-            /// <summary>
-            /// Whether this "offset" represents a static type.
-            /// 
-            /// When this is true, RawMemory is null and Bytes is equal to Address 
-            /// since the offset really points to an arbitrary memory location.
-            /// </summary>
-            public bool IsStatic { get; internal set; }
-
-            /// <summary>
-            /// Whether this offset deals with a primitive type.
-            /// </summary>
-            public bool IsPrimitive { get; internal set; }
-
-            /// <summary>
-            /// Whether this offset deals with a pointer type.
-            /// </summary>
-            public bool IsPointer { get; internal set; }
-
-            public Offset DeepCopy()
-            {
-                return new Offset
-                       {
-                           Bytes = Bytes,
-                           TypeName = TypeName,
-                           Instance = null, // Don't copy the instance data over.
-                           IsStatic = IsStatic,
-                           IsPrimitive = IsPrimitive,
-                           IsPointer = IsPointer
-                       };
-            }
         }
 
         #endregion

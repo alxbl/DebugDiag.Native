@@ -128,13 +128,15 @@ namespace DebugDiag.Native.Test
         }
 
         [TestMethod]
-        public void TestGetPrimitiveWhenInstance()
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void TestGetPrimitiveWhenNotPrimitive()
         {
-            // WARN: This will return the raw memory at the type's root.
+            // WARN: This is not not supported
+            // Consider using a windbg command.
             var t = NativeType.AtAddress(X86.VtableAddrULong);
             //var field = t.GetField(0x14);
             Assert.IsFalse(t is Primitive);
-            Assert.AreEqual(0x0114cc84UL, t.GetIntValue()); // vtable address.
+            t.GetIntValue();
         }
 
         [TestMethod]
@@ -176,7 +178,6 @@ namespace DebugDiag.Native.Test
             Assert.IsTrue(field is Pointer); // Change to Vtable once Vtable support is added.
             Assert.IsTrue(field.IsInstance);
             Assert.AreEqual("`vftable' *", field.QualifiedName);
-            Assert.AreEqual(0x0114cc84UL, field.GetIntValue());
             // TODO: It should be possible to inspect the vtable.
         }
 
@@ -252,12 +253,6 @@ namespace DebugDiag.Native.Test
         }
 
         [TestMethod]
-        public void TestStringToULongWindbgNull()
-        {
-            Assert.AreEqual(0UL, Native.ParseWindbgPrimitive("(null)"));
-        }
-
-                [TestMethod]
         public void TestAtAddressVtableAsString()
         {
             var t = NativeType.AtAddress(X86.VtableAddr);
@@ -341,7 +336,7 @@ namespace DebugDiag.Native.Test
         [TestMethod]
         public void TestParseCorruptedVtableType()
         {
-            Assert.Fail("Not implemented");
+            Assert.Inconclusive("Not implemented.");
         }
 
         [TestMethod]
@@ -359,10 +354,10 @@ namespace DebugDiag.Native.Test
         //[TestMethod]
         //public void TestStaticInDifferentModules()
         //{
-            // Assert.Fail("Not Implemented");
-            // A static member can have different values in different modules.
-            // This is a disgusting case, but it needs to be handled properly.
-            // The idea is that internally we want to always use the fully qualified type.
+        // Assert.Inconclusive("Not implemented.");
+        // A static member can have different values in different modules.
+        // This is a disgusting case, but it needs to be handled properly.
+        // The idea is that internally we want to always use the fully qualified type.
         //}
 
         [TestMethod]
@@ -377,7 +372,7 @@ namespace DebugDiag.Native.Test
             Assert.IsFalse(virtualType.IsStatic);
             Assert.IsTrue(virtualType.IsInstance);
             Assert.AreEqual("VirtualTypeDeriv", virtualType.TypeName);
-            
+
             // Drill into the VirtualType's PODType instance. 
             var podType = virtualType.GetField("PODObject");
             Assert.IsFalse(podType is Primitive);
@@ -389,7 +384,7 @@ namespace DebugDiag.Native.Test
             var offset1 = podType.GetField(0x000);
             Assert.AreNotSame(podType, offset1);
             // This will work because PODType has no vtable.
-            Assert.AreEqual(42UL, offset1.GetIntValue()); 
+            Assert.AreEqual(42UL, offset1.GetIntValue());
         }
 
         [TestMethod]
@@ -405,31 +400,31 @@ namespace DebugDiag.Native.Test
         [TestMethod]
         public void TestGetPrimitiveString()
         {
-            Assert.Fail("Not Implemented");
+            Assert.Inconclusive("Not implemented.");
         }
 
         [TestMethod]
         public void TestCastPrimitiveToInteger()
         {
-            Assert.Fail("Not implemented");
+            Assert.Inconclusive("Not implemented.");
         }
 
         [TestMethod]
         public void TestCastPrimitiveToString()
         {
-            Assert.Fail("Not implemented");
+            Assert.Inconclusive("Not implemented.");
         }
 
         [TestMethod]
         public void TestCastNonPrimitiveToInteger()
         {
-            Assert.Fail("Not implemented");
+            Assert.Inconclusive("Not implemented.");
         }
 
         [TestMethod]
         public void TestCastNonPrimitiveToString()
         {
-            Assert.Fail("Not implemented");
+            Assert.Inconclusive("Not implemented.");
         }
     }
 }

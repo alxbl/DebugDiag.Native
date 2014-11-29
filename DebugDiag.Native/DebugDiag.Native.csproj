@@ -63,15 +63,16 @@
   <ItemGroup>
     <Compile Include="DumpContext.cs" />
     <Compile Include="NativeInstance.cs" />
+    <Compile Include="Type\Offset.cs" />
     <Compile Include="Type\Enumerable.cs" />
     <Compile Include="Type\List.cs" />
     <Compile Include="Type\Map.cs" />
     <Compile Include="Type\Pair.cs" />
+    <Compile Include="Type\Parser.cs" />
     <Compile Include="Type\Pointer.cs" />
     <Compile Include="Type\Primitive.cs" />
     <Compile Include="Type\Set.cs" />
     <Compile Include="Type\String.cs" />
-    <Compile Include="Type\TypeParser.cs" />
     <Compile Include="Type\UserType.cs" />
     <Compile Include="Type\Vector.cs" />
     <Compile Include="Windbg\Command.cs" />

@@ -8,19 +8,19 @@ namespace DebugDiag.Native.Test
         [TestMethod]
         public void TestPointToPrimitive()
         {
-            Assert.Fail("Not implemented");
+            Assert.Inconclusive("Not implemented.");
         }
 
         [TestMethod]
         public void TestPointToNull()
         {
-            Assert.Fail("Not implemented");
+            Assert.Inconclusive("Not implemented.");
         }
 
         [TestMethod]
         public void TestPointToPointer()
         {
-            Assert.Fail("Not implemented");
+            Assert.Inconclusive("Not implemented.");
         }
     }
 }

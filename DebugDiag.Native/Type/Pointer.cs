@@ -27,13 +27,19 @@ namespace DebugDiag.Native.Type
         public override NativeType GetField(string name)
         {
             // If this pointer was created directly from a Rebase(), we need to inspect the pointed type.
-            if (Dereference == null) Dereference = AtAddress(PointsTo, PointedType.QualifiedName);
+            LazyDereference();
             return Dereference.GetField(name);
         }
 
         public override NativeType GetField(ulong offset)
         {
             return Dereference.GetField(offset);
+        }
+
+        public override ulong GetIntValue()
+        {
+            LazyDereference();
+            return Dereference != null ? Dereference.GetIntValue() : 0;
         }
 
         protected override void Rebase()
@@ -76,6 +82,14 @@ namespace DebugDiag.Native.Type
                 std += (std.EndsWith(" *")) ? "*" : " *";
             }
             return std;
+        }
+
+        /// <summary>
+        /// Will inspect the memory pointer to by the pointer if it hasn't yet been dereferenced.
+        /// </summary>
+        private void LazyDereference()
+        {
+            if (Dereference == null) Dereference = AtAddress(PointsTo, PointedType.QualifiedName);
         }
 
         #endregion

@@ -139,27 +139,5 @@ namespace DebugDiag.Native
                 throw new ArgumentException(string.Format("Cannot parse address `{0}`:\n{1}", addr, x), x);
             }
         }
-
-        /// <summary>
-        /// Parses a windbg primitive value type and attempts to extract the raw value.
-        /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        public static ulong? ParseWindbgPrimitive(string value)
-        {
-            if (string.IsNullOrWhiteSpace(value)) return null;
-            if (value.Equals("(null)")) return 0;
-            // HACK: This method will be removed once primitives are parsed as objects and no longer rely on RawMemory for their value.
-            // In the mean time, split the value at the first space and take everything before that to prevent the "parser" from breaking
-            // due to compound type support.
-            try
-            {
-                return StringAddrToUlong(value.Split(' ')[0]); 
-            }
-            catch (ArgumentException)
-            {
-                return null;
-            }
-        }
     }
 }

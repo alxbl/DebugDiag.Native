@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using DebugDiag.Native.Windbg;
 
 namespace DebugDiag.Native.Type
 {
@@ -11,11 +13,23 @@ namespace DebugDiag.Native.Type
     /// </summary>
     public static class TypeParser
     {
-        private static readonly Dictionary<Regex, System.Type> RegisteredUserTypes = new Dictionary<Regex, System.Type>();
+        /// <summary>
+        /// Decomposes a complex type into its type tree.
+        /// </summary>
+        /// <param name="typename">The string representing the type.</param>
+        /// <returns>The root of the type tree</returns>
+        public static NativeType Parse(string typename)
+        {
+            return Parse(null, typename, false);
+        }
 
+
+        #region User Type Extensibility
+
+        private static readonly Dictionary<Regex, System.Type> RegisteredUserTypes = new Dictionary<Regex, System.Type>();
         /// <summary>
         /// Adds a user type to the type parser. When parsing a type, the parser will try to match the typename
-        /// against each type in its registered user types. If a match is found, the type parser will create an instance
+        /// against each type in its registered user types. If a match is found, the type parser will create an dt
         /// of that user type and return it.
         /// </summary>
         /// <typeparam name="T">Restricts this method to be called with types that extend UserType.</typeparam>
@@ -27,26 +41,41 @@ namespace DebugDiag.Native.Type
             RegisteredUserTypes[pattern] = type.GetType();
         }
 
-        public static NativeType Parse(string typename)
+        #endregion
+        #region Private API
+
+        /// <summary>
+        /// Decomposes a complex type into its type tree.
+        /// 
+        /// This overload also makes the distinction between whether it is parsing an instance of a type, or simply a type.
+        /// When parsing an instance of a type, it will properly create primitives.
+        /// 
+        /// This function is only called internally.
+        /// 
+        /// TODO: FIXME: It should be clear from the API when to call Parse() with isInstance = true;
+        /// </summary>
+        /// <param name="dt">The `dt` output for this member</param>
+        /// <param name="typename"></param>
+        /// <param name="isInstance"></param>
+        /// <returns></returns>
+        internal static NativeType Parse(DumpType.Line? dt, string typename, bool isInstance)
         {
             var unqualifiedType = (typename.Contains("!")) ? typename.Split('!')[1] : typename; // Ignore module name.
 
             NativeType type = null;
 
             // In order of priority.
-            if (unqualifiedType.StartsWith("Ptr32") || unqualifiedType.StartsWith("Ptr64")) // Pointer: windbg style pointers.
+            // TODO: Let char* and wchar_t* pass through to Primitive handling.
+            if (unqualifiedType.StartsWith("Ptr32") || unqualifiedType.StartsWith("Ptr64") || unqualifiedType.EndsWith("*")) // Pointer
             {
                 // TODO: Allow Vtable inspection.
-                type = new Pointer(typename);
-            }
-            else if (unqualifiedType.EndsWith("*")) // Pointer: C++ style pointers.
-            {
-                type = new Pointer(typename);
+                type = dt.HasValue && isInstance ? 
+                    new Pointer(typename, Primitive.ParseWindbgPrimitive(dt.Value.Detail).GetValueOrDefault()) // Instantiate the pointer when possible
+                    : new Pointer(typename);
             }
             else if (IsPrimitive(unqualifiedType)) // Primitive: Create the matching primitive type.
             {
-                // Template black magic here?
-                type = new Primitive();
+                type = Primitive.CreatePrimitive(typename, dt, isInstance);
             }
             else if (IsUserType(unqualifiedType, ref type)) // User-types: Let the extension handle creation.
             {
@@ -96,5 +125,7 @@ namespace DebugDiag.Native.Type
             }
             return false; // No matching user type found.
         }
+
+        #endregion
     }
 }

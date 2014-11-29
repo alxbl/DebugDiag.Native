@@ -50,9 +50,19 @@ namespace DebugDiag.Native.Type
         protected override void Rebase()
         {
             base.Rebase(); // Let NativeType identify the vector's members.
-            _first = GetIntValue("_Myfirst");
-            _last = GetIntValue("_Mylast");
-            _end = GetIntValue("_Myend");
+
+            var first = GetField("_Myfirst") as Pointer;
+            Debug.Assert(first != null, "Vector cannot have null _Myfirst");
+
+            var last = GetField("_Mylast") as Pointer;
+            Debug.Assert(last != null, "Vector cannot have null _Mylast");
+
+            var end = GetField("_Myend") as Pointer;
+            Debug.Assert(end != null, "Vector cannot have null _Myend");
+
+            _first = first.PointsTo;
+            _last = last.PointsTo;
+            _end = end.PointsTo;
 
             var size = new SizeOf(ValueType.TypeName);
             _elementSize = size.Size; // Implicit  size.Execute();

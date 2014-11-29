@@ -40,7 +40,7 @@ namespace DebugDiag.Native.Test
         [TestMethod]
         public void TestVectorEmpty()
         {
-            Assert.Fail("Not implemented");
+            Assert.Inconclusive("Not implemented.");
         }
 
         [TestMethod]
