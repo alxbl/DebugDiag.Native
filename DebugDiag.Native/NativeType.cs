@@ -60,7 +60,7 @@ namespace DebugDiag.Native
         {
             get
             {
-                return !String.IsNullOrEmpty(ModuleName) ? String.Format("{0}!{1}", ModuleName, TypeName) : TypeName;
+                return !string.IsNullOrEmpty(ModuleName) ? string.Format("{0}!{1}", ModuleName, TypeName) : TypeName;
             }
         }
 
@@ -89,7 +89,7 @@ namespace DebugDiag.Native
             CheckInstance();
 
             if (string.IsNullOrEmpty(name) || !_nameLookup.ContainsKey(name))
-                throw new ArgumentOutOfRangeException(String.Format("The field `{0}` does not exist in type `{1}`", name, QualifiedName));
+                throw new ArgumentOutOfRangeException(string.Format("The field `{0}` does not exist in type `{1}`", name, QualifiedName));
 
             var o = _nameLookup[name];
             return GetInstance(o);
@@ -106,7 +106,7 @@ namespace DebugDiag.Native
             CheckInstance();
 
             if (!_offsetLookup.ContainsKey(offset))
-                throw new ArgumentOutOfRangeException(String.Format("The offset `+0x{0:x04}` does not exist in type `{1}`", offset, QualifiedName));
+                throw new ArgumentOutOfRangeException(string.Format("The offset `+0x{0:x04}` does not exist in type `{1}`", offset, QualifiedName));
             var o = _offsetLookup[offset];
             return GetInstance(o);
         }
@@ -148,13 +148,13 @@ namespace DebugDiag.Native
         public override string GetStringValue()
         {
             CheckInstance();
-            return Native.Context.Execute(String.Format("ds {0}", _rawMem));
+            return Native.Context.Execute(string.Format("ds {0}", _rawMem));
         }
 
         public override string GetUnicodeStringValue()
         {
             CheckInstance();
-            return Native.Context.Execute(String.Format("du {0}", _rawMem));
+            return Native.Context.Execute(string.Format("du {0}", _rawMem));
         }
 
         #endregion
@@ -204,7 +204,7 @@ namespace DebugDiag.Native
         public static NativeType AtAddress(ulong addr)
         {
             if (addr == 0) throw new ArgumentException("Invalid memory location.");
-            return AtAddressInternal(String.Format("0x{0:x}", addr), addr);
+            return AtAddressInternal(string.Format("0x{0:x}", addr), addr);
         }
 
         public static NativeType AtAddress(string addr, string type)
@@ -261,7 +261,7 @@ namespace DebugDiag.Native
         private static NativeType AtAddressInternal(string addrStr, ulong addrUlong)
         {
             // Look for a vtable.
-            string vtable = Native.Context.Execute(String.Format("ln poi({0})", addrStr));
+            string vtable = Native.Context.Execute(string.Format("ln poi({0})", addrStr));
 
             var matches = VtableFormat.Matches(vtable);
             if (matches.Count == 0) return null; // No matching vtable.

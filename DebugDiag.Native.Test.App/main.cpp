@@ -109,6 +109,13 @@ int main(int argc, char** argv)
     f.list.push_back(PODType(4, 5, 6));
     f.list.push_back(PODType(7, 8, 9));
 
+    char* str = "A new string is born, it may be long, it may be short, \r\nit may never stop. It has nothing to do with theory, everything is in the empirical truth.";
+    wchar_t* strw = L"A longeru stringu.\r\nThis one is wide.";
+    char super[80] = "This is also a\r\n super string";
+    wchar_t duper[80] = L"Super\r\nduper";
+    std::string strstr = "An std::string. This one is wide or not,\r\nit depends on the build?";
+    std::wstring strwstr = L"Definitely long.\r\nstandard library too.";
+
     int* crash = nullptr;
     *crash = 42;
 }

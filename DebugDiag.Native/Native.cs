@@ -136,7 +136,7 @@ namespace DebugDiag.Native
             // ReSharper disable once EmptyGeneralCatchClause
             catch (Exception x)
             {
-                throw new ArgumentException(String.Format("Cannot parse address `{0}`:\n{1}", addr, x), x);
+                throw new ArgumentException(string.Format("Cannot parse address `{0}`:\n{1}", addr, x), x);
             }
         }
 

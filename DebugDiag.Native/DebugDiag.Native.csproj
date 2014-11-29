@@ -70,6 +70,7 @@
     <Compile Include="Type\Pointer.cs" />
     <Compile Include="Type\Primitive.cs" />
     <Compile Include="Type\Set.cs" />
+    <Compile Include="Type\String.cs" />
     <Compile Include="Type\TypeParser.cs" />
     <Compile Include="Type\UserType.cs" />
     <Compile Include="Type\Vector.cs" />
