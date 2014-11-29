@@ -39,7 +39,7 @@ namespace DebugDiag.Native.Type
             Debug.Assert(match.Groups.Count == 2, "List expects only one group");
 
             // Recursively parse the type of elements inside the list.
-            ValueType = TypeParser.Parse(match.Groups[1].Value);
+            ValueType = Parser.Parse(match.Groups[1].Value);
         }
 
         protected override void Rebase()

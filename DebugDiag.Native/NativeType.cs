@@ -176,7 +176,7 @@ namespace DebugDiag.Native
             var typeInfo = TypeLookup(type);
             if (typeInfo != null) return typeInfo;
 
-            typeInfo = TypeParser.Parse(type);
+            typeInfo = Parser.Parse(type);
 
             typeInfo.BuildOffsetTable(type);
 
@@ -355,7 +355,7 @@ namespace DebugDiag.Native
                 // Retrieve the instance value of primitive fields.
                 if (o.IsPrimitive && !l.IsBits)
                 {
-                    o.Instance = TypeParser.Parse(l, o.TypeName, /* isInstance: */ true);
+                    o.Instance = Parser.Parse(l, o.TypeName, /* isInstance: */ true);
                     o.Instance.IsInstance = true;
                     o.Instance.IsStatic = o.IsStatic;
                     o.Instance.Address = Address + o.Bytes;
@@ -391,7 +391,7 @@ namespace DebugDiag.Native
                 // TODO: Possible optimization store this stub in the cache and lazily inspect it to avoid double parsing.
                 // When building the offset table, there is no instance information available so we tell the parser not
                 // to bother with instance information.
-                var fieldInfo = TypeParser.Parse(line, line.Detail, /*isInstance:*/ false);
+                var fieldInfo = Parser.Parse(line, line.Detail, /*isInstance:*/ false);
 
                 var offset = new Offset
                              {

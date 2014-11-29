@@ -71,7 +71,7 @@ namespace DebugDiag.Native.Type
         internal override void OnCreateInstance(string typename, Match match)
         {
             Debug.Assert(match.Groups.Count == 2, "Set expects 1 group.");
-            ValueType = TypeParser.Parse(match.Groups[1].Value);
+            ValueType = Parser.Parse(match.Groups[1].Value);
         }
 
         #endregion

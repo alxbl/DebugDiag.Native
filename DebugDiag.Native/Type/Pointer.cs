@@ -110,7 +110,7 @@ namespace DebugDiag.Native.Type
             : base(StandardizePointerType(typename))
         {
             // Use the standardized pointer type.
-            PointedType = TypeParser.Parse(TypeName.Substring(0, TypeName.Length - 1).TrimEnd());
+            PointedType = Parser.Parse(TypeName.Substring(0, TypeName.Length - 1).TrimEnd());
         }
 
         public Pointer(string typename, ulong pointsTo)

@@ -22,7 +22,7 @@ namespace DebugDiag.Native.Type
             Debug.Assert(match.Groups.Count == 2, "Vector expects only one group");
 
             // Recursively parse the type of elements inside the vector.
-            ValueType = TypeParser.Parse(match.Groups[1].Value);
+            ValueType = Parser.Parse(match.Groups[1].Value);
         }
 
         public override IEnumerator<NativeType> GetEnumerator()

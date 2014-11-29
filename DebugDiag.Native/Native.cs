@@ -23,11 +23,11 @@ namespace DebugDiag.Native
             // Register built-in user types. (Could be registered by reflection.)
             if (!_typesRegistered)
             {
-                TypeParser.RegisterUserType(Vector.Syntax, new Vector(""));
-                TypeParser.RegisterUserType(List.Syntax, new List(""));
-                TypeParser.RegisterUserType(Map.Syntax, new Map(""));
-                TypeParser.RegisterUserType(Set.Syntax, new Set(""));
-                //TypeParser.RegisterUserType();
+                Parser.RegisterUserType(Vector.Syntax, new Vector(""));
+                Parser.RegisterUserType(List.Syntax, new List(""));
+                Parser.RegisterUserType(Map.Syntax, new Map(""));
+                Parser.RegisterUserType(Set.Syntax, new Set(""));
+                //Parser.RegisterUserType();
                 _typesRegistered = true;
             }
         }

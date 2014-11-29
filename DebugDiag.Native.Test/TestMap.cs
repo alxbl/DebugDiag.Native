@@ -19,7 +19,7 @@ namespace DebugDiag.Native.Test
                        };
             foreach (var m in maps)
             {
-                var t = TypeParser.Parse(m);
+                var t = Parser.Parse(m);
                 Assert.IsInstanceOfType(t, typeof(Map), "Could not parse " + m);
             }
         }

@@ -76,8 +76,8 @@ namespace DebugDiag.Native.Type
         internal override void OnCreateInstance(string typename, Match match)
         {
             Debug.Assert(match.Groups.Count == 3, "Map expects 2 groups.");
-            KeyType = TypeParser.Parse(match.Groups[1].Value);
-            ValueType = TypeParser.Parse(match.Groups[2].Value);
+            KeyType = Parser.Parse(match.Groups[1].Value);
+            ValueType = Parser.Parse(match.Groups[2].Value);
         }
 
         #endregion
