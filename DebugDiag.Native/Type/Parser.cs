@@ -11,7 +11,7 @@ namespace DebugDiag.Native.Type
     /// 
     /// Provides extension services to register user-defined types into the parser.
     /// </summary>
-    public static class TypeParser
+    public static class Parser
     {
         /// <summary>
         /// Decomposes a complex type into its type tree.
