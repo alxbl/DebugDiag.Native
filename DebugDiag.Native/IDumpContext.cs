@@ -1,3 +1,4 @@
+using System.Security.Cryptography.X509Certificates;
 using DebugDiag.DotNet;
 
 namespace DebugDiag.Native
@@ -23,6 +24,11 @@ namespace DebugDiag.Native
         /// The reference to the DebugDiag progress tracker.
         /// </summary>
         NetProgress Progress { get; }
+
+        /// <summary>
+        /// The name of the active dump file.
+        /// </summary>
+        string Filename { get; }
 
         #endregion
         #region API

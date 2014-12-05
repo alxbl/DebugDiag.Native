@@ -10,6 +10,7 @@ namespace DebugDiag.Native.Test.Mock
         public NetScriptManager Manager { get; private set; }
         public NetDbgObj Debugger { get; private set; }
         public NetProgress Progress { get; private set; }
+        public string Filename { get { return "MockX86Dump.dmp";  } }
         public bool Is32Bit { get { return true; } }
 
         public string Execute(string cmd)
