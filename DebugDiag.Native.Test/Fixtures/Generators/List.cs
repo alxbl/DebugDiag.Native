@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace DebugDiag.Native.Test.Fixtures.Generators
 {
+    /// <summary>
+    /// Generates an std::list fixture.
+    /// </summary>
     class List : Generator
     {
         private readonly Generator _childGenerator;
@@ -27,32 +26,32 @@ namespace DebugDiag.Native.Test.Fixtures.Generators
 
         public override string GetTypeName()
         {
-            return String.Format("std::list<{0},std::allocator<{0}> >", _childGenerator.GetTypeName());
+            return string.Format("std::list<{0},std::allocator<{0}> >", _childGenerator.GetTypeName());
         }
 
         public override KeyValuePair<string, string> GetTypeInfo()
         {
-            var k = String.Format("dt 0 {0}", GetTypeName());
-            var v = String.Format(@"+0x000 _Myproxy         : Ptr32 std::_Container_proxy
+            var k = string.Format("dt 0 {0}", GetTypeName());
+            var v = string.Format(@"+0x000 _Myproxy         : Ptr32 std::_Container_proxy
    +0x004 _Myhead          : Ptr32 std::_List_node<PODType,void *>
    +0x008 _Mysize          : Uint4B");
             return new KeyValuePair<string, string>(k,v);
         }
 
-        public override IEnumerator<KeyValuePair<string, string>> Generate()
+        public override IEnumerable<KeyValuePair<string, string>> GenerateInternal()
         {
             string k, v;
             var kv = new KeyValuePair<string, string>();
             
             // Root of the list
-            k = String.Format("dt {0:x} {1}", Address, GetTypeName());
-            v = String.Format("");
+            k = string.Format("dt {0:x} {1}", Address, GetTypeName());
+            v = string.Format("");
             kv = new KeyValuePair<string, string>(k, v);
             yield return kv;
 
             // Head of the list
-            k = String.Format("dt");
-            v = String.Format("");
+            k = string.Format("dt");
+            v = string.Format("");
             kv = new KeyValuePair<string, string>(k,v);
             yield return kv;
         }

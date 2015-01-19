@@ -9,15 +9,24 @@ namespace DebugDiag.Native.Type
     public class Primitive : NativeType
     {
         private ulong _value;
-        
+
+        #region Constructor
         public Primitive(string typename, ulong value) :
             base(typename)
         {
             _value = value;
         }
 
+        internal Primitive(Primitive other)
+            : base(other)
+        {
+            _value = other._value;
+        }
+        #endregion
+
         #region NativeType overrides
-        
+
+        /* TODO: Move these to Integer.cs
         public override NativeType GetField(string field)
         {
             throw new InvalidOperationException("Cannot call GetField() on a primitive type.");
@@ -27,7 +36,7 @@ namespace DebugDiag.Native.Type
         {
             throw new InvalidOperationException("Cannot call GetField() on a primitive type.");
         }
-
+        */
         public override ulong GetIntValue()
         {
             return _value;
@@ -37,13 +46,21 @@ namespace DebugDiag.Native.Type
 
         internal static NativeType CreatePrimitive(string typename, DumpType.Line? dt, bool isInstance)
         {
-            if (!isInstance || !dt.HasValue) return new Primitive(typename, 0); // No need to do extra parsing for non-instances.
+            
 
             NativeType type;
-            if (typename.Equals("std::string") || typename.Equals("std::wstring"))
-                type = new String(typename, 0); // TODO: Handle string properly.
+            if (String.Syntax.IsMatch(typename))
+            {
+                //if (!isInstance || !dt.HasValue)
+                type = new String(typename, 0); // TODO: Handle string instance properly.
+                //else
+            }
             else
-            type = new Primitive(typename, ParseWindbgPrimitive(dt.Value.Detail).GetValueOrDefault());
+            {
+                type = (!isInstance || !dt.HasValue) 
+                    ? new Primitive(typename, 0) 
+                    : new Primitive(typename, ParseWindbgPrimitive(dt.Value.Detail).GetValueOrDefault());
+            }
 
             return type;
         }

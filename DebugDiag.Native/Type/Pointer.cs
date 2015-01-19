@@ -1,4 +1,5 @@
-﻿using DebugDiag.Native.Windbg;
+﻿using System.Text.RegularExpressions;
+using DebugDiag.Native.Windbg;
 
 namespace DebugDiag.Native.Type
 {
@@ -10,6 +11,7 @@ namespace DebugDiag.Native.Type
     /// </summary>
     public sealed class Pointer : NativeType
     {
+        public static readonly Regex Syntax = new Regex(@"(^(Ptr32|Ptr64))|\*$");
         public ulong PointsTo { get; private set; } // The address to use when re-basing this pointer.
 
         /// <summary>

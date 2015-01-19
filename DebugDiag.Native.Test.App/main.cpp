@@ -114,6 +114,7 @@ int main(int argc, char** argv)
     char super[80] = "This is also a\r\n super string";
     wchar_t duper[80] = L"Super\r\nduper";
     std::string strstr = "An std::string. This one is wide or not,\r\nit depends on the build?";
+    std::string shstr = "Yo\\\r\n"; // With an escaped backslash.
     std::wstring strwstr = L"Definitely long.\r\nstandard library too.";
 
     int* crash = nullptr;

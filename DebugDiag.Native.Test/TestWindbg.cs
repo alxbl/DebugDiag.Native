@@ -71,5 +71,39 @@ namespace DebugDiag.Native.Test
             dp.Execute();
         }
         #endregion
+
+        #region DumpString
+        [TestMethod]
+        public void TestDumpStringNarrow()
+        {
+            Assert.Inconclusive();
+        }
+
+        [TestMethod]
+        public void TestDumpStringWide()
+        {
+            Assert.Inconclusive();
+        }
+
+        [TestMethod]
+        public void TestDumpStringNarrowNull()
+        {
+            Assert.Inconclusive();
+        }
+
+        [TestMethod]
+        public void TestDumpStringWideNull()
+        {
+            Assert.Inconclusive();
+        }
+
+        [TestMethod]
+        public void TestDumpStringInvalidMemory()
+        {
+            // It's impossible for the computer to know that the memory is invalid.
+            // In this scenario DumpString() will return trash until it finds a \0.
+            Assert.Inconclusive();
+        }
+        #endregion
     }
 }

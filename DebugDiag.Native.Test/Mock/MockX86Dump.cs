@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using DebugDiag.DotNet;
 using DebugDiag.Native.Test.Fixtures;
 
@@ -18,6 +19,18 @@ namespace DebugDiag.Native.Test.Mock
             if (!InputOutputMap.ContainsKey(cmd))
                 throw new Exception("Mock command not found: " + cmd);
             return InputOutputMap[cmd]; 
+        }
+
+        /// <summary>
+        /// Adds a generated fixture to the dump context.
+        /// </summary>
+        /// <param name="g">The constructed generator that represents the fixture.</param>
+        public void AddFixture(Generator g)
+        {
+            foreach (var f in g.Where(f => f.Key != null && f.Value != null))
+            {
+                InputOutputMap[f.Key] = f.Value; // Register this fixture's output.
+            }
         }
 
         public MockX86Dump()

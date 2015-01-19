@@ -178,11 +178,11 @@ namespace DebugDiag.Native
 
             typeInfo = Parser.Parse(type);
 
+            // TODO: Support NativeType.AtAddress for primitives. (This will currently fail)
             typeInfo.BuildOffsetTable(type);
 
             CacheType(typeInfo.TypeName, typeInfo);
             CacheType(typeInfo.QualifiedName, typeInfo);
-
             return typeInfo;
         }
 

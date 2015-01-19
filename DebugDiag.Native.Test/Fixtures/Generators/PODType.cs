@@ -26,10 +26,10 @@ namespace DebugDiag.Native.Test.Fixtures.Generators
    +0x008 Offset3          : Int4B");
         }
 
-        public override IEnumerator<KeyValuePair<string, string>> Generate()
+        public override IEnumerable<KeyValuePair<string, string>> GenerateInternal()
         {
-            var kv = new KeyValuePair<string, string>(String.Format("dt {0:x} PODType", Address),
-                String.Format(@"   +0x000 Offset1          : 0n{0}
+            var kv = new KeyValuePair<string, string>(string.Format("dt {0:x} PODType", Address),
+                string.Format(@"   +0x000 Offset1          : 0n{0}
    +0x004 Offset2          : 0n{0}
    +0x008 Offset3          : 0n{0}", _value++));
             Address += 0x8;

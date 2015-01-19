@@ -9,7 +9,7 @@ namespace DebugDiag.Native.Test.Fixtures
     /// 
     /// This type is enumerable and will return a finite list of fixtures depending on the object created.
     /// </summary>
-    internal abstract class Generator : IEnumerable<KeyValuePair<string, string>>
+    public abstract class Generator : IEnumerable<KeyValuePair<string, string>>
     {
         /// <summary>
         /// The address to use for the location of this fixture.
@@ -38,7 +38,14 @@ namespace DebugDiag.Native.Test.Fixtures
         /// always succeed.
         /// </summary>
         /// <returns></returns>
-        public abstract IEnumerator<KeyValuePair<string, string>> Generate();
+        public abstract IEnumerable<KeyValuePair<string, string>> GenerateInternal();
+
+        public IEnumerator<KeyValuePair<string, string>> Generate()
+        {
+            foreach (var f in GenerateInternal())
+                yield return f;
+            yield return GetTypeInfo(); // Last because some primitive types can set it to null.
+        }
 
         #endregion
         #region Enumerator

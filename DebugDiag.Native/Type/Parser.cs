@@ -65,13 +65,17 @@ namespace DebugDiag.Native.Type
             NativeType type = null;
 
             // In order of priority.
-            // TODO: Let char* and wchar_t* pass through to Primitive handling.
-            if (unqualifiedType.StartsWith("Ptr32") || unqualifiedType.StartsWith("Ptr64") || unqualifiedType.EndsWith("*")) // Pointer
+            if (Pointer.Syntax.IsMatch(unqualifiedType)) // A pointer or a string primitive (char*, wchar_t*)
             {
                 // TODO: Allow Vtable inspection.
                 type = dt.HasValue && isInstance ? 
                     new Pointer(typename, Primitive.ParseWindbgPrimitive(dt.Value.Detail).GetValueOrDefault()) // Instantiate the pointer when possible
                     : new Pointer(typename);
+
+                // Special case: Pointer to string. This could be improved to not cause parsing of the tree and simplify the logic here.
+                if (String.Syntax.IsMatch(type.TypeName))
+                    type = Primitive.CreatePrimitive(typename, dt, isInstance);
+
             }
             else if (IsPrimitive(unqualifiedType)) // Primitive: Create the matching primitive type.
             {
@@ -91,6 +95,7 @@ namespace DebugDiag.Native.Type
 
         private static bool IsPrimitive(string typename)
         {
+            if (String.Syntax.IsMatch(typename)) return true;
             if (typename.Equals("Char")) return true;
             if (typename.Equals("UChar")) return true;
             if (typename.Equals("Int2B")) return true;
