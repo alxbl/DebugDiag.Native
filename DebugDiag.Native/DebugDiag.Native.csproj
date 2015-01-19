@@ -65,6 +65,7 @@
   <ItemGroup>
     <Compile Include="DumpContext.cs" />
     <Compile Include="NativeInstance.cs" />
+    <Compile Include="Type\Integer.cs" />
     <Compile Include="Type\Offset.cs" />
     <Compile Include="Type\Enumerable.cs" />
     <Compile Include="Type\List.cs" />

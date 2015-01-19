@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 using DebugDiag.Native.Windbg;
 
 namespace DebugDiag.Native.Type
@@ -6,7 +7,7 @@ namespace DebugDiag.Native.Type
     /// <summary>
     /// Represents a string primitive.
     /// 
-    /// String primitives can be anything from an std::string, std::wstring to char* and wchar_t*.
+    /// String primitives can be any of std::string, std::wstring to char* and wchar_t*.
     /// </summary>
     public sealed class String : Primitive
     {
@@ -26,6 +27,23 @@ namespace DebugDiag.Native.Type
                 if (string.IsNullOrEmpty(_cache)) GetStringValue();
                 return _cache.Length;
             }
+        }
+
+        public override ulong GetIntValue()
+        {
+            throw new InvalidOperationException("Not an integer");
+        }
+
+        public override NativeType GetField(string field)
+        {
+            if (!_isStl) throw new InvalidOperationException("Cannot call GetField() on a primitive type.");
+            return base.GetField(field); // Allow GetField if the string is an STL string.
+        }
+
+        public override NativeType GetField(ulong offset)
+        {
+            if (!_isStl) throw new InvalidOperationException("Cannot call GetField() on a primitive type.");
+            return base.GetField(offset); // Allow GetField if the string is an STL string.
         }
 
         public override string GetStringValue()
@@ -71,6 +89,10 @@ namespace DebugDiag.Native.Type
             // Otherwise, this is a string primitive.
         }
 
+        public override string ToString()
+        {
+            return GetStringValue();
+        }
         #endregion
 
         #region Constructor
@@ -87,8 +109,8 @@ namespace DebugDiag.Native.Type
             _cache = other._cache;
         }
         
-        public String(string typename, ulong value)
-            : base(typename, value)
+        public String(string typename)
+            : base(typename)
         {
             _isStl = typename.Contains("std::basic_string");
             _isWide = typename.Contains("wchar") || typename.Contains("Wchar");

@@ -6,60 +6,32 @@ namespace DebugDiag.Native.Type
     /// <summary>
     /// Represents a primitive value type.
     /// </summary>
-    public class Primitive : NativeType
+    public abstract class Primitive : NativeType
     {
-        private ulong _value;
-
         #region Constructor
-        public Primitive(string typename, ulong value) :
+        protected Primitive(string typename) :
             base(typename)
         {
-            _value = value;
         }
 
-        internal Primitive(Primitive other)
+        internal Primitive(NativeType other)
             : base(other)
         {
-            _value = other._value;
         }
-        #endregion
-
-        #region NativeType overrides
-
-        /* TODO: Move these to Integer.cs
-        public override NativeType GetField(string field)
-        {
-            throw new InvalidOperationException("Cannot call GetField() on a primitive type.");
-        }
-
-        public override NativeType GetField(ulong offset)
-        {
-            throw new InvalidOperationException("Cannot call GetField() on a primitive type.");
-        }
-        */
-        public override ulong GetIntValue()
-        {
-            return _value;
-        }
-
         #endregion
 
         internal static NativeType CreatePrimitive(string typename, DumpType.Line? dt, bool isInstance)
         {
-            
-
             NativeType type;
             if (String.Syntax.IsMatch(typename))
             {
-                //if (!isInstance || !dt.HasValue)
-                type = new String(typename, 0); // TODO: Handle string instance properly.
-                //else
+                type = new String(typename);
             }
             else
             {
                 type = (!isInstance || !dt.HasValue) 
-                    ? new Primitive(typename, 0) 
-                    : new Primitive(typename, ParseWindbgPrimitive(dt.Value.Detail).GetValueOrDefault());
+                    ? new Integer(typename, 0) 
+                    : new Integer(typename, ParseWindbgPrimitive(dt.Value.Detail).GetValueOrDefault());
             }
 
             return type;
