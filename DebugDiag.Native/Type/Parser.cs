@@ -80,8 +80,12 @@ namespace DebugDiag.Native.Type
 
         private static bool IsPrimitive(string typename)
         {
+            // These types are treated as though they were native, and bypass the user type extension framework.
+            if (Guid.Syntax.IsMatch(typename)) return true;
             if (Pointer.Syntax.IsMatch(typename)) return true;
             if (String.Syntax.IsMatch(typename)) return true;
+
+            // Real native types.
             if (typename.Equals("Char")) return true;
             if (typename.Equals("UChar")) return true;
             if (typename.Equals("Int2B")) return true;
@@ -90,6 +94,7 @@ namespace DebugDiag.Native.Type
             if (typename.Equals("Uint4B")) return true;
             if (typename.Equals("Int8B")) return true;
             if (typename.Equals("Uint8B")) return true;
+
             return false;
         }
 

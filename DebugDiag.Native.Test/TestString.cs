@@ -19,6 +19,7 @@ namespace DebugDiag.Native.Test
             Native.Initialize(Context);
 
         }
+
         [TestMethod]
         public void TestStringSyntax()
         {
@@ -171,7 +172,7 @@ namespace DebugDiag.Native.Test
         }
 
         [TestMethod]
-        public void TestStdStringptr()
+        public void TestStdStringPtr()
         {
             const ulong addr = 0x37;
             const string expected = "The length of this string must be longer than 16 characters.\r\nHello.";

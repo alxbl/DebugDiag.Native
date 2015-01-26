@@ -28,11 +28,6 @@ namespace DebugDiag.Native.Type
             }
         }
 
-        public override ulong GetIntValue()
-        {
-            throw new InvalidOperationException("Not an integer");
-        }
-
         public override NativeType GetField(string field)
         {
             if (!_isStl) throw new InvalidOperationException("Cannot call GetField() on a primitive type.");

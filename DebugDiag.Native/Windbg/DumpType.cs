@@ -140,7 +140,11 @@ namespace DebugDiag.Native.Windbg
                 }
 
                 var m = LineFormat.Matches(line);
-                Debug.Assert(m.Count == 1, "LineFormat should match exactly once per line.");
+
+                // In some cases, `dt` will output formatting for the type. Skip those lines,
+                // they can be parsed externally if the caller really wants them.
+                // e.g. ntdll!_GUID will always output the formatted GUID. 
+                if (m.Count != 1) continue; 
 
                 var groups = m[0].Groups;
                 Debug.Assert(groups.Count == 5, "Could not match all required offset information");
