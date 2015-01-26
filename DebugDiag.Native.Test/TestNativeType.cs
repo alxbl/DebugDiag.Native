@@ -178,7 +178,6 @@ namespace DebugDiag.Native.Test
             Assert.IsTrue(field is Pointer); // Change to Vtable once Vtable support is added.
             Assert.IsTrue(field.IsInstance);
             Assert.AreEqual("`vftable' *", field.QualifiedName);
-            // TODO: It should be possible to inspect the vtable.
         }
 
         [TestMethod]

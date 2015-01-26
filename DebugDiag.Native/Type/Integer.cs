@@ -14,11 +14,11 @@ namespace DebugDiag.Native.Type
     /// </summary>
     public sealed class Integer : Primitive
     {
-        private readonly ulong _value;
+        private ulong _value;
 
-        public Integer(string typename, ulong value) : base(typename)
+        public Integer(string typename) : base(typename)
         {
-            _value = value;
+            _value = ulong.MaxValue; // Default value is invalid.
         }
 
         public Integer(Integer other) : base(other)
@@ -45,6 +45,18 @@ namespace DebugDiag.Native.Type
         public override string ToString()
         {
             return (string) this;
+        }
+
+        protected override void Parse(string detail)
+        {
+            try
+            {
+                _value = Native.StringAddrToUlong(detail.Split(' ')[0]);
+            }
+            catch (ArgumentException)
+            {
+                _value = ulong.MaxValue;
+            }
         }
         #endregion
 
@@ -98,8 +110,6 @@ namespace DebugDiag.Native.Type
         {
             return i._value;
         }
-
-        
         #endregion
     }
 }

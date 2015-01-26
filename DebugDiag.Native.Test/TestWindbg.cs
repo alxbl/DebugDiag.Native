@@ -46,7 +46,7 @@ namespace DebugDiag.Native.Test
             var dt = new DumpType("HasAStaticField");
             dt.Execute();
             Assert.IsNotNull(dt.GetEnumerator());
-            // TODO: Check that the `dt` parsing was successful.
+            Assert.IsFalse(string.IsNullOrEmpty(dt.Output));
         }
         #endregion
 

@@ -22,41 +22,33 @@ namespace DebugDiag.Native.Type
 
         internal static NativeType CreatePrimitive(string typename, DumpType.Line? dt, bool isInstance)
         {
-            NativeType type;
-            if (String.Syntax.IsMatch(typename))
+            Primitive type;
+            if (Pointer.Syntax.IsMatch(typename)) // A pointer or a string
+            {
+                // TODO: Allow Vtable inspection.
+                type = new Pointer(typename); // Should be unqualified name
+
+                // Special case: pointer to string. This could be improved to not cause parsing of the pointer tree.
+                if (String.Syntax.IsMatch(type.TypeName))
+                    type = new String(type.TypeName);
+            }
+            else if (String.Syntax.IsMatch(typename)) // A string (STL, char [] or wchar [])
             {
                 type = new String(typename);
             }
-            else
+            else // Any numerical type.
             {
-                type = (!isInstance || !dt.HasValue) 
-                    ? new Integer(typename, 0) 
-                    : new Integer(typename, ParseWindbgPrimitive(dt.Value.Detail).GetValueOrDefault());
+                type = new Integer(typename);
             }
 
+            if (dt.HasValue && isInstance) type.Parse(dt.Value.Detail);
             return type;
         }
 
         /// <summary>
-        /// Parses a windbg primitive value type and attempts to extract the raw value.
+        /// Extract the value of this primitive field. Must be implemented by primitive types.
         /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        internal static ulong? ParseWindbgPrimitive(string value)
-        {
-            if (string.IsNullOrWhiteSpace(value)) return null;
-            if (value.Equals("(null)")) return 0;
-            // HACK: This method will be removed once primitives are parsed as objects and no longer rely on RawMemory for their value.
-            // In the mean time, split the value at the first space and take everything before that to prevent the "parser" from breaking
-            // due to compound type support.
-            try
-            {
-                return Native.StringAddrToUlong(value.Split(' ')[0]);
-            }
-            catch (ArgumentException)
-            {
-                return null;
-            }
-        }
+        /// <param name="detail">The field detail as provided by `dt`.</param>
+        protected abstract void Parse(string detail);
     }
 }

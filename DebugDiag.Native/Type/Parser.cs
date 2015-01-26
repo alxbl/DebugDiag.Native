@@ -51,12 +51,10 @@ namespace DebugDiag.Native.Type
         /// When parsing an instance of a type, it will properly create primitives.
         /// 
         /// This function is only called internally.
-        /// 
-        /// TODO: FIXME: It should be clear from the API when to call Parse() with isInstance = true;
         /// </summary>
         /// <param name="dt">The `dt` output for this member</param>
-        /// <param name="typename"></param>
-        /// <param name="isInstance"></param>
+        /// <param name="typename">The name of the type being parsed.</param>
+        /// <param name="isInstance">Whether Parse is being called as part of type instanciation.</param>
         /// <returns></returns>
         internal static NativeType Parse(DumpType.Line? dt, string typename, bool isInstance)
         {
@@ -64,20 +62,7 @@ namespace DebugDiag.Native.Type
 
             NativeType type = null;
 
-            // In order of priority.
-            if (Pointer.Syntax.IsMatch(unqualifiedType)) // A pointer or a string primitive (char*, wchar_t*)
-            {
-                // TODO: Allow Vtable inspection.
-                type = dt.HasValue && isInstance ? 
-                    new Pointer(typename, Primitive.ParseWindbgPrimitive(dt.Value.Detail).GetValueOrDefault()) // Instantiate the pointer when possible
-                    : new Pointer(typename);
-
-                // Special case: Pointer to string. This could be improved to not cause parsing of the tree and simplify the logic here.
-                if (String.Syntax.IsMatch(type.TypeName))
-                    type = Primitive.CreatePrimitive(typename, dt, isInstance);
-
-            }
-            else if (IsPrimitive(unqualifiedType)) // Primitive: Create the matching primitive type.
+            if (IsPrimitive(unqualifiedType)) // Primitive: Create the matching primitive type.
             {
                 type = Primitive.CreatePrimitive(typename, dt, isInstance);
             }
@@ -95,6 +80,7 @@ namespace DebugDiag.Native.Type
 
         private static bool IsPrimitive(string typename)
         {
+            if (Pointer.Syntax.IsMatch(typename)) return true;
             if (String.Syntax.IsMatch(typename)) return true;
             if (typename.Equals("Char")) return true;
             if (typename.Equals("UChar")) return true;

@@ -42,7 +42,6 @@ namespace DebugDiag.Native.Test.Mock
 
         /// <summary>
         /// Constructs the I/O map for mocking a dump context.
-        /// TODO: Move to a generated fixture.
         /// </summary>
         static MockX86Dump()
         {
@@ -92,9 +91,6 @@ namespace DebugDiag.Native.Test.Mock
             InputOutputMap["dp /c1 0x5bd3e8 L1"] = X86.Dp2;
             InputOutputMap["dp /c1 0x0 L1"] = X86.DpInvalid;
             #endregion
-            #region Map
-            // TODO: Test fixtures for Map.
-            #endregion
             #region Vector
             InputOutputMap["dt 0 " + X86.PtrVector] = X86.PtrVectorDt;
             InputOutputMap[String.Format("dt {0} {1}", X86.PtrVectorAddr, X86.PtrVector)] = X86.PtrVectorDtInst;
@@ -119,12 +115,6 @@ namespace DebugDiag.Native.Test.Mock
             InputOutputMap["dt 0x28db48 PODType"] = X86.DtListElem2;
             InputOutputMap["dt 0x28db90 std::_List_node<PODType,void *>"] = X86.DtListNode3;
             InputOutputMap["dt 0x28db98 PODType"] = X86.DtListElem3;
-
-            #endregion
-
-            #region Set
-
-            // TODO: Test fixtures for Set.
 
             #endregion
         }

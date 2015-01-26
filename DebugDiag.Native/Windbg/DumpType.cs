@@ -41,7 +41,7 @@ namespace DebugDiag.Native.Windbg
 
         private DumpType()
         {
-            IsRecursive = false; // TODO: Allow for internal recursion when parsing dt.
+            IsRecursive = false; // TODO: Allow for internal recursion when parsing dt if it ever becomes a performance issue.
         }
 
         #endregion

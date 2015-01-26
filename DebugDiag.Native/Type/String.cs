@@ -16,10 +16,9 @@ namespace DebugDiag.Native.Type
         private readonly bool _isStl, _isWide;
         private string _cache;
 
-        public static readonly Regex Syntax = new Regex(@"^((\[\d+\]|Ptr32|Ptr64) (Wchar|Char))|std::basic_string<.*>|Wchar \*|Char \*$");
+        public static readonly Regex Syntax = new Regex(@"^((\[\d+\]|Ptr32|Ptr64) (Wchar|Char))$|^std::basic_string<.*>$|^Wchar \*$|^Char \*$");
 
         #region Type Implementation
-
         public int Length
         {
             get
@@ -93,6 +92,12 @@ namespace DebugDiag.Native.Type
         {
             return GetStringValue();
         }
+
+        protected override void Parse(string detail)
+        {
+            // Don't do anything: We want to include non-printable characters inside the string and the `dt`
+            // output displays them as "." See Rebase() instead.
+        }
         #endregion
 
         #region Constructor
@@ -116,7 +121,5 @@ namespace DebugDiag.Native.Type
             _isWide = typename.Contains("wchar") || typename.Contains("Wchar");
         }
         #endregion
-
-        //private string _value;
     }
 }

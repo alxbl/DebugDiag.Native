@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 using DebugDiag.Native.Windbg;
 
 namespace DebugDiag.Native.Type
@@ -9,9 +10,13 @@ namespace DebugDiag.Native.Type
     /// Calling investigation methods on the pointer will automatically forward the methods
     /// to the pointed-to instance, thereby implicitly dereferencing the type.
     /// </summary>
-    public sealed class Pointer : NativeType
+    public sealed class Pointer : Primitive
     {
-        public static readonly Regex Syntax = new Regex(@"(^(Ptr32|Ptr64))|\*$");
+        // A pointer:
+        // Either begins with `Ptr32` or `Ptr64`,
+        // Or has the form [ModuleName!]Type and ends with a `*`.
+        //     Where `Type` cannot start with `*`.
+        public static readonly Regex Syntax = new Regex(@"(^(Ptr32|Ptr64))|^(.+!)?[^\*].+\*$");
         public ulong PointsTo { get; private set; } // The address to use when re-basing this pointer.
 
         /// <summary>
@@ -52,7 +57,7 @@ namespace DebugDiag.Native.Type
             PointsTo = dp.BytesAt(0);
 
             // When accessing a pointer, to an object instance, we have to preload the object.
-            if (!(PointedType is Primitive) && !(PointedType is Pointer))
+            if (!(PointedType is Primitive))
                 PointedType = Preload(PointedType.QualifiedName);
 
             Dereference = PointedType.RebaseAt(PointsTo);
@@ -72,7 +77,7 @@ namespace DebugDiag.Native.Type
         /// <returns></returns>
         private static string StandardizePointerType(string typename)
         {
-            string std = typename;
+            var std = (typename.Contains("!")) ? typename.Split('!')[1] : typename; // Ignore module name.
 
             // Special case for virtual tables.
             if (std.Equals("Ptr32") || std.Equals("Ptr64")) return "`vftable' *";
@@ -113,14 +118,21 @@ namespace DebugDiag.Native.Type
         {
             // Use the standardized pointer type.
             PointedType = Parser.Parse(TypeName.Substring(0, TypeName.Length - 1).TrimEnd());
-        }
-
-        public Pointer(string typename, ulong pointsTo)
-            : this(typename)
-        {
-            PointsTo = pointsTo;
+            PointsTo = ulong.MaxValue;
         }
 
         #endregion
+
+        protected override void Parse(string detail)
+        {
+            try
+            {
+                PointsTo = Native.StringAddrToUlong(detail.Split(' ')[0]);
+            }
+            catch (ArgumentException)
+            {
+                PointsTo = ulong.MaxValue;
+            }
+        }
     }
 }
