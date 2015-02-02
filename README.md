@@ -3,7 +3,7 @@
 Extensions to make navigating types in a native crash dump less painful. The aim
 of this project is to give a .NET like way of handling type exploration and dump
 navigation and improve the experience of writing automated dump analysis for
-native code. For the initial release, only code compiled down from `C++` is 
+native code. For the initial release, only code compiled down from `C++` is
 being considered.
 
 The project is still in its early phases and as such is missing a lot of documentation.
@@ -12,10 +12,10 @@ The project is still in its early phases and as such is missing a lot of documen
 
 ### Pre-requisites
 
-	* Microsoft Debug Diagnostics must be installed. It can be [downloaded from MSDN][1].
-	* .NET 4.5
-	* Visual Studio 2012 or more recent.
-	* A C# compiler.
+* Microsoft Debug Diagnostics must be installed. It can be [downloaded from MSDN][1].
+* .NET 4.5
+* Visual Studio 2012 or more recent.
+* A C# compiler.
 
 [1]: http://www.microsoft.com/en-us/download/details.aspx?id=42933
 
@@ -51,11 +51,8 @@ version of Visual Studio.
 The general idea is that DebugDiag needs to know where to find the DLLs that will
 contain your Analysis Rules. There are two ways to achieve that:
 
-    1.  Make DebugDiag aware of your rules by adding `C:\path\to\rules\`.
-    This is usually your project's `bin\Debug` folder. **Recommended**
-
-    2. Copy all of your analysis rules and DebugDiag.Native.dll to the DebugDiag
-    Analysis Rule folder (`C:\Program Files\DebugDiag\AnalysisRules\`)
+1.  Make DebugDiag aware of your rules by adding `C:\path\to\rules\`. This is usually your project's `bin\Debug` folder. **Recommended**
+2. Copy all of your analysis rules and DebugDiag.Native.dll to the DebugDiag Analysis Rule folder (`C:\Program Files\DebugDiag\AnalysisRules\`)
 
 **Extra Symbols**
 
@@ -64,14 +61,14 @@ additional search paths in the option menu.
 
 ## References
 
-    * [Tutorial][2]
-    * API Documentation (Working on it)
+* [Tutorial][2]
+* API Documentation (Working on it)
 
 [2]: /doc/intro.md
 
 ## Current limitations and improvements
 
-There are a few things that have yet to be supported, and a few things that need 
+There are a few things that have yet to be supported, and a few things that need
 to be improved. Below is a non-exhaustive list of those things:
 
 * Using `NativeType.AtAddress()` with numeric types will always yield a value of `ulong.MaxValue`.
