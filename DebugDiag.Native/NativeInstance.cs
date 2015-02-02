@@ -64,8 +64,6 @@ namespace DebugDiag.Native
         /// <returns>The string based at this object's given location</returns>
         public abstract string GetStringValue();
 
-        public abstract string GetUnicodeStringValue();
-
         /// <summary>
         /// Adjusts each field in the type to reflect the instance context.
         /// 

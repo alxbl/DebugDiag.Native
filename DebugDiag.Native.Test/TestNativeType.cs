@@ -105,7 +105,7 @@ namespace DebugDiag.Native.Test
         public void TestGetIntValueField()
         {
             var t = NativeType.AtAddress(X86.VtableAddrULong);
-            Assert.AreEqual(0UL, t.GetIntValue("MoreOffset"));
+            Assert.AreEqual(0x0000000200000001UL, t.GetIntValue("MoreOffset"));
             Assert.AreEqual(8UL, t.GetIntValue(0x004));
         }
 
@@ -128,7 +128,6 @@ namespace DebugDiag.Native.Test
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void TestGetPrimitiveWhenNotPrimitive()
         {
             // WARN: This is not not supported
@@ -136,7 +135,7 @@ namespace DebugDiag.Native.Test
             var t = NativeType.AtAddress(X86.VtableAddrULong);
             //var field = t.GetField(0x14);
             Assert.IsFalse(t is Primitive);
-            t.GetIntValue();
+            Assert.AreEqual(0x0114cc84UL, t.GetIntValue());
         }
 
         [TestMethod]

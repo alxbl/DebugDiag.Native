@@ -34,7 +34,7 @@ namespace DebugDiag.Native.Type
         #endregion
         #region Type Implementation
 
-        internal override void OnCreateInstance(string typename, Match match)
+        public override void OnCreateInstance(string typename, Match match)
         {
             Debug.Assert(match.Groups.Count == 2, "List expects only one group");
 

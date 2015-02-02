@@ -53,6 +53,7 @@ namespace DebugDiag.Native.Test.Mock
             InputOutputMap["dt 0 VirtualTypeDeriv"] = X86.VirtualTypeDerivDt;
             InputOutputMap["dt 0x49beb8 DebugDiag_Native_Test_App!VirtualTypeDeriv "] = X86.VirtualTypeDerivInst;
             InputOutputMap["dt 0x49beb8 DebugDiag_Native_Test_App!VirtualTypeDeriv"] = X86.VirtualTypeDerivInst;
+            InputOutputMap["dp /c1 0x49beb8 L1"] = "0049beb8  0114cc84";
             #endregion
             #region Edge Cases
             InputOutputMap["dt 0x49bebc Int4B"] = "Symbol Int4B not found.";

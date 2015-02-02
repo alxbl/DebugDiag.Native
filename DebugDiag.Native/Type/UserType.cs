@@ -16,7 +16,7 @@ namespace DebugDiag.Native.Type
         /// </summary>
         /// <param name="typename">The full typename that caused this user type to match.</param>
         /// <param name="match">The matches returned by the regular expression.</param>
-        internal abstract void OnCreateInstance(string typename, Match match);
+        public abstract void OnCreateInstance(string typename, Match match);
 
         #region Constructor
 

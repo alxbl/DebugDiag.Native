@@ -39,7 +39,7 @@ namespace DebugDiag.Native.Windbg
             }
             catch (Exception ex)
             {
-                throw new CommandException("Error while executing command. See inner exception.", ex);
+                throw new CommandException(string.Format("Error while executing command. See inner exception.\r\n<br><br>{0}", ex), ex);
             }
             Executed = true;
         }

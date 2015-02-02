@@ -21,6 +21,8 @@ namespace DebugDiag.Native
         #endregion
         #region Dynamic API
 
+        public dynamic Dynamic { get { return this; } }
+
         /// <summary>
         /// Allows to use the member accessors to navigate types easily.
         /// 
@@ -118,7 +120,11 @@ namespace DebugDiag.Native
         public override ulong GetIntValue()
         {
             CheckInstance();
-            throw new InvalidOperationException("Cannot Retrieve Integer Value of non-primitive.");
+            if (_rawMem.HasValue) return _rawMem.Value;
+            
+            var dp = new Dp(Address, 1);
+            _rawMem = dp.BytesAt(0);
+            return _rawMem.Value;
         }
 
         /// <summary>
@@ -141,20 +147,22 @@ namespace DebugDiag.Native
             return GetField(offset).GetIntValue();
         }
 
-        /// <summary>
-        /// Converts a primitive null-terminated C-style string NativeType into the string literal based at that location.
-        /// </summary>
-        /// <returns>The string based at this object's given location</returns>
         public override string GetStringValue()
         {
             CheckInstance();
-            return Native.Context.Execute(string.Format("ds {0}", _rawMem));
+            throw new InvalidOperationException("Cannot retrieve string value of non-primitive.");
         }
 
-        public override string GetUnicodeStringValue()
+        /// <summary>
+        /// Returns the string representation of the NativeType instance.
+        /// 
+        /// Unless overridden, the default behavior is to return the typename, and its address.
+        /// Primitive types override this method to return their leaf value.
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
         {
-            CheckInstance();
-            return Native.Context.Execute(string.Format("du {0}", _rawMem));
+            return string.Format("NativeType {{ IsInstance={0}, Address=0x{1:x}, TypeName={2} }}", IsInstance, Address, QualifiedName);
         }
 
         #endregion
@@ -239,6 +247,58 @@ namespace DebugDiag.Native
         }
 
         #endregion
+        #region Casts
+        public static explicit operator int(NativeType i)
+        {
+            return (int)i.GetIntValue();
+        }
+
+        public static explicit operator uint(NativeType i)
+        {
+            return (uint)i.GetIntValue();
+        }
+
+        public static explicit operator float(NativeType i)
+        {
+            return i.GetIntValue();
+        }
+
+        public static explicit operator double(NativeType i)
+        {
+            return i.GetIntValue();
+        }
+
+        public static explicit operator bool(NativeType i)
+        {
+            return i.GetIntValue() != 0;
+        }
+
+        public static explicit operator char(NativeType i)
+        {
+            return (char)i.GetIntValue();
+        }
+
+        public static explicit operator string(NativeType i)
+        {
+            return i.ToString();
+        }
+
+        public static explicit operator long(NativeType i)
+        {
+            return (long)i.GetIntValue();
+        }
+
+        /// <summary>
+        /// Implicitly use Integer as a ulong.
+        /// </summary>
+        /// <param name="i"></param>
+        /// <returns></returns>
+        public static implicit operator ulong(NativeType i)
+        {
+            return i.GetIntValue();
+        }
+
+        #endregion
         #region Private API
 
         internal NativeType()
@@ -311,7 +371,7 @@ namespace DebugDiag.Native
         /// <summary>
         /// The memory value at this instance's address. Useful for primitive types.
         /// </summary>
-        private ulong _rawMem;
+        private ulong? _rawMem;
 
         #region Type Instantiation
 
@@ -400,7 +460,7 @@ namespace DebugDiag.Native
                                  Bytes = line.Offset,
                                  Instance = null,
                                  TypeName = fieldInfo.TypeName,
-                                 IsPrimitive = (fieldInfo is Primitive || fieldInfo is Pointer),
+                                 IsPrimitive = (fieldInfo is Primitive),
                                  IsStatic = line.IsStatic
                              };
 

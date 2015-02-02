@@ -9,13 +9,13 @@ namespace DebugDiag.Native.Test.Fixtures
         public const string VirtualTypeDerivDt = @"   +0x000 __VFN_table : Ptr32 
    +0x004 POD              : Int4B
    +0x008 Offset           : Int4B
-   +0x00c MoreOffset       : Int4B
+   +0x00c MoreOffset       : _LARGE_INTEGER
    +0x010 Child            : Ptr32 VirtualType
    +0x014 PODObject        : PODType";
         public const string VirtualTypeDerivInst = @"   +0x000 __VFN_table : 0x0114cc84 
    +0x004 POD              : 0n8
    +0x008 Offset           : 0n-1
-   +0x00c MoreOffset       : 0
+   +0x00c MoreOffset       : _LARGE_INTEGER 0x00000002`00000001
    +0x010 Child            : (null) 
    +0x014 PODObject        : PODType";
         public const string VtableAddr = "0x49beb8";

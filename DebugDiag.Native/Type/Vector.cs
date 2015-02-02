@@ -17,7 +17,7 @@ namespace DebugDiag.Native.Type
 
         #region Type Implementation
 
-        internal override void OnCreateInstance(string typename, Match match)
+        public override void OnCreateInstance(string typename, Match match)
         {
             Debug.Assert(match.Groups.Count == 2, "Vector expects only one group");
 

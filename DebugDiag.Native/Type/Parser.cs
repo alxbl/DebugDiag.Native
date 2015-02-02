@@ -35,10 +35,12 @@ namespace DebugDiag.Native.Type
         /// <typeparam name="T">Restricts this method to be called with types that extend UserType.</typeparam>
         /// <param name="pattern">A compiled regular expression user to match against this type.</param>
         /// <param name="type"></param>
-        public static void RegisterUserType<T>(Regex pattern, T type) where T : UserType
+        public static void RegisterUserType(Regex pattern, System.Type type)
         {
+            if (!type.IsSubclassOf(typeof(UserType))) throw new ArgumentException("Only user types can be registered.");
+
             Debug.Assert(pattern != null && type != null);
-            RegisteredUserTypes[pattern] = type.GetType();
+            RegisteredUserTypes[pattern] = type;
         }
 
         #endregion
@@ -86,6 +88,7 @@ namespace DebugDiag.Native.Type
             if (String.Syntax.IsMatch(typename)) return true;
 
             // Real native types.
+            if (typename.Equals("_LARGE_INTEGER")) return true;
             if (typename.Equals("Char")) return true;
             if (typename.Equals("UChar")) return true;
             if (typename.Equals("Int2B")) return true;

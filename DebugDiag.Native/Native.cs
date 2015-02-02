@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Text.RegularExpressions;
 using DebugDiag.DotNet;
 using DebugDiag.Native.Type;
@@ -11,7 +12,6 @@ namespace DebugDiag.Native
     public static class Native
     {
         public static IDumpContext Context { get; private set; }
-    
         /// <summary>
         /// Initializes the native library with the dump context.
         /// This can be called multiple times to change the context.
@@ -19,14 +19,15 @@ namespace DebugDiag.Native
         /// <param name="context">The dump context that the native library will use.</param>
         public static void Initialize(IDumpContext context)
         {
+
             Context = context;
             // Register built-in user types. (Could be registered by reflection.)
             if (!_typesRegistered)
             {
-                Parser.RegisterUserType(Vector.Syntax, new Vector(""));
-                Parser.RegisterUserType(List.Syntax, new List(""));
-                Parser.RegisterUserType(Map.Syntax, new Map(""));
-                Parser.RegisterUserType(Set.Syntax, new Set(""));
+                Parser.RegisterUserType(Vector.Syntax, typeof(Vector));
+                Parser.RegisterUserType(List.Syntax, typeof(List));
+                Parser.RegisterUserType(Map.Syntax, typeof(Map));
+                Parser.RegisterUserType(Set.Syntax, typeof(Set));
                 //Parser.RegisterUserType();
                 _typesRegistered = true;
             }
@@ -130,6 +131,8 @@ namespace DebugDiag.Native
 
             try
             {
+                if (parse.Contains("`")) parse = parse.Remove(parse.IndexOf('`'), 1); // Handle long.
+
                 // Coerce negative values into ulong.
                 return parse.StartsWith("-") ? (ulong)Convert.ToInt64(parse) : Convert.ToUInt64(parse, isHex ? 16 : 10);
             }
