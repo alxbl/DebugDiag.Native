@@ -23,5 +23,12 @@ namespace DebugDiag.Native.Test
                 Assert.IsInstanceOfType(t, typeof(Map), "Could not parse " + m);
             }
         }
+
+        [TestMethod]
+        public void TestDeepCopyIntegrity()
+        {
+            // Use reflection to check if all fields are deep copied properly.
+            Assert.Inconclusive("Not implemented");
+        }
     }
 }

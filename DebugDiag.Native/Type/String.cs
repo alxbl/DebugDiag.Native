@@ -13,7 +13,7 @@ namespace DebugDiag.Native.Type
     {
         public const int WStringBufLen = 8; // The length of the std::wstring built-in buffer.
         public const int StringBufLen = 16; // The length of the std::string built-in buffer.
-        private readonly bool _isStl, _isWide;
+        private readonly bool _isStl, _isWide, _isPtr;
         private string _cache;
 
         public static readonly Regex Syntax = new Regex(@"^((\[\d+\]|Ptr32|Ptr64) (Wchar|Char))$|^std::basic_string<.*>$|^Wchar \*$|^Char \*$");
@@ -60,7 +60,7 @@ namespace DebugDiag.Native.Type
                 else
                 {
                     // When we are looking at a real string primitive, we already have the address of the string.
-                    ds = new DumpString(Address, _isWide, false);
+                    ds = new DumpString(Address, _isWide, _isPtr);
                 }
 
                 // Do we want to do some special handling of the returned value? That should probably be done in DumpString.Parse()
@@ -107,6 +107,7 @@ namespace DebugDiag.Native.Type
             _isStl = other._isStl;
             _isWide = other._isWide;
             _cache = other._cache;
+            _isPtr = other._isPtr; // For (w)char*
         }
         
         public String(string typename)
@@ -114,6 +115,7 @@ namespace DebugDiag.Native.Type
         {
             _isStl = typename.Contains("std::basic_string");
             _isWide = typename.Contains("wchar") || typename.Contains("Wchar");
+            _isPtr = typename.Contains("*") || typename.Contains("Ptr");
         }
         #endregion
     }

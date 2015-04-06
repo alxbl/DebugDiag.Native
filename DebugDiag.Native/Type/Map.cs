@@ -62,6 +62,7 @@ namespace DebugDiag.Native.Type
         {
             KeyType = other.KeyType;
             _elements = other._elements; // We can do shallow copies since these should never change.
+            _offset = other._offset;
         }
 
         public Map(string typename)
