@@ -1,5 +1,5 @@
 @echo off
-REM r * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+REM * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 REM This script copies the windbg extensions into the DebugDiag install folder.
 REM
 REM It will check for DebugDiag in the following locations:
@@ -10,7 +10,7 @@ REM     C:\Program Files\DebugDiag\
 REM
 REM If your install folder is not one of the above, you can override the install
 REM folder by setting the DEBUGDIAG environment variable to the proper path.
-REM r * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+REM * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 set IMGDIR=%~dp0
 IF NOT "%DEBUGDIAG%"=="" set ENVDD=%DEBUGDIAG%
 
