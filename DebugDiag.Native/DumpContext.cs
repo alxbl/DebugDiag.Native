@@ -65,7 +65,7 @@ namespace DebugDiag.Native
             private set { _progress = value; }
         }
 
-        public string Filename { get; private set; }
+        public string Filename { get { return Debugger.DumpFileShortName; } }
 
         public bool Is32Bit
         {

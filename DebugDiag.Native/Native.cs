@@ -3,6 +3,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using DebugDiag.DotNet;
 using DebugDiag.Native.Type;
+using DebugDiag.Native.Windbg;
 
 namespace DebugDiag.Native
 {
@@ -31,6 +32,9 @@ namespace DebugDiag.Native
                 //Parser.RegisterUserType();
                 _typesRegistered = true;
             }
+
+            // Load native extensions into the dump context.
+            new Load(Context.Is32Bit ? "NDbgExt.dll" : "NDbgExt64.dll").Execute();
         }
 
         /// <summary>

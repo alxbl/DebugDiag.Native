@@ -45,6 +45,7 @@ namespace DebugDiag.Native.Test.Mock
         /// </summary>
         static MockX86Dump()
         {
+            InputOutputMap[".load NDbgExt.dll"] = ""; // Success.
             #region VirtualType
             InputOutputMap["ln poi(0x49beb8)"] = X86.VtableLnPoi;
             InputOutputMap["ln poi(49beb8)"] = X86.VtableLnPoi;
