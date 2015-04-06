@@ -1,0 +1,21 @@
+; -------------------------------------------------------------------
+; NDbgExt.dll - Utilities for debugging native dumps.
+; Copyright (c) 2015 - Alexandre Beaulieu <alex@segfault.me>
+; See LICENSE for details.
+; -------------------------------------------------------------------
+
+EXPORTS
+;--------------------------------------------------------------------
+; Core exports provided by the ExtCpp framework.
+;--------------------------------------------------------------------
+
+    DebugExtensionInitialize
+    DebugExtensionUninitialize
+    DebugExtensionNotify
+    help
+
+;--------------------------------------------------------------------
+; Extension commands.
+;--------------------------------------------------------------------
+    map
+	set
