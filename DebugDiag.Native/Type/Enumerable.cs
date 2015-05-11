@@ -8,6 +8,9 @@ namespace DebugDiag.Native.Type
     /// </summary>
     public abstract class Enumerable : UserType, IEnumerable<NativeType>
     {
+        // Keep a cached copy of the instances to avoid constantly querying the dump file.
+        private List<NativeType> _elements;
+
         #region Public API
 
         /// <summary>
@@ -23,8 +26,22 @@ namespace DebugDiag.Native.Type
         #endregion
         #region Enumerable Interface
 
-        public abstract IEnumerator<NativeType> GetEnumerator();
+        public abstract IEnumerable<NativeType> EnumerateInternal();
 
+        public IEnumerator<NativeType> GetEnumerator()
+        {
+            if (_elements != null) 
+                foreach (var e in _elements) yield return e;
+            else
+            {
+                _elements = new List<NativeType>();
+                foreach (var e in EnumerateInternal())
+                {
+                    _elements.Add(e);
+                    yield return e;
+                }
+            }
+        }
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();

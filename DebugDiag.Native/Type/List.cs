@@ -7,9 +7,6 @@ namespace DebugDiag.Native.Type
     public sealed class List : Enumerable
     {
         public static readonly Regex Syntax = new Regex(@"^std::list<(.*),std::allocator<.*> >$");
-        // Keep a cached copy of the instances to avoid constantly querying the dump file.
-        private readonly List<NativeType> _elements = new List<NativeType>();
-        private bool _built;
         private NativeType _head;
 
         #region Constructor
@@ -22,7 +19,6 @@ namespace DebugDiag.Native.Type
         private List(List other)
             : base(other)
         {
-            _elements = other._elements;
         }
 
         public List(string typename)
@@ -49,15 +45,9 @@ namespace DebugDiag.Native.Type
             _head = GetField("_Myhead");
         }
 
-        public override IEnumerator<NativeType> GetEnumerator()
+        public override IEnumerable<NativeType> EnumerateInternal()
         {
             if (Size == 0) yield break;
-
-            if (_built)
-            {
-                foreach (var e in _elements) yield return e;
-                yield break;
-            }
 
             dynamic cur = _head.GetField("_Next");
             ulong idx = 0;
@@ -68,10 +58,8 @@ namespace DebugDiag.Native.Type
                 idx++;
                 NativeType e = cur._Myval;
                 cur = cur._Next;
-                _elements.Add(e);
                 yield return e;
             }
-            _built = true;
         }
 
         #endregion

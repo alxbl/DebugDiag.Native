@@ -7,9 +7,6 @@ namespace DebugDiag.Native.Type
     public sealed class Set : Enumerable
     {
         public static readonly Regex Syntax = new Regex(@"^std::set<(.*),.*,std::allocator<.*> >$");
-        private readonly List<NativeType> _elements = new List<NativeType>();
-
-        private bool _built;
         private Pointer _head;
 
         #region Type Implementation
@@ -22,31 +19,26 @@ namespace DebugDiag.Native.Type
             Debug.Assert(_head != null, "Set cannot have a null head node.");
         }
 
-        public override IEnumerator<NativeType> GetEnumerator()
+        public override IEnumerable<NativeType> EnumerateInternal()
         {
             if (Size == 0) yield break;
-            if (!_built)
-            {
-                dynamic root = _head.GetField("_Parent");
-                EnumerateSubtree(root);
-                _built = true;
-            }
-            foreach (var e in _elements) yield return e;
+            dynamic root = _head.GetField("_Parent");
+            yield return EnumerateSubtree(root);
         }
 
         /// <summary>
         /// In-order traversal of the tree.
         /// </summary>
         /// <param name="node">One node in the tree.</param>
-        private void EnumerateSubtree(dynamic node)
+        private IEnumerable<NativeType> EnumerateSubtree(dynamic node)
         {
-            if (node.PointsTo == _head.PointsTo) return; // base case: leaf node
-            EnumerateSubtree(node._Left);
+            if (node.PointsTo == _head.PointsTo) yield break; // base case: leaf node
+            yield return EnumerateSubtree(node._Left);
             
             var e = node._Myval;
-            _elements.Add(e);
+            yield return e;
             
-            EnumerateSubtree(node._Right);
+            yield return EnumerateSubtree(node._Right);
         }
 
         #endregion
@@ -65,7 +57,6 @@ namespace DebugDiag.Native.Type
         public Set(Set other)
             : base(other)
         {
-            _elements = other._elements;
         }
 
         public override void OnCreateInstance(string typename, Match match)

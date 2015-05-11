@@ -9,6 +9,8 @@ namespace DebugDiag.Native.Test
         [TestMethod]
         public void TestParseMap()
         {
+            // FIXME: This test fails because the fixtures don't not exist.
+            // TODO: Implement a Map fixture generator.
             var maps = new[]
                        {
                            "std::map<int,Foo *,std::less<int>,std::allocator<std::pair<int const ,Foo *> > >",

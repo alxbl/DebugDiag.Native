@@ -8,9 +8,6 @@ namespace DebugDiag.Native.Type
     public sealed class Vector : Enumerable
     {
         public static readonly Regex Syntax = new Regex(@"^std::vector<(.*),std::allocator<.*> >$");
-        // Keep a cached copy of the instances to avoid constantly querying the dump file.
-        private readonly List<NativeType> _elements = new List<NativeType>();
-        private bool _built;
         private ulong _first, _last, _end, _elementSize;
 
         public ulong Capacity { get; private set; }
@@ -25,26 +22,18 @@ namespace DebugDiag.Native.Type
             ValueType = Parser.Parse(match.Groups[1].Value);
         }
 
-        public override IEnumerator<NativeType> GetEnumerator()
+        public override IEnumerable<NativeType> EnumerateInternal()
         {
             if (Size == 0) yield break;
-
-            if (_built) // Use the cached elements if possible.
-            {
-                foreach (var e in _elements) yield return e;
-                yield break;
-            }
 
             // Build the list of elements.
             ulong idx = 0;
             while (idx < Size)
             {
                 var e = ValueType.RebaseAt(_first + idx * _elementSize);
-                _elements.Add(e);
                 idx++;
                 yield return e;
             }
-            _built = true; // Cache the iterated list for future iterations.
         }
 
         protected override void Rebase()
@@ -82,7 +71,6 @@ namespace DebugDiag.Native.Type
         private Vector(Vector other)
             : base(other)
         {
-            _elements = other._elements;
         }
 
         public Vector(string typename)

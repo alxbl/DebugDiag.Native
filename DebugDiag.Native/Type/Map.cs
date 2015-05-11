@@ -9,8 +9,6 @@ namespace DebugDiag.Native.Type
     public sealed class Map : Enumerable
     {
         public static readonly Regex Syntax = new Regex(@"^std::map<(.*),(.*),.*,std::allocator<(std::pair<.*>) > >$");
-        // Keep a cached copy of the instances to avoid constantly querying the dump file.
-        private readonly List<Pair> _elements = new List<Pair>();
         private ulong _offset; // The offset of std::pair<K,V>::second
 
         public NativeType KeyType { get; private set; }
@@ -23,18 +21,17 @@ namespace DebugDiag.Native.Type
             Size = GetIntValue("_Mysize");
         }
 
-        public override IEnumerator<NativeType> GetEnumerator()
+        public override IEnumerable<NativeType> EnumerateInternal()
         {
             if (Size == 0) yield break;
-            if (_elements.Count == 0)
-            {
-                // If there are no elements in the list, we need to extract it from the dump.
-                // This will only extract the base address of the pairs to maximize performance.
-                var foreachStl = new ForeachStl(ForeachStl.Type.Map, Address);
-                _elements.AddRange(foreachStl.GetElements().Select(x => new Pair(){Address = x, IsInstance = false, First = null, Second = null}));
-            }
+            
+            var elements = new List<Pair>();
+            // This will only extract the base address of the pairs to maximize performance.
+            var foreachStl = new ForeachStl(ForeachStl.Type.Map, Address);
+                
+            elements.AddRange(foreachStl.GetElements().Select(x => new Pair(){Address = x, IsInstance = false, First = null, Second = null}));
 
-            foreach (var e in _elements)
+            foreach (var e in elements)
             {
                 if (!e.IsInstance)
                 {
@@ -61,7 +58,6 @@ namespace DebugDiag.Native.Type
             : base(other)
         {
             KeyType = other.KeyType;
-            _elements = other._elements; // We can do shallow copies since these should never change.
             _offset = other._offset;
         }
 
