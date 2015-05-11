@@ -115,7 +115,7 @@ namespace DebugDiag.Native.Type
         {
             _isStl = typename.Contains("std::basic_string");
             _isWide = typename.Contains("wchar") || typename.Contains("Wchar");
-            _isPtr = typename.Contains("*") || typename.Contains("Ptr");
+            _isPtr = typename.Contains("**"); // (w)char ** -> need to use poi()
         }
         #endregion
     }
