@@ -2,7 +2,6 @@
 #include "../stdafx.h"
 
 #include "RBT.h"
-#include <string>
 
 class Map : public RBT
 {

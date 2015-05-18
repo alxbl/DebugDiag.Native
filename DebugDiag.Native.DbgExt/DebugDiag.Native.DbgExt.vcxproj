@@ -266,6 +266,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="commands\Command.h" />
+    <ClInclude Include="commands\Container.h" />
+    <ClInclude Include="commands\List.h" />
     <ClInclude Include="commands\Map.h" />
     <ClInclude Include="commands\RBT.h" />
     <ClInclude Include="commands\Set.h" />
@@ -273,6 +275,8 @@
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="commands\Container.cpp" />
+    <ClCompile Include="commands\List.cpp" />
     <ClCompile Include="commands\Map.cpp" />
     <ClCompile Include="commands\RBT.cpp" />
     <ClCompile Include="commands\Set.cpp" />

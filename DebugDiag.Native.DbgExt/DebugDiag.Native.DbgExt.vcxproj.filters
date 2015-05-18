@@ -33,6 +33,12 @@
     <ClInclude Include="commands\Set.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="commands\Container.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="commands\List.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Memory.cpp">
@@ -48,6 +54,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="commands\Set.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="commands\Container.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="commands\List.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

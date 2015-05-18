@@ -26,7 +26,8 @@ void Map::Traverse() // override
     {
         return;
     }
-    else if (GetSkip() >= (ULONG64)size)
+    
+    if (GetSkip() >= (ULONG64)size)
     {
         Out("Skipped all elements.\r\n");
         return;
