@@ -1,13 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text.RegularExpressions;
+using DebugDiag.Native.Windbg;
 
 namespace DebugDiag.Native.Type
 {
     public sealed class Set : Enumerable
     {
         public static readonly Regex Syntax = new Regex(@"^std::set<(.*),.*,std::allocator<.*> >$");
-        private Pointer _head;
 
         #region Type Implementation
 
@@ -15,30 +16,16 @@ namespace DebugDiag.Native.Type
         {
             base.Rebase();
             Size = GetIntValue("_Mysize");
-            _head = GetField("_Myhead") as Pointer;
-            Debug.Assert(_head != null, "Set cannot have a null head node.");
         }
 
         public override IEnumerable<NativeType> EnumerateInternal()
         {
             if (Size == 0) yield break;
-            dynamic root = _head.GetField("_Parent");
-            yield return EnumerateSubtree(root);
-        }
 
-        /// <summary>
-        /// In-order traversal of the tree.
-        /// </summary>
-        /// <param name="node">One node in the tree.</param>
-        private IEnumerable<NativeType> EnumerateSubtree(dynamic node)
-        {
-            if (node.PointsTo == _head.PointsTo) yield break; // base case: leaf node
-            yield return EnumerateSubtree(node._Left);
-            
-            var e = node._Myval;
-            yield return e;
-            
-            yield return EnumerateSubtree(node._Right);
+            var foreachStl = new ForeachStl(ForeachStl.Type.Set, Address);
+
+            foreach (var e in foreachStl.GetElements())
+                yield return AtAddress(e, ValueType.TypeName);
         }
 
         #endregion

@@ -5,12 +5,11 @@ namespace DebugDiag.Native.Test.Fixtures.Generators
 {
     internal class PodType : Generator
     {
-        private readonly ulong _addr;
         private int _value;
 
         public PodType(ulong addr, int value)
         {
-            _addr = addr;
+            Address = addr;
             _value = value;
         }
 
@@ -28,7 +27,7 @@ namespace DebugDiag.Native.Test.Fixtures.Generators
 
         public override IEnumerable<KeyValuePair<string, string>> GenerateInternal()
         {
-            var kv = new KeyValuePair<string, string>(string.Format("dt {0:x} PODType", Address),
+            var kv = new KeyValuePair<string, string>(string.Format("dt 0x{0:x} PODType", Address),
                 string.Format(@"   +0x000 Offset1          : 0n{0}
    +0x004 Offset2          : 0n{0}
    +0x008 Offset3          : 0n{0}", _value++));

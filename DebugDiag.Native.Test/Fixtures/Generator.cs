@@ -40,11 +40,12 @@ namespace DebugDiag.Native.Test.Fixtures
         /// <returns></returns>
         public abstract IEnumerable<KeyValuePair<string, string>> GenerateInternal();
 
-        public IEnumerator<KeyValuePair<string, string>> Generate()
+        public IEnumerable<KeyValuePair<string, string>> Generate(bool generateTypeInfo = true)
         {
             foreach (var f in GenerateInternal())
                 yield return f;
-            yield return GetTypeInfo(); // Last because some primitive types can set it to null.
+            
+            if (generateTypeInfo) yield return GetTypeInfo(); // Last because some primitive types can set it to null.
         }
 
         #endregion
@@ -52,7 +53,7 @@ namespace DebugDiag.Native.Test.Fixtures
 
         public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
         {
-            return Generate();
+            return Generate().GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

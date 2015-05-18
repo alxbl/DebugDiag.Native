@@ -75,7 +75,7 @@ namespace DebugDiag.Native.Windbg
         #endregion
         #region Private
 
-        private static readonly Regex LineFormat = new Regex(@" +(\+0x|=)([0-9a-fA-F]+) ([A-Za-z_][A-Za-z0-9_]+) +: +([^\n\r]*)");
+        private static readonly Regex LineFormat = new Regex(@"\s*(\+0x|=)([0-9a-fA-F]+) ([A-Za-z_][A-Za-z0-9_]+) +: +([^\n\r]*)");
         private static readonly Regex BitfieldFormat = new Regex(@"Pos (\d+), (\d+) Bits?");
         private readonly IList<Line> _lines = new List<Line>();
         private readonly string _command; // The windbg command to run.

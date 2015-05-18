@@ -528,8 +528,10 @@ namespace DebugDiag.Native
             _rawMem = other._rawMem;
 
             // Copy offset tables.
-            foreach (var o in other._nameLookup) _nameLookup.Add(o.Key, o.Value.DeepCopy());
-            foreach (var o in other._offsetLookup) _offsetLookup.Add(o.Key, o.Value.DeepCopy());
+            foreach (var o in other._nameLookup) 
+                _nameLookup.Add(o.Key, o.Value.DeepCopy());
+            foreach (var o in other._offsetLookup) 
+                _offsetLookup.Add(o.Key, o.Value.DeepCopy());
         }
 
         #endregion

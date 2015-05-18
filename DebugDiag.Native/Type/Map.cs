@@ -10,6 +10,7 @@ namespace DebugDiag.Native.Type
     {
         public static readonly Regex Syntax = new Regex(@"^std::map<(.*),(.*),.*,std::allocator<(std::pair<.*>) > >$");
         private ulong _offset; // The offset of std::pair<K,V>::second
+        private string _allocator;
 
         public NativeType KeyType { get; private set; }
 
@@ -23,6 +24,13 @@ namespace DebugDiag.Native.Type
 
         public override IEnumerable<NativeType> EnumerateInternal()
         {
+            if (_offset == 0)
+            {
+                // Find the offset for the pair's `second`. Add the const keyword to match the actual std::pair type.
+                var pair = Preload(_allocator);
+                _offset = pair.GetOffset("second");
+            }
+
             if (Size == 0) yield break;
             
             var elements = new List<Pair>();
@@ -59,6 +67,7 @@ namespace DebugDiag.Native.Type
         {
             KeyType = other.KeyType;
             _offset = other._offset;
+            _allocator = other._allocator;
         }
 
         public Map(string typename)
@@ -72,11 +81,8 @@ namespace DebugDiag.Native.Type
 
             var first = match.Groups[1].Value;
             var second = match.Groups[2].Value;
-            var allocator = match.Groups[3].Value;
 
-            // Find the offset for the pair's `second`. Add the const keyword to match the actual std::pair type.
-            var pair = Preload(allocator);
-            _offset = pair.GetOffset("second");
+            _allocator = match.Groups[3].Value;
 
             // Create the native types for later instantiation
             KeyType = Parser.Parse(first);

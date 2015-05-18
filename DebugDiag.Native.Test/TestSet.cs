@@ -6,44 +6,44 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace DebugDiag.Native.Test
 {
     [TestClass]
-    public class TestList
+    public class TestSet
     {
         private const int Size = 3;
         private static readonly MockX86Dump Context = new MockX86Dump();
-        private static List _list;
-        private static List _emptyList;
+        private static Set _set;
+        private static Set _emptySet;
 
         [ClassInitialize]
         public static void Setup(TestContext ctx)
         {
             Native.Initialize(Context);
 
-            var gList = new Fixtures.Generators.List(0xeeeee, Size, new Fixtures.Generators.PodType(0, 1));
-            Context.AddFixture(gList);
-            _list = NativeType.AtAddress(gList.Address, gList.GetTypeName()) as List;
-            var gEmpty = new Fixtures.Generators.List(0xefefef, 0, new Fixtures.Generators.PodType(0, 0));
+            var gSet = new Fixtures.Generators.Set(0x6666, Size, new Fixtures.Generators.PodType(0, 1));
+            Context.AddFixture(gSet);
+            _set = NativeType.AtAddress(gSet.Address, gSet.GetTypeName()) as Set;
+            var gEmpty = new Fixtures.Generators.Set(0xefefef, 0, new Fixtures.Generators.PodType(0, 0));
             Context.AddFixture(gEmpty);
-            _emptyList = NativeType.AtAddress(gEmpty.Address, gEmpty.GetTypeName()) as List;
+            _emptySet = NativeType.AtAddress(gEmpty.Address, gEmpty.GetTypeName()) as Set;
 
-            Assert.IsNotNull(_list);
-            Assert.IsNotNull(_emptyList);
+            Assert.IsNotNull(_set);
+            Assert.IsNotNull(_emptySet);
         }
 
         [TestMethod]
-        public void TestListTypeParse()
+        public void TestSetTypeParse()
         {
-            var l = _list;
-            Assert.IsNotNull(l.ValueType);
-            Assert.IsInstanceOfType(l.ValueType, typeof(NativeType));
-            Assert.AreEqual("PODType", l.ValueType.TypeName);
+            var s = _set;
+            Assert.IsNotNull(s.ValueType);
+            Assert.IsInstanceOfType(s.ValueType, typeof(NativeType));
+            Assert.AreEqual("PODType", s.ValueType.TypeName);
         }
 
         [TestMethod]
-        public void TestListEnumerate()
+        public void TestSetEnumerate()
         {
-            var l = _list;
+            var s = _set;
             var i = 0UL;
-            foreach (var e in l)
+            foreach (var e in s)
             {
                 Assert.IsNotNull(e);
                 Assert.IsInstanceOfType(e, typeof(NativeType));
@@ -56,9 +56,9 @@ namespace DebugDiag.Native.Test
         }
 
         [TestMethod]
-        public void TestListEnumerateDynamic()
+        public void TestSetEnumerateDynamic()
         {
-            dynamic l = NativeType.AtAddress(_list.Address, _list.TypeName);
+            dynamic l = NativeType.AtAddress(_set.Address, _set.TypeName);
             Assert.IsNotNull(l);
 
             ulong count = 0;
@@ -72,16 +72,16 @@ namespace DebugDiag.Native.Test
         }
 
         [TestMethod]
-        public void TestListSize()
+        public void TestSetSize()
         {
-            Assert.AreEqual((ulong)Size, _list.Size);
+            Assert.AreEqual((ulong)Size, _set.Size);
         }
 
         [TestMethod]
-        public void TestEmptyList()
+        public void TestEmptySet()
         {
-            Assert.AreEqual(0UL, _emptyList.Size);
-            int i = _emptyList.Count(); // foreach sanity check (shouldn't throw)
+            Assert.AreEqual(0UL, _emptySet.Size);
+            int i = _emptySet.Count(); // foreach sanity check (shouldn't throw)
             Assert.AreEqual(0, i);
         }
     }

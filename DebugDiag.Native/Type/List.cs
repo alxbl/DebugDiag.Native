@@ -1,13 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text.RegularExpressions;
+using DebugDiag.Native.Windbg;
 
 namespace DebugDiag.Native.Type
 {
     public sealed class List : Enumerable
     {
         public static readonly Regex Syntax = new Regex(@"^std::list<(.*),std::allocator<.*> >$");
-        private NativeType _head;
 
         #region Constructor
 
@@ -42,23 +43,16 @@ namespace DebugDiag.Native.Type
         {
             base.Rebase(); // Let NativeType identify the list's members.
             Size = GetIntValue("_Mysize");
-            _head = GetField("_Myhead");
         }
 
         public override IEnumerable<NativeType> EnumerateInternal()
         {
             if (Size == 0) yield break;
 
-            dynamic cur = _head.GetField("_Next");
-            ulong idx = 0;
-            
-            // Traverse the linked list.
-            while (idx < Size)
+            var foreachStl = new ForeachStl(ForeachStl.Type.List, Address);
+            foreach (var e in foreachStl.GetElements())
             {
-                idx++;
-                NativeType e = cur._Myval;
-                cur = cur._Next;
-                yield return e;
+                yield return AtAddress(e, ValueType.TypeName);
             }
         }
 

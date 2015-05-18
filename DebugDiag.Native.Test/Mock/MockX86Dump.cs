@@ -105,20 +105,6 @@ namespace DebugDiag.Native.Test.Mock
             InputOutputMap["dt 0x5bd398 DebugDiag_Native_Test_App!PODType"] = X86.PtrVectorElem3;
 
             #endregion
-            #region List
-
-            InputOutputMap["dt 0 std::_List_node<PODType,void *>"] = X86.DtListNode;
-            InputOutputMap[String.Format("dt 0 {0}", X86.List)] = X86.DtList;
-            InputOutputMap[String.Format("dt {0} {1}", X86.ListAddr, X86.List)] = X86.DtListInst;
-            InputOutputMap["dt 0x28d720 std::_List_node<PODType,void *>"] = X86.DtListHead;
-            InputOutputMap["dt 0x28daf0 std::_List_node<PODType,void *>"] = X86.DtListNode1;
-            InputOutputMap["dt 0x28daf8 PODType"] = X86.DtListElem1;
-            InputOutputMap["dt 0x28db40 std::_List_node<PODType,void *>"] = X86.DtListNode2;
-            InputOutputMap["dt 0x28db48 PODType"] = X86.DtListElem2;
-            InputOutputMap["dt 0x28db90 std::_List_node<PODType,void *>"] = X86.DtListNode3;
-            InputOutputMap["dt 0x28db98 PODType"] = X86.DtListElem3;
-
-            #endregion
         }
 
         private static readonly IDictionary<string, string> InputOutputMap = new Dictionary<string, string>();

@@ -31,6 +31,10 @@ namespace DebugDiag.Native.Windbg
             {
                 case Type.Map:
                     return string.Format("!map 0x{0:x}", _addr);
+                case Type.Set:
+                    return string.Format("!set 0x{0:x}", _addr);
+                case Type.List:
+                    return string.Format("!list 0x{0:x}", _addr);
                 default:
                     throw new InvalidOperationException(string.Format("ForeachStl: Unsupported container type {0}", _type));
             }
