@@ -37,20 +37,17 @@ namespace DebugDiag.Native.Type
             // This will only extract the base address of the pairs to maximize performance.
             var foreachStl = new ForeachStl(ForeachStl.Type.Map, Address);
                 
-            elements.AddRange(foreachStl.GetElements().Select(x => new Pair(){Address = x, IsInstance = false, First = null, Second = null}));
+            elements.AddRange(foreachStl.GetElements().Select(x => new Pair(){TypeName = _allocator, Address = x, IsInstance = false, First = null, Second = null}));
 
             foreach (var e in elements)
             {
-                if (!e.IsInstance)
-                {
-                    // This is our first iteration on this collection, we need to instantiate the dump objects.
-                    // Pair has its data embedded directly in the type, so we can use offset manipulations.
-                    // TODO: Possible Optimization when (KeyType is Primitive) or (ValueType is Primitive)?
-                    // -> Get the value directly instead of going through .AtAddress.
-                    e.First = AtAddress(e.Address, KeyType.TypeName);
-                    e.Second = AtAddress(e.Address + _offset, ValueType.TypeName);
-                    e.IsInstance = true;
-                }
+                // This is our first iteration on this collection, we need to instantiate the dump objects.
+                // Pair has its data embedded directly in the type, so we can use offset manipulations.
+                // TODO: Possible Optimization when (KeyType is Primitive) or (ValueType is Primitive)?
+                // -> Get the value directly instead of going through .AtAddress.
+                e.First = AtAddress(e.Address, KeyType.TypeName);
+                e.Second = AtAddress(e.Address + _offset, ValueType.TypeName);
+                e.IsInstance = true;
                 yield return e;
             }
         }

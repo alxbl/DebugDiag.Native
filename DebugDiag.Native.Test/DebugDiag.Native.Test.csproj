@@ -63,10 +63,12 @@
     <Compile Include="Fixtures\Generators\Map.cs" />
     <Compile Include="Fixtures\Generators\PodType.cs" />
     <Compile Include="Fixtures\Generators\Set.cs" />
+    <Compile Include="Fixtures\Generators\Integer.cs" />
     <Compile Include="Fixtures\Generators\String.cs" />
     <Compile Include="Fixtures\x86.cs" />
     <Compile Include="Mock\MockX86Dump.cs" />
     <Compile Include="TestGuid.cs" />
+    <Compile Include="TestInteger.cs" />
     <Compile Include="TestList.cs" />
     <Compile Include="TestMap.cs" />
     <Compile Include="TestNativeType.cs" />

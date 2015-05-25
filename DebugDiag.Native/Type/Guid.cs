@@ -54,6 +54,14 @@ namespace DebugDiag.Native.Type
         }
 
         #endregion
+        #region Casts
+
+        protected override ulong ToUInt64()
+        {
+            throw new InvalidCastException("Guid cannot be cast to an integer");
+        }
+
+        #endregion
         #region Constructor
 
         protected override NativeInstance DeepCopy()

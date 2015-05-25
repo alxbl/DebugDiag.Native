@@ -403,29 +403,5 @@ namespace DebugDiag.Native.Test
             foreach (var v in valids) Assert.IsTrue(Parser.PrimitiveSyntax.IsMatch(v), "Expected primitive typename match for {0}", v);
             foreach (var i in invalids) Assert.IsFalse(Parser.PrimitiveSyntax.IsMatch(i), "Expected non primitive match for {0}", i);
         }
-
-        [TestMethod]
-        public void TestCastPrimitiveToInteger()
-        {
-            Assert.Inconclusive("Not implemented.");
-        }
-
-        [TestMethod]
-        public void TestCastPrimitiveToString()
-        {
-            Assert.Inconclusive("Not implemented.");
-        }
-
-        [TestMethod]
-        public void TestCastNonPrimitiveToInteger()
-        {
-            Assert.Inconclusive("Not implemented.");
-        }
-
-        [TestMethod]
-        public void TestCastNonPrimitiveToString()
-        {
-            Assert.Inconclusive("Not implemented.");
-        }
     }
 }

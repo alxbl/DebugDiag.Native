@@ -46,10 +46,14 @@ namespace DebugDiag.Native.Test
             foreach (var e in s)
             {
                 Assert.IsNotNull(e);
-                Assert.IsInstanceOfType(e, typeof(NativeType));
+                Assert.IsInstanceOfType(e, typeof(Pair));
                 Assert.IsTrue(e.IsInstance);
-                Assert.AreEqual("PODType", e.TypeName);
-                Assert.AreEqual(i + 1, e.GetField("Offset1"));
+                var kv = e as Pair;
+                Assert.IsNotNull(kv);
+                
+                Assert.IsTrue(kv.First is Integer);
+                Assert.AreEqual("PODType", kv.Second.TypeName);
+                Assert.AreEqual(i + 1, kv.Second.GetField("Offset1"));
                 i++;
             }
             Assert.AreEqual((ulong)Size, i);

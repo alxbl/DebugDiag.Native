@@ -44,7 +44,7 @@ namespace DebugDiag.Native.Windbg
             {
                 // Any failure here will result in the command failing.
                 // ReSharper disable once PossibleNullReferenceException
-                _value = (TType) TypeDescriptor.GetConverter(typeof (TType)).ConvertFromString(output.Split(' ')[1]);
+                _value = (TType) TypeDescriptor.GetConverter(typeof (TType)).ConvertFromString(output.Split(' ').Last());
             }
             catch (Exception ex)
             {

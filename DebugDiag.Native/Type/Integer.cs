@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DebugDiag.Native.Windbg;
 
 namespace DebugDiag.Native.Type
 {
@@ -15,16 +16,6 @@ namespace DebugDiag.Native.Type
     public sealed class Integer : Primitive
     {
         private ulong? _value; // 64 bits should fit every native type.
-
-        public Integer(string typename) : base(typename)
-        {
-            _value = null; // Default value is invalid.
-        }
-
-        public Integer(Integer other) : base(other)
-        {
-            _value = other._value;
-        }
 
         #region Type Implementation
 
@@ -65,41 +56,75 @@ namespace DebugDiag.Native.Type
 
         #region Casts
 
+        // TODO: Is it a good idea to have different behaviors when the value was read directly vs. read implicitly?
+        // Behavior on implicit read: The real type is known in the dump, so it's possible to cast only those bytes.
+        // Behavior on explicit read: The caller is asking to interpret an address as a type. Casting will change the number of bytes read.
+
         protected override uint ToUInt32()
         {
-            return _value.HasValue ? (uint)_value : uint.MaxValue;
+            if (_value.HasValue) return (uint)_value.Value;
+            var val = new Format<uint>("unsigned int", Address);
+            return val.Value;
         }
 
         protected override long ToInt64()
         {
-            return _value.HasValue ? (long)_value : long.MaxValue;
+            if (_value.HasValue) return (long)_value.Value;
+            var val = new Format<long>("long", Address);
+            return val.Value;
         }
 
         protected override int ToInt32()
         {
-            return _value.HasValue ? (int)_value : int.MaxValue;
+            if (_value.HasValue) return (int)_value.Value;
+            var val = new Format<int>("int", Address);
+            return val.Value;
         }
 
         protected override bool ToBool()
         {
-            return _value.HasValue && _value != 0;
+            if (_value.HasValue) return _value.Value != 0;
+            var val = new Format<bool>("bool", Address);
+            return val.Value;
         }
 
         protected override ulong ToUInt64()
         {
-            return _value ?? ulong.MaxValue;
+            if (_value.HasValue) return _value.Value;
+            var val = new Format<ulong>("unsigned long", Address);
+            return val.Value;
         }
 
         protected override double ToDouble()
         {
-            return _value.HasValue ? (double) _value : double.NaN;
+            if (_value.HasValue) return _value.Value;
+            var val = new Format<double>("double", Address);
+            return val.Value;
         }
         
         protected override float ToFloat()
         {
-            return _value.HasValue ? (float)_value : float.NaN;
+            if (_value.HasValue) return _value.Value;
+            var val = new Format<float>("float", Address);
+            return val.Value;
         }
 
+        #endregion
+        #region Constructor
+        protected override NativeInstance DeepCopy()
+        {
+            return new Integer(this);
+        }
+
+        public Integer(string typename) : base(typename)
+        {
+            _value = null; // Default value is invalid.
+        }
+
+        public Integer(Integer other) : base(other)
+        {
+            _value = other._value;
+        }
         #endregion
     }
 }
