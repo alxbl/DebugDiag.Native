@@ -396,9 +396,12 @@ namespace DebugDiag.Native.Test
         }
 
         [TestMethod]
-        public void TestGetPrimitiveString()
+        public void TestPrimitiveTypenameParsing()
         {
-            Assert.Inconclusive("Not implemented.");
+            var valids = new[] {"char", "Uchar", "int", "Int4B", "int8B", "_LARGE_INTEGER", "Uint", "UInt", "Uint2B"}; // float
+            var invalids = new[] { "char32", "Integer", "std::list<int>", "int32_t", "Byte", "Uint3B", "Uint8b"};
+            foreach (var v in valids) Assert.IsTrue(Parser.PrimitiveSyntax.IsMatch(v), "Expected primitive typename match for {0}", v);
+            foreach (var i in invalids) Assert.IsFalse(Parser.PrimitiveSyntax.IsMatch(i), "Expected non primitive match for {0}", i);
         }
 
         [TestMethod]

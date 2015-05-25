@@ -14,6 +14,11 @@ namespace DebugDiag.Native.Type
     public static class Parser
     {
         /// <summary>
+        /// Regular Expression to match a typename and determine if it is a primitive type.
+        /// </summary>
+        public static Regex PrimitiveSyntax = new Regex(@"^(_LARGE_INTEGER$|U?[Ii]nt([248]B)?|U?[Cc]har)$");
+
+        /// <summary>
         /// Decomposes a complex type into its type tree.
         /// </summary>
         /// <param name="typename">The string representing the type.</param>
@@ -32,7 +37,6 @@ namespace DebugDiag.Native.Type
         /// against each type in its registered user types. If a match is found, the type parser will create an dt
         /// of that user type and return it.
         /// </summary>
-        /// <typeparam name="T">Restricts this method to be called with types that extend UserType.</typeparam>
         /// <param name="pattern">A compiled regular expression user to match against this type.</param>
         /// <param name="type"></param>
         public static void RegisterUserType(Regex pattern, System.Type type)
@@ -82,22 +86,13 @@ namespace DebugDiag.Native.Type
 
         private static bool IsPrimitive(string typename)
         {
+            // Real native types.
+            if (PrimitiveSyntax.IsMatch(typename)) return true;
+
             // These types are treated as though they were native, and bypass the user type extension framework.
             if (Guid.Syntax.IsMatch(typename)) return true;
             if (Pointer.Syntax.IsMatch(typename)) return true;
             if (String.Syntax.IsMatch(typename)) return true;
-
-            // Real native types.
-            if (typename.Equals("_LARGE_INTEGER")) return true;
-            if (typename.Equals("Char")) return true;
-            if (typename.Equals("UChar")) return true;
-            if (typename.Equals("Int2B")) return true;
-            if (typename.Equals("Uint2B")) return true;
-            if (typename.Equals("Int4B")) return true;
-            if (typename.Equals("Uint4B")) return true;
-            if (typename.Equals("Int8B")) return true;
-            if (typename.Equals("Uint8B")) return true;
-
             return false;
         }
 
