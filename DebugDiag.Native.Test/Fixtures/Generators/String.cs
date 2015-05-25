@@ -97,10 +97,14 @@ namespace DebugDiag.Native.Test.Fixtures.Generators
             switch (_type)
             {
                 case StringFormat.Wide:
+                    yield return new KeyValuePair<string, string>(string.Format(".printf \"%mu\", poi(0x{0:x})", _addr), _string);
+                    break;
                 case StringFormat.ArrayWide:
                     yield return new KeyValuePair<string, string>(string.Format(".printf \"%mu\", 0x{0:x}", _addr), _string);
                     break;
                 case StringFormat.Narrow:
+                    yield return new KeyValuePair<string, string>(string.Format(".printf \"%ma\", poi(0x{0:x})", _addr), _string);
+                    break;
                 case StringFormat.ArrayNarrow:
                     yield return new KeyValuePair<string, string>(string.Format(".printf \"%ma\", 0x{0:x}", _addr), _string);
                     break;
