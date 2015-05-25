@@ -57,11 +57,11 @@ namespace DebugDiag.Native.Test
             Context.AddFixture(guid);
 
             var t = NativeType.AtAddress(addr, guid.GetTypeName());
-            Assert.AreEqual(string.Format("{{{0}}}", expected), t.GetStringValue());
+            Assert.AreEqual(string.Format("{{{0}}}", expected), (string)t);
         }
 
         [TestMethod]
-        [ExpectedException((typeof(InvalidOperationException)))]
+        [ExpectedException((typeof(InvalidCastException)))]
         public void TestGetIntValueGuid()
         {
             const ulong addr = 0x1003;
@@ -70,7 +70,7 @@ namespace DebugDiag.Native.Test
             Context.AddFixture(guid);
 
             var t = NativeType.AtAddress(addr, guid.GetTypeName());
-            t.GetIntValue();
+            ulong asUlong = t;
         }
 
         [TestMethod]

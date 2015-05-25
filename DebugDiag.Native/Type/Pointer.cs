@@ -43,12 +43,6 @@ namespace DebugDiag.Native.Type
             return Dereference.GetField(offset);
         }
 
-        public override ulong GetIntValue()
-        {
-            LazyDereference();
-            return Dereference != null ? Dereference.GetIntValue() : 0;
-        }
-
         protected override void Rebase()
         {
             // We don't call base.Rebase() because a pointer is a (special) primitive.
@@ -119,6 +113,21 @@ namespace DebugDiag.Native.Type
             // Use the standardized pointer type.
             PointedType = Parser.Parse(TypeName.Substring(0, TypeName.Length - 1).TrimEnd());
             PointsTo = ulong.MaxValue;
+        }
+
+        #endregion
+        #region Casts
+
+        protected override ulong ToUInt64()
+        {
+            LazyDereference();
+            return Dereference != null ? (ulong)Dereference : 0;
+        }
+
+        protected override long ToInt64()
+        {
+            LazyDereference();
+            return Dereference != null ? (long)Dereference : 0;
         }
 
         #endregion

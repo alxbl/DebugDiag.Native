@@ -23,8 +23,7 @@ namespace DebugDiag.Native.Type
         {
             get
             {
-                if (string.IsNullOrEmpty(_cache)) GetStringValue();
-                return _cache.Length;
+                return (string.IsNullOrEmpty(_cache)) ? ToString().Length : _cache.Length;
             }
         }
 
@@ -40,7 +39,7 @@ namespace DebugDiag.Native.Type
             return base.GetField(offset); // Allow GetField if the string is an STL string.
         }
 
-        public override string GetStringValue()
+        public override string ToString()
         {
             if (string.IsNullOrEmpty(_cache))
             {
@@ -50,9 +49,9 @@ namespace DebugDiag.Native.Type
                     // This next part warrants a bit of explanation: _Bx is a union of a buffer and pointer.
                     // If we determined that the string is too big to be stored in the local buffer, then we need to
                     // dump out the address that _Bx is pointing to. This is done by getting the raw memory at _Bx.
-                    var len = GetIntValue("_Mysize");
+                    var len = (int)GetField("_Mysize");
                     // Check if we need to use the pointer or the built-in buffer. Remove one from the buffer length to account for null terminator.
-                    bool isPtr = _isWide ? len > WStringBufLen - 1 : len > StringBufLen - 1;
+                    var isPtr = _isWide ? len > WStringBufLen - 1 : len > StringBufLen - 1;
 
                     // _Bx resides at offset 4 of the string object. If we're using a pointer, use poi(_Bx).
                     ds = new DumpString(Address + 4, _isWide, isPtr);
@@ -81,11 +80,6 @@ namespace DebugDiag.Native.Type
             if (_isStl) // This is an STL object, we need to inspect it.
                 base.Rebase();
             // Otherwise, this is a string primitive.
-        }
-
-        public override string ToString()
-        {
-            return GetStringValue();
         }
 
         protected override void Parse(string detail)

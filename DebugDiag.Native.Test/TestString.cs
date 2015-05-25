@@ -66,7 +66,7 @@ namespace DebugDiag.Native.Test
             Assert.IsTrue(t.IsInstance);
             Assert.IsTrue(t is Primitive);
             Assert.IsTrue(t is Type.String);
-            Assert.AreEqual(expected, t.GetStringValue());
+            Assert.AreEqual(expected, t);
         }
 
         [TestMethod]
@@ -87,7 +87,7 @@ namespace DebugDiag.Native.Test
             Assert.IsTrue(t.IsInstance);
             Assert.IsTrue(t is Primitive);
             Assert.IsTrue(t is Type.String);
-            Assert.AreEqual(expected, t.GetStringValue());
+            Assert.AreEqual(expected, t);
         }
 
         [TestMethod]
@@ -108,7 +108,7 @@ namespace DebugDiag.Native.Test
             Assert.IsTrue(t.IsInstance);
             Assert.IsTrue(t is Primitive);
             Assert.IsTrue(t is Type.String);
-            Assert.AreEqual(expected, t.GetStringValue());
+            Assert.AreEqual(expected, t);
         }
 
         [TestMethod]
@@ -123,7 +123,7 @@ namespace DebugDiag.Native.Test
             Assert.IsTrue(t.IsInstance);
             Assert.IsTrue(t is Primitive);
             Assert.IsTrue(t is Type.String);
-            Assert.AreEqual(expected, t.GetStringValue());
+            Assert.AreEqual(expected, t);
         }
 
         [TestMethod]
@@ -138,7 +138,7 @@ namespace DebugDiag.Native.Test
             Assert.IsTrue(t.IsInstance);
             Assert.IsTrue(t is Primitive);
             Assert.IsTrue(t is Type.String);
-            Assert.AreEqual(expected, t.GetStringValue());
+            Assert.AreEqual(expected, t);
         }
 
         [TestMethod]
@@ -153,7 +153,7 @@ namespace DebugDiag.Native.Test
             Assert.IsTrue(t.IsInstance);
             Assert.IsTrue(t is Primitive);
             Assert.IsTrue(t is Type.String);
-            Assert.AreEqual(expected, t.GetStringValue());
+            Assert.AreEqual(expected, t);
         }
 
         [TestMethod]
@@ -168,7 +168,7 @@ namespace DebugDiag.Native.Test
             Assert.IsTrue(t.IsInstance);
             Assert.IsTrue(t is Primitive);
             Assert.IsTrue(t is Type.String);
-            Assert.AreEqual(expected, t.GetStringValue());
+            Assert.AreEqual(expected, t);
         }
 
         [TestMethod]
@@ -183,7 +183,7 @@ namespace DebugDiag.Native.Test
             Assert.IsTrue(t.IsInstance);
             Assert.IsTrue(t is Primitive);
             Assert.IsTrue(t is Type.String);
-            Assert.AreEqual(expected, t.GetStringValue());
+            Assert.AreEqual(expected, t);
         }
     }
 }

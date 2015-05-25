@@ -89,6 +89,7 @@
     <Compile Include="NativeType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Windbg\ForeachStl.cs" />
+    <Compile Include="Windbg\Format.cs" />
     <Compile Include="Windbg\Load.cs" />
     <Compile Include="Windbg\SizeOf.cs" />
     <Compile Include="Windbg\TypeDoesNotExistException.cs" />

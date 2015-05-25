@@ -19,7 +19,7 @@ namespace DebugDiag.Native.Type
         protected override void Rebase()
         {
             base.Rebase();
-            Size = GetIntValue("_Mysize");
+            Size = GetField("_Mysize");
         }
 
         public override IEnumerable<NativeType> EnumerateInternal()
@@ -45,6 +45,8 @@ namespace DebugDiag.Native.Type
                 {
                     // This is our first iteration on this collection, we need to instantiate the dump objects.
                     // Pair has its data embedded directly in the type, so we can use offset manipulations.
+                    // TODO: Possible Optimization when (KeyType is Primitive) or (ValueType is Primitive)?
+                    // -> Get the value directly instead of going through .AtAddress.
                     e.First = AtAddress(e.Address, KeyType.TypeName);
                     e.Second = AtAddress(e.Address + _offset, ValueType.TypeName);
                     e.IsInstance = true;

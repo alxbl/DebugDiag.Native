@@ -114,46 +114,6 @@ namespace DebugDiag.Native
         }
 
         /// <summary>
-        /// Converts a primitive instance into its integer value.
-        /// </summary>
-        /// <returns>The raw memory at this instance's base address as a 64 bit integer.</returns>
-        public override ulong GetIntValue()
-        {
-            CheckInstance();
-            if (_rawMem.HasValue) return _rawMem.Value;
-            
-            var dp = new Dp(Address, 1);
-            _rawMem = dp.BytesAt(0);
-            return _rawMem.Value;
-        }
-
-        /// <summary>
-        /// Shortcut method for dumping out the integer value of a field.
-        /// </summary>
-        /// <param name="field">The name of the field in the current type.</param>
-        /// <returns>The raw memory at this instance's base address as a 64 bit integer.</returns>
-        public override ulong GetIntValue(string field)
-        {
-            return GetField(field).GetIntValue();
-        }
-
-        /// <summary>
-        /// Shortcut method for dumping out the integer value of a field.
-        /// </summary>
-        /// <param name="offset">The offset of the field in the current type.</param>
-        /// <returns>The raw memory at this instance's base address as a 64 bit integer.</returns>
-        public override ulong GetIntValue(ulong offset)
-        {
-            return GetField(offset).GetIntValue();
-        }
-
-        public override string GetStringValue()
-        {
-            CheckInstance();
-            throw new InvalidOperationException("Cannot retrieve string value of non-primitive.");
-        }
-
-        /// <summary>
         /// Returns the string representation of the NativeType instance.
         /// 
         /// Unless overridden, the default behavior is to return the typename, and its address.
@@ -186,7 +146,6 @@ namespace DebugDiag.Native
 
             typeInfo = Parser.Parse(type);
 
-            // TODO: Support NativeType.AtAddress for primitives. (This will currently fail)
             typeInfo.BuildOffsetTable(type);
 
             CacheType(typeInfo.TypeName, typeInfo);
@@ -248,59 +207,104 @@ namespace DebugDiag.Native
 
         #endregion
         #region Casts
-        public static explicit operator int(NativeType i)
-        {
-            return (int)i.GetIntValue();
-        }
 
+        /// <summary>
+        /// Allows to implicitly cast an instance to a string.
+        /// </summary>
+        /// <param name="i"></param>
+        /// <returns></returns>
+        public static implicit operator string(NativeType i)
+        {
+            return i.ToString();
+        }
+        
         public static explicit operator uint(NativeType i)
         {
-            return (uint)i.GetIntValue();
+            return i.ToUInt32();
         }
 
         public static explicit operator float(NativeType i)
         {
-            return i.GetIntValue();
+            return i.ToFloat();
         }
 
         public static explicit operator double(NativeType i)
         {
-            return i.GetIntValue();
+            return i.ToDouble();
         }
 
         public static explicit operator bool(NativeType i)
         {
-            return i.GetIntValue() != 0;
+            return i.ToBool();
         }
-
-        public static explicit operator char(NativeType i)
-        {
-            return (char)i.GetIntValue();
-        }
-
-        public static explicit operator string(NativeType i)
-        {
-            return i.ToString();
-        }
-
+        
         public static explicit operator long(NativeType i)
         {
-            return (long)i.GetIntValue();
+            return i.ToInt64();
         }
-
+        
         /// <summary>
-        /// Implicitly use Integer as a ulong.
+        /// Allows to implicitly cast an instance to an unsigned long.
         /// </summary>
         /// <param name="i"></param>
         /// <returns></returns>
         public static implicit operator ulong(NativeType i)
         {
-            return i.GetIntValue();
+            return i.ToUInt64();
         }
 
         #endregion
         #region Private API
+        #region Casting Default Implementation
 
+        private T RaiseUnsupportedCast<T>()
+        {
+            throw new InvalidCastException(string.Format("Cast from `{0}` to `{1}` is not supported", GetType().Name, typeof(T).Name));
+        }
+
+        // This implements a default behavior of failure for all casts.
+        protected override bool ToBool()
+        {
+            return RaiseUnsupportedCast<bool>();
+        }
+
+        protected override float ToFloat()
+        {
+            return RaiseUnsupportedCast<float>();
+        }
+
+        protected override double ToDouble()
+        {
+            return RaiseUnsupportedCast<double>();
+        }
+
+        protected override int ToInt32()
+        {
+            return RaiseUnsupportedCast<int>();
+        }
+
+        protected override uint ToUInt32()
+        {
+            return RaiseUnsupportedCast<uint>();
+        }
+
+        protected override long ToInt64()
+        {
+            return RaiseUnsupportedCast<long>();
+        }
+
+        protected override ulong ToUInt64()
+        {
+            CheckInstance();
+            if (_rawMem.HasValue) return _rawMem.Value;
+
+            var dp = new Dp(Address, 1); // TODO: Switch to Format()
+            _rawMem = dp.BytesAt(0);
+            return _rawMem.Value;
+        }
+
+
+        #endregion
         internal NativeType()
         {
             IsInstance = false; // When a default object is constructed, it is not an instance.
@@ -335,7 +339,7 @@ namespace DebugDiag.Native
         /// <summary>
         /// Checks that this type is instantiated, and throws an exception if it is not.
         /// </summary>
-        private void CheckInstance()
+        protected void CheckInstance()
         {
             if (!IsInstance) throw new InvalidOperationException("This method needs to be called on an instantiated type.");
         }

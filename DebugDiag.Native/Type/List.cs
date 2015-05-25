@@ -42,7 +42,7 @@ namespace DebugDiag.Native.Type
         protected override void Rebase()
         {
             base.Rebase(); // Let NativeType identify the list's members.
-            Size = GetIntValue("_Mysize");
+            Size = GetField("_Mysize");
         }
 
         public override IEnumerable<NativeType> EnumerateInternal()

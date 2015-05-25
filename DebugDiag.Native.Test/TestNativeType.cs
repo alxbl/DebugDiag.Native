@@ -98,15 +98,15 @@ namespace DebugDiag.Native.Test
             var field = t.GetField("POD");
             Assert.IsTrue(field is Primitive);
             Assert.AreEqual(X86.VtableAddrULong + t.GetOffset("POD"), field.Address);
-            Assert.AreEqual(8UL, field.GetIntValue());
+            Assert.AreEqual(8UL, field);
         }
 
         [TestMethod]
         public void TestGetIntValueField()
         {
             var t = NativeType.AtAddress(X86.VtableAddrULong);
-            Assert.AreEqual(0x0000000200000001UL, t.GetIntValue("MoreOffset"));
-            Assert.AreEqual(8UL, t.GetIntValue(0x004));
+            Assert.AreEqual(0x0000000200000001UL, t.GetField("MoreOffset"));
+            Assert.AreEqual(8UL, t.GetField(0x004));
         }
 
         [TestMethod]
@@ -115,7 +115,7 @@ namespace DebugDiag.Native.Test
             dynamic t = NativeType.AtAddress(X86.VtableAddrULong);
             dynamic field = t.POD;
             Assert.IsTrue(field is Primitive);
-            Assert.AreEqual(8UL, field.GetIntValue());
+            Assert.AreEqual(8UL, field);
         }
 
         [TestMethod]
@@ -135,7 +135,7 @@ namespace DebugDiag.Native.Test
             var t = NativeType.AtAddress(X86.VtableAddrULong);
             //var field = t.GetField(0x14);
             Assert.IsFalse(t is Primitive);
-            Assert.AreEqual(0x0114cc84UL, t.GetIntValue());
+            Assert.AreEqual(0x0114cc84UL, t);
         }
 
         [TestMethod]
@@ -163,7 +163,7 @@ namespace DebugDiag.Native.Test
             var field = t.GetField(0x4);
             Assert.IsTrue(field.IsInstance);
             Assert.IsTrue(field is Primitive);
-            Assert.AreEqual(8UL, field.GetIntValue());
+            Assert.AreEqual(8UL, field);
             field.GetField(0x0);
         }
 
@@ -188,7 +188,7 @@ namespace DebugDiag.Native.Test
             var field = t.GetField(0x0);
             Assert.IsTrue(field is Primitive);
             Assert.IsTrue(field.IsInstance);
-            Assert.AreEqual(42UL, field.GetIntValue());
+            Assert.AreEqual(42UL, field);
         }
 
         [TestMethod]
@@ -320,7 +320,7 @@ namespace DebugDiag.Native.Test
         {
             var t = NativeType.AtAddress(X86.PebAddr, "nt!_PEB");
             var field = t.GetField(0x3); // PEB->BitField
-            Assert.AreEqual(0x8UL, field.GetIntValue());
+            Assert.AreEqual(0x8UL, field);
         }
 
         [TestMethod]
@@ -344,7 +344,7 @@ namespace DebugDiag.Native.Test
             var f = t.GetField("IAmSoStatic");
             Assert.IsTrue(f is Primitive);
             Assert.IsTrue(f.IsStatic);
-            Assert.AreEqual(3UL, f.GetIntValue());
+            Assert.AreEqual(3UL, f);
         }
 
         // TODO: Enable this test and implement it.
@@ -382,7 +382,7 @@ namespace DebugDiag.Native.Test
             var offset1 = podType.GetField(0x000);
             Assert.AreNotSame(podType, offset1);
             // This will work because PODType has no vtable.
-            Assert.AreEqual(42UL, offset1.GetIntValue());
+            Assert.AreEqual(42UL, offset1);
         }
 
         [TestMethod]
@@ -392,7 +392,7 @@ namespace DebugDiag.Native.Test
             dynamic t = NativeType.AtAddress(X86.StaticDtAddr, "HasAStaticField");
 
             // Drill into its VirtualType instance (easily) thanks to 
-            Assert.AreEqual(42UL, t.subType.PODObject.Offset1.GetIntValue());
+            Assert.AreEqual(42UL, t.subType.PODObject.Offset1);
         }
 
         [TestMethod]

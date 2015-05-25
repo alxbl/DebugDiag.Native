@@ -23,11 +23,6 @@ namespace DebugDiag.Native.Type
             return string.Format("{{{0}}}", _value);
         }
 
-        public override string GetStringValue()
-        {
-            return ToString();
-        }
-
         public override NativeType GetField(string name)
         {
             throw new InvalidOperationException("This is a primitive type.");

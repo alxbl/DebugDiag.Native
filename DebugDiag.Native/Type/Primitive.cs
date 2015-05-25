@@ -55,21 +55,5 @@ namespace DebugDiag.Native.Type
         protected abstract void Parse(string detail);
 
         #endregion
-        #region Default Behavior
-        
-        // By default, every Getter function returns an invalid operation exception. This means derived types need only implement
-        // the getters they wish to support.
-
-        public override ulong GetIntValue()
-        {
-            throw new InvalidOperationException("This is not an integer.");
-        }
-
-        public override string GetStringValue()
-        {
-            throw new InvalidOperationException("This is not a string.");
-        }
-
-        #endregion
     }
 }

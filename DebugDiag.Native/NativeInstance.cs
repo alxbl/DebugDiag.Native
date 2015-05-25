@@ -39,32 +39,6 @@ namespace DebugDiag.Native
         public abstract NativeType GetField(ulong offset);
 
         /// <summary>
-        /// Converts a primitive instance into its integer value.
-        /// </summary>
-        /// <returns>The raw memory at this instance's base address as a 64 bit integer.</returns>
-        public abstract ulong GetIntValue();
-
-        /// <summary>
-        /// Shortcut method for dumping out the integer value of a field.
-        /// </summary>
-        /// <param name="field">The name of the field in the current type.</param>
-        /// <returns>The raw memory at this instance's base address as a 64 bit integer.</returns>
-        public abstract ulong GetIntValue(string field);
-
-        /// <summary>
-        /// Shortcut method for dumping out the integer value of a field.
-        /// </summary>
-        /// <param name="offset">The offset of the field in the current type.</param>
-        /// <returns>The raw memory at this instance's base address as a 64 bit integer.</returns>
-        public abstract ulong GetIntValue(ulong offset);
-
-        /// <summary>
-        /// Converts a primitive null-terminated C-style string NativeType into the string literal based at that location.
-        /// </summary>
-        /// <returns>The string based at this object's given location</returns>
-        public abstract string GetStringValue();
-
-        /// <summary>
         /// Adjusts each field in the type to reflect the instance context.
         /// 
         /// This method must be overridden by user defined types and serves as a hook
@@ -90,5 +64,17 @@ namespace DebugDiag.Native
         /// </summary>
         /// <param name="type"></param>
         protected abstract void BuildOffsetTable(string type);
+
+        #region Casting
+
+        protected abstract int ToInt32();
+        protected abstract uint ToUInt32();
+        protected abstract long ToInt64();
+        protected abstract ulong ToUInt64();
+        protected abstract float ToFloat();
+        protected abstract double ToDouble();
+        protected abstract bool ToBool();
+
+        #endregion
     }
 }

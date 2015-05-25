@@ -49,7 +49,7 @@ namespace DebugDiag.Native.Test
                 Assert.IsInstanceOfType(e, typeof(NativeType));
                 Assert.IsTrue(e.IsInstance);
                 Assert.AreEqual("PODType", e.TypeName);
-                Assert.AreEqual(i + 1, e.GetIntValue("Offset1"));
+                Assert.AreEqual(i + 1, e.GetField("Offset1"));
                 i++;
             }
             Assert.AreEqual((ulong)Size, i);
