@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace DebugDiag.Native.Windbg
 {
@@ -9,6 +10,9 @@ namespace DebugDiag.Native.Windbg
     public abstract class Command
     {
         private string _output; /// Output cache.
+
+        
+        private string _command; /// Command cache.
 
         /// <summary>
         /// The raw output of that command.
@@ -31,10 +35,12 @@ namespace DebugDiag.Native.Windbg
         /// <exception cref="CommandException">Thrown if something went wrong while executing this command.</exception>
         public void Execute()
         {
-            Output = Native.Context.Execute(BuildCommand()); // Should we really use a static context for commands?
+            _command = BuildCommand();
+            Output = Native.Context.Execute(_command); // Should we really use a static context for commands?
 
             try
             {
+
                 Parse(_output);
             }
             catch (Exception ex)

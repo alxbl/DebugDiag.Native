@@ -195,12 +195,25 @@ namespace DebugDiag.Native
 
         }
 
-        public ulong GetOffset(string field)
+        /// <summary>
+        /// Returns the offset of a type's field.
+        /// </summary>
+        /// <param name="field">The field for which to find the offset.</param>
+        /// <exception cref="ArgumentException">Thrown when the field does not exist.</exception>
+        /// <returns>The offset of the field.</returns>
+        public virtual ulong GetOffset(string field)
         {
-            return (_nameLookup.ContainsKey(field)) ? _nameLookup[field].Bytes : InvalidOffset;
+            if (!_nameLookup.ContainsKey(field))
+                throw new ArgumentException(string.Format("Field `{0}` does not exist in type `{1}`.", field, TypeName), "field");
+            return _nameLookup[field].Bytes;
         }
 
-        public bool HasOffset(ulong offset)
+        /// <summary>
+        /// Returns whether an offset exists in the type.
+        /// </summary>
+        /// <param name="offset">The offset to look up.</param>
+        /// <returns>Whether the offset exists.</returns>
+        public virtual bool HasOffset(ulong offset)
         {
             return _offsetLookup.ContainsKey(offset);
         }

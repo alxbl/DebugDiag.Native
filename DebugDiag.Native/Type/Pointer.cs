@@ -43,14 +43,27 @@ namespace DebugDiag.Native.Type
             return Dereference.GetField(offset);
         }
 
+        public override ulong GetOffset(string field)
+        {
+            LazyDereference(); // FIXME: GetOffset() should work on non-instances.
+            return Dereference.GetOffset(field);
+        }
+
+        public override bool HasOffset(ulong offset)
+        {
+            LazyDereference(); // FIXME: GetOffset() should work on non-instances.
+            return Dereference.HasOffset(offset);
+        }
+
         protected override void Rebase()
         {
-            // We don't call base.Rebase() because a pointer is a (special) primitive.
+            // We don't call base.Rebase() because a pointer is a special case of primitive.
 
             var dp = new Dp(Address, 1);
             PointsTo = dp.BytesAt(0);
 
-            // When accessing a pointer, to an object instance, we have to preload the object.
+            // When accessing a pointer to an object instance, we have to preload the object
+            // TODO: Move to constructor when Vtable support is added.
             if (!(PointedType is Primitive))
                 PointedType = Preload(PointedType.QualifiedName);
 
@@ -112,6 +125,7 @@ namespace DebugDiag.Native.Type
         {
             // Use the standardized pointer type.
             PointedType = Parser.Parse(TypeName.Substring(0, TypeName.Length - 1).TrimEnd());
+            
             PointsTo = ulong.MaxValue;
         }
 
